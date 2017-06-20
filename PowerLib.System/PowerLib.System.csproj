@@ -1,0 +1,457 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{34D71A5D-1F7C-4A23-8404-5956FA32730A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PowerLib.System</RootNamespace>
+    <AssemblyName>PowerLib.System</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <DocumentationFile>
+    </DocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>1591, 1574, 1720</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <DocumentationFile>
+    </DocumentationFile>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\powerlib.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Accessors\Accessor%271.cs" />
+    <Compile Include="Accessors\Accessor%2710.cs" />
+    <Compile Include="Accessors\Accessor%2711.cs" />
+    <Compile Include="Accessors\Accessor%2712.cs" />
+    <Compile Include="Accessors\Accessor%2713.cs" />
+    <Compile Include="Accessors\Accessor%2714.cs" />
+    <Compile Include="Accessors\Accessor%2715.cs" />
+    <Compile Include="Accessors\Accessor%272.cs" />
+    <Compile Include="Accessors\Accessor%273.cs" />
+    <Compile Include="Accessors\Accessor%274.cs" />
+    <Compile Include="Accessors\Accessor%275.cs" />
+    <Compile Include="Accessors\Accessor%276.cs" />
+    <Compile Include="Accessors\Accessor%277.cs" />
+    <Compile Include="Accessors\Accessor%278.cs" />
+    <Compile Include="Accessors\Accessor%279.cs" />
+    <Compile Include="Accessors\IAccessor.cs" />
+    <Compile Include="Accessors\ParamsAccessor.cs" />
+    <Compile Include="Arrays\Accessors\FlatArrayAccessor.cs" />
+    <Compile Include="Arrays\Accessors\JaggedArrayAccessor.cs" />
+    <Compile Include="Arrays\Accessors\JaggedArrayRankedAccessor.cs" />
+    <Compile Include="Arrays\Accessors\RegularArrayAccessor.cs" />
+    <Compile Include="Arrays\ArgumentJaggedArrayElementException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Arrays\ArgumentJaggedArrayLongElementException.cs" />
+    <Compile Include="Arrays\ArgumentRegularArrayElementException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Arrays\ArgumentRegularArrayLongElementException.cs" />
+    <Compile Include="Arrays\ArrayDimension.cs" />
+    <Compile Include="Arrays\ArrayLongDimSlice.cs" />
+    <Compile Include="Arrays\ArrayDimSlice.cs" />
+    <Compile Include="Arrays\ArrayLongFlatSlice.cs" />
+    <Compile Include="Arrays\ArrayFlatSlice.cs" />
+    <Compile Include="Arrays\ArrayIndex.cs" />
+    <Compile Include="Arrays\ArrayInfo.cs" />
+    <Compile Include="Arrays\ArrayInfoExtension.cs" />
+    <Compile Include="Arrays\ArrayLongDimension.cs" />
+    <Compile Include="Arrays\ArrayLongIndex.cs" />
+    <Compile Include="Arrays\ArrayLongInfo.cs" />
+    <Compile Include="Arrays\ArrayResources.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Arrays\ArraySlice.cs" />
+    <Compile Include="Collections\List\PwrKeySortedList.cs" />
+    <Compile Include="Collections\List\PwrSortedList.cs" />
+    <Compile Include="Collections\Queue\IDeque.cs" />
+    <Compile Include="Collections\Queue\IQueue.cs" />
+    <Compile Include="Collections\Queue\PwrDeque.cs" />
+    <Compile Include="Collections\Queue\PwrKeySortedDeque.cs" />
+    <Compile Include="Collections\Queue\PwrKeySortedQueue.cs" />
+    <Compile Include="Collections\Queue\PwrSortedDeque.cs" />
+    <Compile Include="Collections\Queue\PwrSortedQueue.cs" />
+    <Compile Include="Collections\Queue\PwrQueue.cs" />
+    <Compile Include="Collections\Stack\PwrKeySortedStack.cs" />
+    <Compile Include="ComponentModel\AttributeValueHelper.cs" />
+    <Compile Include="ComponentModel\DisplayStringAttribute.cs" />
+    <Compile Include="ComponentModel\DisplayStringResourceAttribute.cs" />
+    <Compile Include="ConditionCriteria.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ConditionCriteria.resx</DependentUpon>
+    </Compile>
+    <Compile Include="DateTimeInterval.cs" />
+    <Compile Include="IO\RangeStream.cs" />
+    <Compile Include="IO\Streamed\BaseFlaggedStreamedArray.cs" />
+    <Compile Include="IO\Streamed\BaseFlaggedStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\BaseFlaggedStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\BaseStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\FlaggedRegularArrayParameter.cs" />
+    <Compile Include="IO\Streamed\RegularArrayParameter.cs" />
+    <Compile Include="IO\Streamed\CustomFlaggedStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\CustomFlaggedStreamedArray.cs" />
+    <Compile Include="IO\Streamed\CustomFlaggedStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\CustomStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\CustomStreamedArray.cs" />
+    <Compile Include="IO\Streamed\CustomStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\FlaggedCollectionParameter.cs" />
+    <Compile Include="IO\Streamed\StoredFlaggedStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\StoredFlaggedStreamedArray.cs" />
+    <Compile Include="IO\Streamed\CollectionParameter.cs" />
+    <Compile Include="IO\Streamed\StoredFlaggedStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\StoredStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\StoredStreamedArray.cs" />
+    <Compile Include="IO\Streamed\StoredStreamedCollection.cs" />
+    <Compile Include="IO\IStreamable.cs" />
+    <Compile Include="IO\Streamed\Typed\FixedStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\FixedStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\FixedStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\BinaryStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\BinaryStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\BinaryStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulBooleanStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulBooleanStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulByteStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulByteStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulComplexStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulComplexStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDateTimeStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDateTimeStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDecimalStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDecimalStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDoubleStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDoubleStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulGuidStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulGuidStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt16StreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt16StreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt32StreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt32StreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt64StreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt64StreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulRangeStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulRangeStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulSingleStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulSingleStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulTimeStpanStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulTimeSpanStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\StringArrayParameter.cs" />
+    <Compile Include="IO\Streamed\Typed\StringStreamedRegularArray.cs" />
+    <Compile Include="IO\Streamed\Typed\StringStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\StringCollectionParameter.cs" />
+    <Compile Include="IO\Streamed\Typed\NulBooleanStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulByteStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulComplexStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDateTimeStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDecimalStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulDoubleStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulGuidStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt16StreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt32StreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulInt64StreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulRangeStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulSingleStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulTimeSpanStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\StringStreamedCollection.cs" />
+    <Compile Include="Linq\Builders\AccessorBuilder.cs" />
+    <Compile Include="Linq\Builders\ComparerBuilder.cs" />
+    <Compile Include="Linq\Builders\EqualityComparerBuilder.cs" />
+    <Compile Include="Linq\Builders\ParametersBuilder.cs" />
+    <Compile Include="Linq\Builders\PredicateBuilder.cs" />
+    <Compile Include="Linq\Builders\ReflectionBuilder.cs" />
+    <Compile Include="TypeExtension.cs" />
+    <Compile Include="Arrays\JaggedArrayEnumerator.cs" />
+    <Compile Include="Arrays\JaggedArrayInfo.cs" />
+    <Compile Include="Arrays\JaggedArrayLongEnumerator.cs" />
+    <Compile Include="Arrays\JaggedArrayLongInfo.cs" />
+    <Compile Include="Arrays\PwrArray.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Arrays\ArrayParseFormatInfo.cs" />
+    <Compile Include="Arrays\RingBuffer.cs" />
+    <Compile Include="Arrays\RegularArrayEnumerator.cs" />
+    <Compile Include="Arrays\RegularArrayInfo.cs" />
+    <Compile Include="Arrays\RegularArrayLongEnumerator.cs" />
+    <Compile Include="Arrays\RegularArrayLongInfo.cs" />
+    <Compile Include="Collections\CollectionElementException.cs" />
+    <Compile Include="Collections\ArgumentCollectionElementException.cs" />
+    <Compile Include="Collections\CollectionResources.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\CollectionRestrictions.cs" />
+    <Compile Include="Collections\Collection\CollectionExtension.cs" />
+    <Compile Include="Collections\Collection\PwrCollectionView%271.cs" />
+    <Compile Include="Collections\Collection\PwrCollectionView%272.cs" />
+    <Compile Include="Collections\Collection\PwrCollectionViewBase%271.cs" />
+    <Compile Include="Collections\Collection\PwrCollectionViewBase%272.cs" />
+    <Compile Include="Collections\Collection\PwrReadOnlyCollection%271.cs" />
+    <Compile Include="Collections\Collection\PwrReadOnlyCollection%272.cs" />
+    <Compile Include="Collections\Collection\PwrReadOnlyCollectionBase%271.cs" />
+    <Compile Include="Collections\Collection\PwrReadOnlyCollectionBase%272.cs" />
+    <Compile Include="Collections\Dictionary\KeyValuePair.cs" />
+    <Compile Include="Collections\Enumerable\PwrEnumerableView%271.cs" />
+    <Compile Include="Collections\Enumerable\PwrEnumerableView%272.cs" />
+    <Compile Include="Collections\Enumerable\PwrEnumerableViewBase%271.cs" />
+    <Compile Include="Collections\Enumerable\PwrEnumerableViewBase%272.cs" />
+    <Compile Include="Collections\Equality.cs" />
+    <Compile Include="Collections\IAutoCapacitySupport.cs" />
+    <Compile Include="Collections\ICapacitySupport.cs" />
+    <Compile Include="Collections\IParentRef.cs" />
+    <Compile Include="Collections\IPredicate.cs" />
+    <Compile Include="Collections\ISelfRef.cs" />
+    <Compile Include="Collections\IStampSupport.cs" />
+    <Compile Include="Collections\List\ListExtension.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\List\PwrFrameListView.cs" />
+    <Compile Include="Collections\List\PwrList.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\List\PwrListView%271.cs" />
+    <Compile Include="Collections\List\PwrListView%272.cs" />
+    <Compile Include="Collections\List\PwrListViewBase%271.cs" />
+    <Compile Include="Collections\List\PwrListViewBase%272.cs" />
+    <Compile Include="Collections\List\PwrReadOnlyList%271.cs" />
+    <Compile Include="Collections\List\PwrReadOnlyList%272.cs" />
+    <Compile Include="Collections\List\PwrReadOnlyListBase%271.cs" />
+    <Compile Include="Collections\List\PwrReadOnlyListBase%272.cs" />
+    <Compile Include="IO\PeekStream.cs" />
+    <Compile Include="IO\RestrictiveStream.cs" />
+    <Compile Include="IO\Streamed\BaseStreamedArray.cs" />
+    <Compile Include="IO\Streamed\BaseStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\StreamedCollection.cs" />
+    <Compile Include="IO\StreamWriteLongException.cs" />
+    <Compile Include="IO\StreamWriteException.cs" />
+    <Compile Include="IO\StreamLoadLongException.cs" />
+    <Compile Include="IO\StreamLoadException.cs" />
+    <Compile Include="IO\StreamReadLongException.cs" />
+    <Compile Include="IO\StreamReadException.cs" />
+    <Compile Include="IO\StreamReadException%271.cs" />
+    <Compile Include="Math\Combinatorial\Arrangement%271.cs" />
+    <Compile Include="Math\Combinatorial\Arrangement.cs" />
+    <Compile Include="Math\Combinatorial\ArrangementWithRepeats%271.cs" />
+    <Compile Include="Math\Combinatorial\ArrangementWithRepeats.cs" />
+    <Compile Include="Math\Combinatorial\Combination%271.cs" />
+    <Compile Include="Math\Combinatorial\Combination.cs" />
+    <Compile Include="Math\Combinatorial\Combinatorial%271.cs" />
+    <Compile Include="Math\Combinatorial\Combinatorial.cs" />
+    <Compile Include="Math\Combinatorial\Permutation%271.cs" />
+    <Compile Include="Math\Combinatorial\Permutation.cs" />
+    <Compile Include="Math\Combinatorial\Subset%271.cs" />
+    <Compile Include="Math\Combinatorial\Subset.cs" />
+    <Compile Include="Numerics\ComplexNumber.cs" />
+    <Compile Include="Numerics\Numeric.cs" />
+    <Compile Include="Endian.cs" />
+    <Compile Include="IO\LookbackStream.cs" />
+    <Compile Include="IO\PwrBinaryReader.cs" />
+    <Compile Include="IO\PwrBinaryWriter.cs" />
+    <Compile Include="IO\PwrBinaryReaderExtension.cs" />
+    <Compile Include="IO\PwrBinaryWriterExtension.cs" />
+    <Compile Include="IO\PwrStream.cs" />
+    <Compile Include="SizeEncoding.cs" />
+    <Compile Include="IO\WriteRestrictiveStream.cs" />
+    <Compile Include="IO\ReadRestrictiveStream.cs" />
+    <Compile Include="IO\ReverseSearchStream.cs" />
+    <Compile Include="IO\PwrStreamExtension.cs" />
+    <Compile Include="LongRange.cs" />
+    <Compile Include="Collections\Matching\BetweenPredicate.cs" />
+    <Compile Include="Collections\Matching\ComparableComparer.cs" />
+    <Compile Include="Collections\Matching\ComparisonExtension.cs" />
+    <Compile Include="Collections\Matching\ComparisonPredicate.cs" />
+    <Compile Include="Collections\Matching\CompositeComparer%271.cs" />
+    <Compile Include="Collections\Matching\CompositeComparer.cs" />
+    <Compile Include="Collections\Matching\CompositeEqualityComparer%271.cs" />
+    <Compile Include="Collections\Matching\CompositeEqualityComparer.cs" />
+    <Compile Include="Collections\Matching\CustomComparer%271.cs" />
+    <Compile Include="Collections\Matching\CustomComparer.cs" />
+    <Compile Include="Collections\Matching\CustomEqualityComparer%271.cs" />
+    <Compile Include="Collections\Matching\CustomEqualityComparer.cs" />
+    <Compile Include="Collections\Matching\CustomPredicate.cs" />
+    <Compile Include="Collections\Matching\EqualityExtension.cs" />
+    <Compile Include="Collections\Matching\EqualityPredicate.cs" />
+    <Compile Include="Collections\Matching\EquatableEqualityComparer.cs" />
+    <Compile Include="Collections\Matching\GroupPredicate.cs" />
+    <Compile Include="Collections\Matching\InPredicate.cs" />
+    <Compile Include="Collections\Matching\InverseComparer%271.cs" />
+    <Compile Include="Collections\Matching\InverseComparer.cs" />
+    <Compile Include="Collections\Matching\NotPredicate.cs" />
+    <Compile Include="Collections\Matching\NullableComparer%271.cs" />
+    <Compile Include="Collections\Matching\NullableEqualityComparer%271.cs" />
+    <Compile Include="Collections\Matching\NullPredicate.cs" />
+    <Compile Include="Collections\Matching\ObjectComparer%271.cs" />
+    <Compile Include="Collections\Matching\ObjectComparer.cs" />
+    <Compile Include="Collections\Matching\ObjectEqualityComparer%271.cs" />
+    <Compile Include="Collections\Matching\ObjectEqualityComparer.cs" />
+    <Compile Include="Collections\Matching\PersistentPredicate.cs" />
+    <Compile Include="Collections\Matching\PositionStringPredicateEx.cs" />
+    <Compile Include="Collections\Matching\PredicateExtension.cs" />
+    <Compile Include="Collections\Matching\QuantifyPredicate.cs" />
+    <Compile Include="Collections\Matching\RegexPredicate.cs" />
+    <Compile Include="Collections\Matching\RegularArrayEqualityComparer.cs" />
+    <Compile Include="Collections\Matching\SelectComparer.cs" />
+    <Compile Include="Collections\Matching\SelectEqualityComparer.cs" />
+    <Compile Include="Collections\Matching\SelectPredicate.cs" />
+    <Compile Include="Collections\Matching\SequenceComparer%271.cs" />
+    <Compile Include="Collections\Matching\SequenceComparer.cs" />
+    <Compile Include="Collections\Matching\SequenceEqualityComparer%271.cs" />
+    <Compile Include="Collections\Matching\SequenceEqualityComparer.cs" />
+    <Compile Include="Collections\Matching\StringComparer.cs" />
+    <Compile Include="Collections\Matching\StringPredicate.cs" />
+    <Compile Include="Collections\Matching\StringPredicateEx.cs" />
+    <Compile Include="Collections\Matching\TypeOfPredicate.cs" />
+    <Compile Include="PwrBitConverter.cs" />
+    <Compile Include="Range.cs" />
+    <Compile Include="Collections\SortingEnums.cs" />
+    <Compile Include="Collections\Stack\IStack.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\Stack\PwrStack.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Comparable.cs" />
+    <Compile Include="ConditionCriteria.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Linq\Expressions\ExpressionVisitor.cs" />
+    <Compile Include="Linq\Expressions\ExpressionVisitorExtension.cs" />
+    <Compile Include="Linq\PwrElement.cs" />
+    <Compile Include="Linq\PwrEnumerable.cs" />
+    <Compile Include="Numerics\Angle.cs" />
+    <Compile Include="Numerics\GradAngle.cs" />
+    <Compile Include="Numerics\GradAngleConverter.cs" />
+    <Compile Include="Numerics\HourAngle.cs" />
+    <Compile Include="Numerics\HourAngleConverter.cs" />
+    <Compile Include="Numerics\SexagesimalAngle.cs" />
+    <Compile Include="Numerics\SexagesimalAngleConverter.cs" />
+    <Compile Include="Numerics\IAngle.cs" />
+    <Compile Include="Numerics\Numeral.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CompositeHashing.cs" />
+    <Compile Include="LongRangeParseFormatInfo.cs" />
+    <Compile Include="Reflection\ReflectionExtension.cs" />
+    <Compile Include="Resources\EnumTypeResourceAccessor.cs" />
+    <Compile Include="Resources\ResourceAccessor.cs" />
+    <Compile Include="Resources\SelfTypeResourceAccessor.cs" />
+    <Compile Include="Resources\TypeResourceAccessor.cs" />
+    <Compile Include="Runtime\InteropServices\PtrStream.cs" />
+    <Compile Include="StringExtension.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Text\CustomFormatter.cs" />
+    <Compile Include="Text\INumberParser.cs" />
+    <Compile Include="Text\IParser.cs" />
+    <Compile Include="Text\IFormatter.cs" />
+    <Compile Include="RangeParseFormatInfo.cs" />
+    <Compile Include="Text\StringBuilderExtension.cs" />
+    <Compile Include="TryOut.cs" />
+    <Compile Include="Collections\Stack\PwrSortedStack.cs" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Collections\Bitwise\" />
+    <Folder Include="Collections\Dimensional\" />
+    <Folder Include="Collections\Enumerator\" />
+    <Folder Include="Collections\Graph\" />
+    <Folder Include="Collections\Hash\" />
+    <Folder Include="Collections\Node\" />
+    <Folder Include="Collections\Tree\" />
+    <Folder Include="Xml\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Arrays\ArrayResources.resx">
+      <DependentUpon>ArrayResources.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Arrays\ArrayResources.ru.resx">
+      <DependentUpon>ArrayResources.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Collections\CollectionResources.resx">
+      <DependentUpon>CollectionResources.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Collections\CollectionResources.ru.resx">
+      <DependentUpon>CollectionResources.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConditionCriteria.resx">
+      <DependentUpon>ConditionCriteria.cs</DependentUpon>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConditionCriteria.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConditionCriteria.ru.resx">
+      <DependentUpon>ConditionCriteria.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DateTimeInterval.resx">
+      <DependentUpon>DateTimeInterval.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DateTimeInterval.ru.resx">
+      <DependentUpon>DateTimeInterval.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

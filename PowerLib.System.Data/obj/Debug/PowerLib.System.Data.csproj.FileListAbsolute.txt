@@ -1,0 +1,16 @@
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.Data.dll
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.Data.pdb
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.dll
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.pdb
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\bin\Debug\ru\PowerLib.System.resources.dll
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\obj\Debug\PowerLib.System.Data.csprojResolveAssemblyReference.cache
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\obj\Debug\PowerLib.System.Data.dll
+D:\Projects\CodePlex\PowerLib\PowerLib.System.Data\obj\Debug\PowerLib.System.Data.pdb
+D:\Projects\Github\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.Data.dll
+D:\Projects\Github\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.Data.pdb
+D:\Projects\Github\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.dll
+D:\Projects\Github\PowerLib\PowerLib.System.Data\bin\Debug\PowerLib.System.pdb
+D:\Projects\Github\PowerLib\PowerLib.System.Data\bin\Debug\ru\PowerLib.System.resources.dll
+D:\Projects\Github\PowerLib\PowerLib.System.Data\obj\Debug\PowerLib.System.Data.csprojResolveAssemblyReference.cache
+D:\Projects\Github\PowerLib\PowerLib.System.Data\obj\Debug\PowerLib.System.Data.dll
+D:\Projects\Github\PowerLib\PowerLib.System.Data\obj\Debug\PowerLib.System.Data.pdb
