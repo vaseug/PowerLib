@@ -4,3 +4,19 @@
 
 *.suo
 *.csproj.user
+/PowerLib.System.Data.SqlTypes/obj
+/PowerLib.System.Data.SqlTypes/bin
+/PowerLib.System.Data.Linq/obj
+/PowerLib.System.Data.Linq/bin
+/PowerLib.System/packages
+/PowerLib.System/obj
+/PowerLib.System/bin
+/PowerLib.SqlServer/obj
+/PowerLib.SqlServer/bin
+/PowerLib.SqlClr.Deploy.Utility/obj
+/PowerLib.SqlClr.Deploy.Utility/bin
+/PowerLib.SqlClr.Deploy/obj
+/PowerLib.SqlClr.Deploy/bin
+/PowerLib.EntityFramework/obj
+/PowerLib.EntityFramework/bin
+/packages

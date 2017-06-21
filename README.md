@@ -39,7 +39,7 @@ Samples:
 	using (var dc = new MyDataContext())
 	{
 		var ns = @"def=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"
-        	+ @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
+			+ @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
 			+ @";act=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes";
 
 		var persons = dc.Person
@@ -67,7 +67,7 @@ Samples:
 	using (var dc = new PwrDbContext())
 	{
 		var ns = @"def=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"
-        	+ @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
+			+ @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
 			+ @";act=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes";
 
 		var persons = dc.Person
@@ -79,6 +79,7 @@ Samples:
 	}
 
 ```
+
 Continued...
 
 ---
@@ -120,12 +121,30 @@ SexagesimalAngle|SexagesimalAngle
 Single|SingleFloat
 String|String
 
+To deploy the assembly on an MSSQL server, use the sqlclrdu.exe utility described below. For example,
+```
+>sqlclrdu.exe create -permission:unsafe -script:script.sql -schema:pwrlib -connection:"Data Source=MASTER\MSSQLSERVER2016;Initial Catalog=AdventureWorks2016;Integrated Security=True;Connect Timeout=15;" "PowerLib.System.Data.SqlTypes.dll"
+```
+Dependent assemblies without sqlclr contents are installed with the -invisible option. Assemblies from GAC deploy by strong assembly name with -strong option. For example,
+```
+>sqlclrdu.exe create -invisible -strong -script:test.sql "System.Runtime.Serialization, version=4.0.0.0, culture=neutral, publickeytoken=b77a5c561934e089"
+```
+
 Continued...
 
 ---
 ### PowerLib.SqlServer
 
 Contains more than a thousand functions that integrates into the SQL server. All functions can be divided into several categories: binary type manipulation, text manipulation (regular expression support), compression, cryptography, xml type manipulation (xpath query, xsl transformation, convert to and from json) and base types collections, single and multiple dimensions array support. All functions integrate into LINQ to SQL and EntityFramework.
+
+To deploy the assembly on an MSSQL server, use the sqlclrdu.exe utility described below. For example,
+```
+sqlclrdu.exe create -permission:unsafe -script:script.sql -schema:pwrlib -map:"PowerLib.System.Data.map" -connection:"Data Source=MASTER\MSSQLSERVER2016;Initial Catalog=AdventureWorks2016;Integrated Security=True;Connect Timeout=15;" "PowerLib.SqlServer.dll"
+```
+Dependent assemblies without sqlclr contents are installed with the -invisible option. Assemblies from GAC deploy by strong assembly name with -strong option. For example,
+```
+>sqlclrdu.exe create -invisible -strong -script:test.sql "System.Runtime.Serialization, version=4.0.0.0, culture=neutral, publickeytoken=b77a5c561934e089"
+```
 
 Continued...
 
