@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace PowerLib.System.Data.Entity
+namespace PowerLib.System.ComponentModel.DataAnnotations
 {
   [AttributeUsage(AttributeTargets.Method | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = true)]
-  public class DbFunctionResultAttribute : Attribute
+  public class FunctionResultAttribute : Attribute
   {
-    public DbFunctionResultAttribute() :
+    public FunctionResultAttribute() :
       this(null)
     {
     }
 
-    public DbFunctionResultAttribute(Type type)
+    public FunctionResultAttribute(Type type)
     {
       Type = type;
     }
@@ -19,6 +19,6 @@ namespace PowerLib.System.Data.Entity
 
     public string ColumnName { get; set; }
 
-    public string DbTypeName { get; set; }
+    public string TypeName { get; set; }
   }
 }

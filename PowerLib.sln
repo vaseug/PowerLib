@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.System.Data.SqlTypes", "PowerLib.System.Data.SqlTypes\PowerLib.System.Data.SqlTypes.csproj", "{4237BD48-1F96-4586-873B-095D6CC53943}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.System.ComponentModel.DataAnnotations", "PowerLib.System.ComponentModel.DataAnnotations\PowerLib.System.ComponentModel.DataAnnotations.csproj", "{615C5CDA-2907-4355-A728-2B7CD1B63C92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{4237BD48-1F96-4586-873B-095D6CC53943}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4237BD48-1F96-4586-873B-095D6CC53943}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4237BD48-1F96-4586-873B-095D6CC53943}.Release|Any CPU.Build.0 = Release|Any CPU
+		{615C5CDA-2907-4355-A728-2B7CD1B63C92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{615C5CDA-2907-4355-A728-2B7CD1B63C92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{615C5CDA-2907-4355-A728-2B7CD1B63C92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{615C5CDA-2907-4355-A728-2B7CD1B63C92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

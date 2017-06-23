@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using PowerLib.System.ComponentModel.DataAnnotations;
 using PowerLib.System.Linq;
 
 namespace PowerLib.System.Data.Entity
@@ -311,25 +312,25 @@ namespace PowerLib.System.Data.Entity
     }
 
     [DbFunctionEx(StoreNamespace, "strQuote", IsComposable = true)]
-    public String strQuote(String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
+    public String strQuote(String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
     {
       return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), input, quote, escape);
     }
 
     [DbFunctionEx(StoreNamespace, "strUnquote", IsComposable = true)]
-    public String strUnquote(String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
+    public String strUnquote(String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
     {
       return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), input, quote, escape);
     }
 
     [DbFunctionEx(StoreNamespace, "strEscape", IsComposable = true)]
-    public String strEscape(String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
+    public String strEscape(String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
     {
       return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), input, escape, symbols);
     }
 
     [DbFunctionEx(StoreNamespace, "strUnescape", IsComposable = true)]
-    public String strUnescape(String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
+    public String strUnescape(String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
     {
       return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), input, escape, symbols);
     }

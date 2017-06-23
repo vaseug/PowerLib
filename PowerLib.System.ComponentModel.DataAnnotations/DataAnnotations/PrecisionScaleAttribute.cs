@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace PowerLib.System.ComponentModel.DataAnnotations
@@ -19,7 +18,7 @@ namespace PowerLib.System.ComponentModel.DataAnnotations
       : base()
     {
       if (scale > precision)
-        throw new ArgumentException("Scalist  greatethaprecision.", "scale");
+        throw new ArgumentException("Scale is greater than precision.", "scale");
 
       _precision = precision;
       _scale = scale;

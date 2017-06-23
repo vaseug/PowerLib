@@ -3,16 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Data.Common;
-using System.Data.Sql;
-using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Globalization;
 using System.Text;
 using System.Reflection;
-using System.Xml;
 using Microsoft.SqlServer.Server;
-
+using PowerLib.System.ComponentModel.DataAnnotations;
 
 namespace PowerLib.SqlClr.Deploy
 {
@@ -72,23 +68,24 @@ namespace PowerLib.SqlClr.Deploy
 
       if (typesMap.TryGetValue(type, out sqlTypeInfo))
       {
-        SqlFacetAttribute facet = provider != null ? (SqlFacetAttribute)provider.GetCustomAttributes(typeof(SqlFacetAttribute), false).FirstOrDefault() : null;
-        sb.Append(facet != null && facet.IsFixedLength ? sqlTypeInfo.TypeNameFixed : sqlTypeInfo.TypeName);
+        FunctionParameterAttribute paramAttr = provider != null ? (FunctionParameterAttribute)provider.GetCustomAttributes(typeof(FunctionParameterAttribute), false).FirstOrDefault() : null;
+        SqlFacetAttribute facetAttr = provider != null ? (SqlFacetAttribute)provider.GetCustomAttributes(typeof(SqlFacetAttribute), false).FirstOrDefault() : null;
+        sb.Append(paramAttr != null && !string.IsNullOrEmpty(paramAttr.TypeName) ? paramAttr.TypeName : facetAttr != null && facetAttr.IsFixedLength ? sqlTypeInfo.TypeNameFixed : sqlTypeInfo.TypeName);
         //  Append type facets
         switch (sqlTypeInfo.Facet)
         {
           case SqlTypeFacet.Size:
-            if (facet != null && (facet.MaxSize > 0 || facet.MaxSize == -1))
-              sb.AppendFormat(CultureInfo.InvariantCulture, "({0})", facet.MaxSize == -1 ? (object)"max" : facet.MaxSize);
+            if (facetAttr != null && (facetAttr.MaxSize > 0 || facetAttr.MaxSize == -1))
+              sb.AppendFormat(CultureInfo.InvariantCulture, "({0})", facetAttr.MaxSize == -1 ? (object)"max" : facetAttr.MaxSize);
             else if (sqlTypeInfo.MaxSize.HasValue)
               sb.AppendFormat(CultureInfo.InvariantCulture, "({0})", sqlTypeInfo.MaxSize == -1 ? (object)"max" : sqlTypeInfo.MaxSize);
             break;
           case SqlTypeFacet.PrecisionScale:
-            if (facet != null && facet.Precision > 0)
-              if (facet.Scale > 0)
-                sb.AppendFormat(CultureInfo.InvariantCulture, "({0}, {1})", facet.Precision, facet.Scale);
+            if (facetAttr != null && facetAttr.Precision > 0)
+              if (facetAttr.Scale > 0)
+                sb.AppendFormat(CultureInfo.InvariantCulture, "({0}, {1})", facetAttr.Precision, facetAttr.Scale);
               else
-                sb.AppendFormat(CultureInfo.InvariantCulture, "({0})", facet.Precision);
+                sb.AppendFormat(CultureInfo.InvariantCulture, "({0})", facetAttr.Precision);
             else if (sqlTypeInfo.Precision.HasValue && sqlTypeInfo.Precision.Value > 0)
               if (sqlTypeInfo.Scale.HasValue && sqlTypeInfo.Scale.Value > 0)
                 sb.AppendFormat(CultureInfo.InvariantCulture, "({0}, {1})", sqlTypeInfo.Precision.Value, sqlTypeInfo.Scale.Value);
@@ -113,15 +110,18 @@ namespace PowerLib.SqlClr.Deploy
     public static string GetSqlParameterResult_Text(ParameterInfo param, IDictionary<string, string> map)
     {
       StringBuilder sb = new StringBuilder();
-      sb.AppendFormat("[{0}] {1}", param.Name, GetSqlType_Text(param.ParameterType, param, map));
+      FunctionParameterAttribute paramAttr = param.GetCustomAttribute<FunctionParameterAttribute>();
+      //  Append result parameter name with type
+      sb.AppendFormat("[{0}] {1}", paramAttr != null && !string.IsNullOrEmpty(paramAttr.Name) ? paramAttr.Name : param.Name, GetSqlType_Text(param.ParameterType, param, map));
       return sb.ToString();
     }
 
     public static string GetSqlParameterArgument_Text(ParameterInfo param, IDictionary<string, string> map)
     {
       StringBuilder sb = new StringBuilder();
+      FunctionParameterAttribute paramAttr = param.GetCustomAttribute<FunctionParameterAttribute>();
       //  Append parameter name with type
-      sb.AppendFormat("@{0} {1}", param.Name, GetSqlType_Text(param.ParameterType, param, map));
+      sb.AppendFormat("@{0} {1}", paramAttr != null && !string.IsNullOrEmpty(paramAttr.Name) ? paramAttr.Name : param.Name, GetSqlType_Text(param.ParameterType, param, map));
       //  Append default value
       DefaultValueAttribute defaultValueAttr = param.GetCustomAttribute<DefaultValueAttribute>();
       if (defaultValueAttr != null)

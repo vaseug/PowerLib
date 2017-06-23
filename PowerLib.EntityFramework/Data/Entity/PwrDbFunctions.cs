@@ -7,13 +7,13 @@ using System.Reflection;
 using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using PowerLib.System.ComponentModel.DataAnnotations;
 
 namespace PowerLib.System.Data.Entity
 {
   public static class PwrDbFunctions
   {
     private const string ContextNamespace = "PwrDbContext";
-    //private const string ContextNamespace = "PwrDbFunctions";
     private const string StoreNamespace = "PwrDbStore";
 
     #region Registration methods
@@ -234,25 +234,25 @@ namespace PowerLib.System.Data.Entity
     }
 
     [DbFunctionEx(StoreNamespace, "strQuote", IsComposable = true)]
-    public static String strQuote(this String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
+    public static String strQuote(this String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
     {
       return ExecuteUnsupported<String>(MethodBase.GetCurrentMethod(), input, quote, escape);
     }
 
     [DbFunctionEx(StoreNamespace, "strUnquote", IsComposable = true)]
-    public static String strUnquote(this String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
+    public static String strUnquote(this String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String quote, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape)
     {
       return ExecuteUnsupported<String>(MethodBase.GetCurrentMethod(), input, quote, escape);
     }
 
     [DbFunctionEx(StoreNamespace, "strEscape", IsComposable = true)]
-    public static String strEscape(this String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
+    public static String strEscape(this String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
     {
       return ExecuteUnsupported<String>(MethodBase.GetCurrentMethod(), input, escape, symbols);
     }
 
     [DbFunctionEx(StoreNamespace, "strUnescape", IsComposable = true)]
-    public static String strUnescape(this String input, [DbFunctionParameter(DbTypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
+    public static String strUnescape(this String input, [FunctionParameter(TypeName = "nchar"), MaxLength(1), MinLength(1)] String escape, String symbols)
     {
       return ExecuteUnsupported<String>(MethodBase.GetCurrentMethod(), input, escape, symbols);
     }

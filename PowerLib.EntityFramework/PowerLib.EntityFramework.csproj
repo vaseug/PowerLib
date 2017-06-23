@@ -61,11 +61,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComponentModel\DataAnnotations\FixedLengthAttribute.cs" />
-    <Compile Include="ComponentModel\DataAnnotations\PrecisionScaleAttribute.cs" />
     <Compile Include="Data\Entity\DbFunctionExAttribute.cs" />
-    <Compile Include="Data\Entity\DbFunctionResultAttribute.cs" />
-    <Compile Include="Data\Entity\DbFunctionParameterAttribute.cs" />
     <Compile Include="Data\Entity\FunctionsConvention.cs" />
     <Compile Include="Data\Entity\FunctionDescriptor.cs" />
     <Compile Include="Data\Entity\DbModelBuilderExtension.cs" />
@@ -79,6 +75,10 @@
     <Compile Include="Data\Entity\ResultDescriptor.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PowerLib.System.ComponentModel.DataAnnotations\PowerLib.System.ComponentModel.DataAnnotations.csproj">
+      <Project>{615c5cda-2907-4355-a728-2b7cd1b63c92}</Project>
+      <Name>PowerLib.System.ComponentModel.DataAnnotations</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PowerLib.System.Data\PowerLib.System.Data.csproj">
       <Project>{45b90168-c6de-4ff8-939b-3d933995905e}</Project>
       <Name>PowerLib.System.Data</Name>

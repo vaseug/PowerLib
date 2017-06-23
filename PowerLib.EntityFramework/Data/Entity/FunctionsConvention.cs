@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using System.Data.Entity.ModelConfiguration.Configuration;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Core.Mapping;
@@ -70,7 +69,7 @@ namespace PowerLib.System.Data.Entity
         .OrderBy(pi => pi.Position)
         .Select((pi, i) =>
         {
-          DbFunctionParameterAttribute parameterAttr = pi.GetCustomAttribute<DbFunctionParameterAttribute>();
+          FunctionParameterAttribute parameterAttr = pi.GetCustomAttribute<FunctionParameterAttribute>();
           Type parameterType = pi.ParameterType == typeof(ObjectParameter) ? parameterAttr.Type : pi.ParameterType;
           if (parameterType == null)
             throw new InvalidOperationException(string.Format("Method parameter '{0}' at position {1} is not defined.", pi.Name, pi.Position));
@@ -82,8 +81,8 @@ namespace PowerLib.System.Data.Entity
           //
           return new ParameterDescriptor(i, parameterType.IsByRef ? pi.IsOut ? ParameterDirection.Output : ParameterDirection.InputOutput : ParameterDirection.Input, parameterType)
           {
-            Name = parameterAttr != null && !string.IsNullOrWhiteSpace(parameterAttr.ColumnName) ? parameterAttr.ColumnName : pi.Name,
-            StoreTypeName = parameterAttr != null && !string.IsNullOrWhiteSpace(parameterAttr.DbTypeName) ? parameterAttr.DbTypeName : null,
+            Name = parameterAttr != null && !string.IsNullOrWhiteSpace(parameterAttr.Name) ? parameterAttr.Name : pi.Name,
+            StoreTypeName = parameterAttr != null && !string.IsNullOrWhiteSpace(parameterAttr.TypeName) ? parameterAttr.TypeName : null,
             Length = maxLengthAttr != null ? maxLengthAttr.Length : default(int?),
             IsFixedLength = minLengthAttr != null && maxLengthAttr != null ? minLengthAttr.Length == maxLengthAttr.Length : fixedLengthAttr != null ? fixedLengthAttr.IsFixedLength : default(bool?),
             Precision = precisionScaleAttr != null ? precisionScaleAttr.Precision : default(byte?),
@@ -96,11 +95,11 @@ namespace PowerLib.System.Data.Entity
         mi.ReturnType.GetInterfaces().SingleOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IQueryable<>));
       if (returnType != null)
       {
-        DbFunctionResultAttribute attrResult = mi.ReturnParameter.GetCustomAttribute<DbFunctionResultAttribute>();
+        FunctionResultAttribute attrResult = mi.ReturnParameter.GetCustomAttribute<FunctionResultAttribute>();
         ResultDescriptor result = new ResultDescriptor(returnType.GetGenericArguments()[0])
         {
           ColumnName = attrResult != null ? attrResult.ColumnName : _resultColumnName,
-          StoreTypeName = attrResult != null ? attrResult.DbTypeName : null
+          StoreTypeName = attrResult != null ? attrResult.TypeName : null
         };
         return new FunctionDescriptor(_namespaceName, databaseSchema, functionName, true,
           attrFunctionEx != null ? attrFunctionEx.IsComposable : default(bool?),
@@ -114,13 +113,13 @@ namespace PowerLib.System.Data.Entity
       returnType = mi.ReturnType == typeof(IQueryable) ? mi.ReturnType : mi.ReturnType.GetInterfaces().SingleOrDefault(t => t == typeof(IQueryable));
       if (returnType != null)
       {
-        DbFunctionResultAttribute attrResult = mi.ReturnParameter.GetCustomAttribute<DbFunctionResultAttribute>();
+        FunctionResultAttribute attrResult = mi.ReturnParameter.GetCustomAttribute<FunctionResultAttribute>();
         if (attrResult != null)
         {
           ResultDescriptor result = new ResultDescriptor(attrResult.Type)
           {
             ColumnName = attrResult.ColumnName ?? _resultColumnName,
-            StoreTypeName = attrResult.DbTypeName
+            StoreTypeName = attrResult.TypeName
           };
           return new FunctionDescriptor(_namespaceName, databaseSchema, functionName, true,
             attrFunctionEx != null ? attrFunctionEx.IsComposable : default(bool?),
@@ -138,18 +137,18 @@ namespace PowerLib.System.Data.Entity
         mi.ReturnType.GetInterfaces().SingleOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
       if (returnType != null)
       {
-        DbFunctionResultAttribute attrResult = mi.ReturnParameter.GetCustomAttribute<DbFunctionResultAttribute>();
+        FunctionResultAttribute attrResult = mi.ReturnParameter.GetCustomAttribute<FunctionResultAttribute>();
         IEnumerable<ResultDescriptor> results =
           Enumerable.Repeat(new ResultDescriptor(returnType.GetGenericArguments()[0])
           {
             ColumnName = attrResult != null ? attrResult.ColumnName : _resultColumnName,
-            StoreTypeName = attrResult != null ? attrResult.DbTypeName : null
+            StoreTypeName = attrResult != null ? attrResult.TypeName : null
           }, 1)
-          .Concat(mi.GetCustomAttributes<DbFunctionResultAttribute>()
+          .Concat(mi.GetCustomAttributes<FunctionResultAttribute>()
             .Select(a => new ResultDescriptor(a.Type)
               {
                 ColumnName = a.ColumnName ?? _resultColumnName,
-                StoreTypeName = a.DbTypeName
+                StoreTypeName = a.TypeName
               }));
         return new FunctionDescriptor(_namespaceName, databaseSchema, functionName, true, false, false, false,
           parameters.Length == 0 ? attrFunctionEx != null ? attrFunctionEx.IsNiladic : default(bool?) : false,
@@ -161,11 +160,11 @@ namespace PowerLib.System.Data.Entity
         mi.ReturnType == typeof(IEnumerable) ? mi.ReturnType : mi.ReturnType.GetInterfaces().SingleOrDefault(t => t == typeof(IEnumerable));
       if (returnType != null)
       {
-        IEnumerable<ResultDescriptor> results = mi.GetCustomAttributes<DbFunctionResultAttribute>()
+        IEnumerable<ResultDescriptor> results = mi.GetCustomAttributes<FunctionResultAttribute>()
           .Select(a => new ResultDescriptor(a.Type)
           {
             ColumnName = a.ColumnName ?? _resultColumnName,
-            StoreTypeName = a.DbTypeName
+            StoreTypeName = a.TypeName
           });
         return new FunctionDescriptor(_namespaceName, databaseSchema, functionName, true, false, false, false,
           parameters.Length == 0 ? attrFunctionEx != null ? attrFunctionEx.IsNiladic : default(bool?) : false,
@@ -174,10 +173,10 @@ namespace PowerLib.System.Data.Entity
       }
       //  Scalar result
       returnType = mi.ReturnType;
-      DbFunctionResultAttribute attr = mi.ReturnParameter.GetCustomAttribute<DbFunctionResultAttribute>();
+      FunctionResultAttribute attr = mi.ReturnParameter.GetCustomAttribute<FunctionResultAttribute>();
       ResultDescriptor resultDescriptor = new ResultDescriptor(mi.ReturnType)
       {
-        StoreTypeName = attr != null ? attr.DbTypeName : null
+        StoreTypeName = attr != null ? attr.TypeName : null
       };
       return new FunctionDescriptor(_namespaceName, databaseSchema, functionName, false,
         attrFunctionEx != null ? attrFunctionEx.IsComposable : default(bool?),
