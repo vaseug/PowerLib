@@ -16,6 +16,31 @@ This solution contains the following projects:
 
 Contains many classes, structures, interfaces and extension methods that expedite and optimize the development process.
 
+**PowerLib.System.Collection.PwrList\<T>** - A list whose operation with an internal buffer is based on the round-robin algorithm. It implements the memory allocation and deallocation management interfaces and contains many methods for working with its elements.
+
+**PowerLib.System.Collection.PwrSortedList\<T>** - Sorted list based on the comparator of elements represented by the interface *IComparer\<T>* or the delegate *Comparison\<T>*. The values of the elements participating in the comparison must be unchanged during the storage in the list. The list can be restricted by storing only unique values. There are also options that control the addition of duplicate values: to the beginning of the chain, to the end, or arbitrarily.
+
+**PowerLib.System.Collection.PwrKeySortedList\<K, T>** - Sorted list based on the element key comparator represented by the *IComparer\<K>* interface or the *Comparison\<K>* delegate. The key extraction is specified by the delegate *Func\<T, K>*. The key values of the elements participating in the comparison must be unchanged during the storage in the list. The list can be restricted by storing only unique values. There are also options that control the addition of duplicate values: to the beginning of the chain, to the end, or arbitrarily.
+
+**PowerLib.System.Collection.PwrStack\<T>** - A general stack with additional range operations.
+**PowerLib.System.Collection.PwrSortedStack\<T>** - A sorted stack (priority stack).
+**PowerLib.System.Collection.PwrKeySortedStack\<T>** - A key sorted stack (priority stack).
+
+**PowerLib.System.Collection.PwrQueue\<T>** - A general queue with additional range operations.
+**PowerLib.System.Collection.PwrSortedQueue\<T>** - A sorted queue (priority queue).
+**PowerLib.System.Collection.PwrKeySortedQueue\<T>** - A key sorted queue (priority queue).
+
+**PowerLib.System.Collection.PwrDeque\<T>** - A general deque with additional range operations.
+**PowerLib.System.Collection.PwrSortedDeque\<T>** - A sorted deque (priority deque).
+**PowerLib.System.Collection.PwrKeySortedDeque\<T>** - A key sorted deque (priority deque).
+
+The **ListExtension** class contains a number of extension methods for working with lists.
+There are many classes in namespace **PowerLib.System.Collection.Matching** for working with items matching and comparison. Also, in namespace **PowerLib.System.Linq.Builders** there are classes that allow you to build complex predicative expressions, comparison expressions, access expressions to fields, properties, and methods. Very useful for compiling predicative Queryable expressions depending on the current filtering conditions.
+
+For working with arrays jagged and regular (one-dimensional, multidimensional), there are many classes and methods of extensions.
+
+A large section to working with linked and tree data (trees, graphs) includes many structures for storing tree elements and methods for working with them (including LINQ extensions) to be posted later.
+
 Continued...
 
 ---
