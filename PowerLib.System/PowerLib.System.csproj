@@ -211,6 +211,7 @@
     <Compile Include="IO\Streamed\Typed\NulTimeSpanStreamedCollection.cs" />
     <Compile Include="IO\Streamed\Typed\StringStreamedCollection.cs" />
     <Compile Include="Linq\Builders\AccessorBuilder.cs" />
+    <Compile Include="Linq\Builders\BuilderResources.cs" />
     <Compile Include="Linq\Builders\ComparerBuilder.cs" />
     <Compile Include="Linq\Builders\EqualityComparerBuilder.cs" />
     <Compile Include="Linq\Builders\ParametersBuilder.cs" />
@@ -444,6 +445,14 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DateTimeInterval.ru.resx">
       <DependentUpon>DateTimeInterval.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Linq\Builders\BuilderResources.resx">
+      <DependentUpon>BuilderResources.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Linq\Builders\BuilderResources.ru.resx">
+      <DependentUpon>BuilderResources.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

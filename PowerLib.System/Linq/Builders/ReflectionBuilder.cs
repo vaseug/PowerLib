@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using PowerLib.System.Collections;
-using PowerLib.System.Linq;
 using PowerLib.System.Linq.Expressions;
-using PowerLib.System.Resources;
 
 namespace PowerLib.System.Linq.Builders
 {
@@ -276,7 +273,7 @@ namespace PowerLib.System.Linq.Builders
 				parInstance);
 		}
 
-		internal static Expression<Func<dynamic>>[] GetParameters(ParameterInfo[] parameterInfos)
+		internal static LambdaExpression[] GetParameters(ParameterInfo[] parameterInfos)
 		{
 			if (parameterInfos == null)
 				throw new ArgumentNullException("parameterInfos");
@@ -284,7 +281,7 @@ namespace PowerLib.System.Linq.Builders
 			return GetParametersCore(parameterInfos, null);
 		}
 
-		internal static Expression<Func<dynamic>>[] GetParameters(ParameterInfo[] parameterInfos, Expression<Action<ICall>> expression)
+		internal static LambdaExpression[] GetParameters(ParameterInfo[] parameterInfos, Expression<Action<ICall>> expression)
 		{
 			if (parameterInfos == null)
 				throw new ArgumentNullException("parameterInfos");
@@ -294,7 +291,7 @@ namespace PowerLib.System.Linq.Builders
 			return GetParametersCore(parameterInfos, expression);
 		}
 
-		internal static Expression<Func<dynamic>>[] GetParameters<R>(ParameterInfo[] parameterInfos, Expression<Func<ICall, R>> expression)
+		internal static LambdaExpression[] GetParameters<R>(ParameterInfo[] parameterInfos, Expression<Func<ICall, R>> expression)
 		{
 			if (parameterInfos == null)
 				throw new ArgumentNullException("parameterInfos");
@@ -304,7 +301,7 @@ namespace PowerLib.System.Linq.Builders
 			return GetParametersCore(parameterInfos, expression);
 		}
 
-		internal static Expression<Func<T, dynamic>>[] GetParameters<T>(ParameterInfo[] parameterInfos, Expression<Action<ICall<T>>> expression)
+		internal static LambdaExpression[] GetParameters<T>(ParameterInfo[] parameterInfos, Expression<Action<ICall<T>>> expression)
 		{
 			if (parameterInfos == null)
 				throw new ArgumentNullException("parameterInfos");
@@ -314,7 +311,7 @@ namespace PowerLib.System.Linq.Builders
 			return GetParametersCore<T>(parameterInfos, expression);
 		}
 
-		internal static Expression<Func<T, dynamic>>[] GetParameters<T, R>(ParameterInfo[] parameterInfos, Expression<Func<ICall<T>, R>> expression)
+		internal static LambdaExpression[] GetParameters<T, R>(ParameterInfo[] parameterInfos, Expression<Func<ICall<T>, R>> expression)
 		{
 			if (parameterInfos == null)
 				throw new ArgumentNullException("parameterInfos");
@@ -324,53 +321,53 @@ namespace PowerLib.System.Linq.Builders
 			return GetParametersCore<T>(parameterInfos, expression);
 		}
 
-		private static Expression<Func<dynamic>>[] GetParametersCore(ParameterInfo[] parameterInfos, LambdaExpression expression)
+		private static LambdaExpression[] GetParametersCore(ParameterInfo[] parameterInfos, LambdaExpression expression)
 		{
-			Expression<Func<dynamic>>[] parameters = new Expression<Func<dynamic>>[parameterInfos.Length];
+      LambdaExpression[] parameters = new LambdaExpression[parameterInfos.Length];
 			if (expression != null)
 				expression.Body.Visit((MethodCallExpression expr) =>
 				{
-					if (expr.Method.DeclaringType == typeof(ICall))
+					if (expr.Method.DeclaringType == typeof(ICall) && expr.Arguments.Count > 1)
 					{
-						Func<ParameterInfo, bool> predicate = GetConstant<Func<ParameterInfo, bool>>(expr.Arguments[0]);
+            Func<ParameterInfo, bool> predicate = ((Expression<Func<ParameterInfo, bool>>)expr.Arguments[0]).Compile();
 						ParameterInfo pi = parameterInfos.SingleOrDefault(predicate);
 						if (pi == null)
-							throw new InvalidOperationException("Parameter is not found in collection");
+							throw new InvalidOperationException("Parameter is not found in collection.");
 						if (pi.Position + expr.Arguments.Count - 1 > parameterInfos.Length)
-							throw new ArgumentException("Inconsistent parameters index and length");
+							throw new ArgumentException("Inconsistent parameters index and length.");
 						for (int c = 0; c < expr.Arguments.Count - 1; c++)
-							parameters[pi.Position + c] = Expression.Lambda<Func<dynamic>>(expr.Arguments[c + 1]);
+							parameters[pi.Position + c] = Expression.Lambda(expr.Arguments[c + 1]);
 					}
 					return expr;
 				});
 			for (int i = 0; i < parameters.Length; i++)
 				if (parameters[i] == null)
 					if (parameterInfos[i].HasDefaultValue)
-						parameters[i] = Expression.Lambda<Func<dynamic>>(Expression.Constant(parameterInfos[i].DefaultValue, parameterInfos[i].ParameterType));
+						parameters[i] = Expression.Lambda(Expression.Constant(parameterInfos[i].DefaultValue, parameterInfos[i].ParameterType));
 					else
-						throw new InvalidOperationException(string.Format("Parameter at {0} position is not initialized", i));
+						throw new InvalidOperationException(string.Format("Parameter at {0} position is not initialized.", i));
 			return parameters;
 		}
 
-		private static Expression<Func<T, dynamic>>[] GetParametersCore<T>(ParameterInfo[] parameterInfos, LambdaExpression expression)
+		private static LambdaExpression[] GetParametersCore<T>(ParameterInfo[] parameterInfos, LambdaExpression expression)
 		{
-			Expression<Func<T, dynamic>>[] parameters = new Expression<Func<T, dynamic>>[parameterInfos.Length];
+			LambdaExpression[] parameters = new LambdaExpression[parameterInfos.Length];
 			ParameterExpression parInstance = Expression.Parameter(typeof(T));
 			if (expression != null)
 				expression.Body.Visit((MethodCallExpression expr) =>
 				{
-					if (expr.Method.DeclaringType == typeof(ICall))
+					if (expr.Method.DeclaringType == typeof(ICall) && expr.Arguments.Count > 1)
 					{
-						Func<ParameterInfo, bool> predicate = GetConstant<Func<ParameterInfo, bool>>(expr.Arguments[0]);
-						ParameterInfo pi = parameterInfos.SingleOrDefault(predicate);
+						Func<ParameterInfo, bool> predicate = ((Expression<Func<ParameterInfo, bool>>)expr.Arguments[0]).Compile();
+            ParameterInfo pi = parameterInfos.SingleOrDefault(predicate);
 						if (pi == null)
 							throw new InvalidOperationException("Parameter is not found in collection");
 						if (pi.Position + expr.Arguments.Count - 1 > parameterInfos.Length)
 							throw new ArgumentException("Inconsistent parameters index and length");
 						for (int c = 0; c < expr.Arguments.Count - 1; c++)
-							parameters[pi.Position + c] = Expression.Lambda<Func<T, dynamic>>(expr.Arguments[c + 1], parInstance);
+							parameters[pi.Position + c] = Expression.Lambda(expr.Arguments[c + 1], parInstance);
 					}
-					else if (expr.Method.DeclaringType == typeof(ICall<T>))
+					else if (expr.Method.DeclaringType == typeof(ICall<T>) && expr.Arguments.Count > 1)
 					{
 						Func<ParameterInfo, bool> predicate = GetConstant<Func<ParameterInfo, bool>>(expr.Arguments[0]);
 						ParameterInfo pi = parameterInfos.SingleOrDefault(predicate);
@@ -390,7 +387,7 @@ namespace PowerLib.System.Linq.Builders
 			for (int i = 0; i < parameters.Length; i++)
 				if (parameters[i] == null)
 					if (parameterInfos[i].HasDefaultValue)
-						parameters[i] = Expression.Lambda<Func<T, dynamic>>(Expression.Constant(parameterInfos[i].DefaultValue, parameterInfos[i].ParameterType), parInstance);
+						parameters[i] = Expression.Lambda(Expression.Constant(parameterInfos[i].DefaultValue, parameterInfos[i].ParameterType), parInstance);
 					else
 						throw new InvalidOperationException(string.Format("Parameter at {0} position is not initialized", i));
 			return parameters;
@@ -454,66 +451,103 @@ namespace PowerLib.System.Linq.Builders
 			throw new ArgumentException("Invalid expression");
 		}
 
-		#endregion
-		#region Public access methods
+    #endregion
+    #region Public access methods
 
-		public static Expression<Func<R>> StaticFieldOrPropertyAccess<T, R>(Func<MemberInfo, bool> predicate)
+    public static Expression<Func<R>> StaticFieldOrPropertyAccess<T, R>(Func<MemberInfo, bool> predicate)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
-			MemberInfo mb = typeof(T)
+			MemberInfo mbAccess = typeof(T)
 				.GetMembers(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.Where(t => t.MemberType == MemberTypes.Field || t.MemberType == MemberTypes.Property)
-				.SingleOrDefault(predicate);
-			if (mb == null)
-				throw new ArgumentException(string.Format("Field or property is not found in type '{0}'", typeof(T).FullName));
+				.SingleOrDefault(mb => predicate(mb) && (
+          mb.MemberType == MemberTypes.Field && typeof(R).IsAssignableFrom(((FieldInfo)mb).FieldType) ||
+          mb.MemberType == MemberTypes.Property && typeof(R).IsAssignableFrom(((PropertyInfo)mb).PropertyType) && ((PropertyInfo)mb).GetIndexParameters().Length == 0));
+			if (mbAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.FieldOrPropertyNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<R>>(Expression.MakeMemberAccess(null, mb));
+      return Expression.Lambda<Func<R>>(Expression.MakeMemberAccess(null, mbAccess));
 		}
 
-		public static Expression<Func<R>> StaticFieldAccess<T, R>(Func<FieldInfo, bool> predicate)
+    public static Expression<Func<R>> StaticFieldOrPropertyAccess<R>(Type type, Func<MemberInfo, bool> predicate)
+    {
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+
+      MemberInfo mbAccess = type
+        .GetMembers(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(mb => predicate(mb) && (
+          mb.MemberType == MemberTypes.Field && typeof(R).IsAssignableFrom(((FieldInfo)mb).FieldType) ||
+          mb.MemberType == MemberTypes.Property && typeof(R).IsAssignableFrom(((PropertyInfo)mb).PropertyType) && ((PropertyInfo)mb).GetIndexParameters().Length == 0));
+      if (mbAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.FieldOrPropertyNotFound, type.FullName));
+
+      return Expression.Lambda<Func<R>>(Expression.MakeMemberAccess(null, mbAccess));
+    }
+
+    public static Expression<Func<R>> StaticFieldAccess<T, R>(Func<FieldInfo, bool> predicate)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
-			FieldInfo fi = typeof(T)
+			FieldInfo fiAccess = typeof(T)
 				.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (fi == null)
-				throw new ArgumentException(string.Format("Field is not found in type '{0}'", typeof(T).FullName));
+        .SingleOrDefault(fi => predicate(fi) && typeof(R).IsAssignableFrom(fi.FieldType));
+      if (fiAccess == null)
+				throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.FieldNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<R>>(Expression.Field(null, fi));
+			return Expression.Lambda<Func<R>>(Expression.Field(null, fiAccess));
 		}
 
-		public static Expression<Func<R>> StaticPropertyAccess<T, R>(Func<PropertyInfo, bool> predicate)
+    public static Expression<Func<R>> StaticFieldAccess<R>(Type type, Func<FieldInfo, bool> predicate)
+    {
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+
+      FieldInfo fiAccess = type
+        .GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(fi => predicate(fi) && typeof(R).IsAssignableFrom(fi.FieldType));
+      if (fiAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.FieldNotFound, type.FullName));
+
+      return Expression.Lambda<Func<R>>(Expression.Field(null, fiAccess));
+    }
+
+    public static Expression<Func<R>> StaticPropertyAccess<T, R>(Func<PropertyInfo, bool> predicate)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
-			PropertyInfo pi = typeof(T)
+			PropertyInfo piAccess = typeof(T)
 				.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (pi == null)
-				throw new ArgumentException(string.Format("Property is not found in type '{0}'", typeof(T).FullName));
+				.SingleOrDefault(pi => predicate(pi) && typeof(R).IsAssignableFrom(pi.PropertyType) && pi.GetIndexParameters().Length == 0);
+			if (piAccess == null)
+				throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.PropertyNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<R>>(Expression.Property(null, pi));
+			return Expression.Lambda<Func<R>>(Expression.Property(null, piAccess));
 		}
 
-		public static Expression<Func<R>> StaticPropertyAccess<T, R>(Func<PropertyInfo, bool> predicate, Expression<Func<IResult, R>> result)
+		public static Expression<Func<R>> StaticPropertyAccess<R>(Type type, Func<PropertyInfo, bool> predicate, Expression<Func<IResult, R>> result)
 		{
-			if (predicate == null)
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
 				throw new ArgumentNullException("predicate");
 			if (result == null)
 				throw new ArgumentNullException("parameters");
 
-			PropertyInfo pi = typeof(T)
+			PropertyInfo piAccess = type
 				.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (pi == null)
-				throw new ArgumentException(string.Format("Property is not found in type '{0}'", typeof(T).FullName));
+				.SingleOrDefault(pi => predicate(pi) && typeof(R).IsAssignableFrom(pi.PropertyType) && pi.GetIndexParameters().Length == 0);
+			if (piAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.PropertyNotFound, type.FullName));
 
-			return Expression.Lambda<Func<R>>(Expression.Property(null, pi));
+      return Expression.Lambda<Func<R>>(Expression.Property(null, piAccess));
 		}
 
 		public static Expression<Func<R>> StaticPropertyAccess<T, R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall, R>> call)
@@ -522,57 +556,126 @@ namespace PowerLib.System.Linq.Builders
 				throw new ArgumentNullException("predicate");
 			if (call == null)
 				throw new ArgumentNullException("call");
-			PropertyInfo pi = typeof(T)
+
+			PropertyInfo piAccess = typeof(T)
 				.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (pi == null)
-				throw new ArgumentException(string.Format("Property is not found in type '{0}'", typeof(T).FullName));
+				.SingleOrDefault(pi => predicate(pi) && typeof(R).IsAssignableFrom(pi.PropertyType));
+			if (piAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.PropertyNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<R>>(Expression.Property(null, pi, GetParameters(pi.GetIndexParameters(), call).Select(e => e.Body)));
+      return Expression.Lambda<Func<R>>(Expression.Property(null, piAccess, GetParameters(piAccess.GetIndexParameters(), call).Select(e => e.Body)));
 		}
 
-		public static Expression<Action> StaticMethodCall<T>(Func<MethodInfo, bool> predicate)
+    public static Expression<Func<R>> StaticPropertyAccess<R>(Type type, Func<PropertyInfo, bool> predicate, Expression<Func<ICall, R>> call)
+    {
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+      if (call == null)
+        throw new ArgumentNullException("call");
+
+      PropertyInfo piAccess = type
+        .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(pi => predicate(pi) && typeof(R).IsAssignableFrom(pi.PropertyType));
+      if (piAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.PropertyNotFound, type.FullName));
+
+      return Expression.Lambda<Func<R>>(Expression.Property(null, piAccess, GetParameters(piAccess.GetIndexParameters(), call).Select(e => e.Body)));
+    }
+
+    public static Expression<Action> StaticMethodCall<T>(Func<MethodInfo, bool> predicate)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
 			MethodInfo miCall = typeof(T)
 				.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
+				.SingleOrDefault(mi => predicate(mi) && mi.GetParameters().Length == 0);
 			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Action>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), null).Select(e => e.Body)));
+      return Expression.Lambda<Action>(Expression.Call(miCall));
 		}
 
-		public static Expression<Func<R>> StaticMethodCall<T, R>(Func<MethodInfo, bool> predicate)
+    public static Expression<Action> StaticMethodCall(Type type, Func<MethodInfo, bool> predicate)
+    {
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+
+      MethodInfo miCall = type
+        .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(mi => predicate(mi) && mi.GetParameters().Length == 0);
+      if (miCall == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, type.FullName));
+
+      return Expression.Lambda<Action>(Expression.Call(miCall));
+    }
+
+    public static Expression<Func<R>> StaticMethodCall<T, R>(Func<MethodInfo, bool> predicate)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
 			MethodInfo miCall = typeof(T)
 				.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
+				.SingleOrDefault(mi => predicate(mi) && typeof(R).IsAssignableFrom(mi.ReturnType) && mi.GetParameters().Length == 0);
 			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<R>>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), null).Select(e => e.Body)));
+      return Expression.Lambda<Func<R>>(Expression.Call(miCall));
 		}
 
-		public static Expression<Action> StaticMethodCall<T>(Func<MethodInfo, bool> predicate, Expression<Action<ICall>> call)
+    public static Expression<Func<R>> StaticMethodCall<R>(Type type, Func<MethodInfo, bool> predicate)
+    {
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+
+      MethodInfo miCall = type
+        .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(mi => predicate(mi) && typeof(R).IsAssignableFrom(mi.ReturnType) && mi.GetParameters().Length == 0);
+      if (miCall == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, type.FullName));
+
+      return Expression.Lambda<Func<R>>(Expression.Call(miCall));
+    }
+
+    public static Expression<Action> StaticMethodCall<T>(Func<MethodInfo, bool> predicate, Expression<Action<ICall>> call)
+    {
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+      if (call == null)
+        throw new ArgumentNullException("call");
+
+      MethodInfo miCall = typeof(T)
+        .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(mi => predicate(mi));
+      if (miCall == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
+
+      return Expression.Lambda<Action>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), call).Select(e => e.Body)));
+    }
+
+    public static Expression<Action> StaticMethodCall(Type type, Func<MethodInfo, bool> predicate, Expression<Action<ICall>> call)
 		{
-			if (predicate == null)
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
 				throw new ArgumentNullException("predicate");
 			if (call == null)
 				throw new ArgumentNullException("call");
 
-			MethodInfo miCall = typeof(T)
+			MethodInfo miCall = type
 				.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
 				.SingleOrDefault(predicate);
 			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, type.FullName));
 
-			return Expression.Lambda<Action>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), call).Select(e => e.Body)));
+      return Expression.Lambda<Action>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), call).Select(e => e.Body)));
 		}
 
 		public static Expression<Func<R>> StaticMethodCall<T, R>(Func<MethodInfo, bool> predicate, Expression<Func<ICall, R>> call)
@@ -584,27 +687,46 @@ namespace PowerLib.System.Linq.Builders
 
 			MethodInfo miCall = typeof(T)
 				.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
+				.SingleOrDefault(mi => predicate(mi) && typeof(R).IsAssignableFrom(mi.ReturnType));
 			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<R>>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), call).Select(e => e.Body)));
+      return Expression.Lambda<Func<R>>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), call).Select(e => e.Body)));
 		}
 
-		public static Expression<Func<T, R>> InstanceFieldOrPropertyAccess<T, R>(Func<MemberInfo, bool> predicate)
+    public static Expression<Func<R>> StaticMethodCall<R>(Type type, Func<MethodInfo, bool> predicate, Expression<Func<ICall, R>> call)
+    {
+      if (type == null)
+        throw new ArgumentNullException("type");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+      if (call == null)
+        throw new ArgumentNullException("call");
+
+      MethodInfo miCall = type
+        .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(mi => predicate(mi) && typeof(R).IsAssignableFrom(mi.ReturnType));
+      if (miCall == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, type.FullName));
+
+      return Expression.Lambda<Func<R>>(Expression.Call(miCall, GetParameters(miCall.GetParameters(), call).Select(e => e.Body)));
+    }
+
+    public static Expression<Func<T, R>> InstanceFieldOrPropertyAccess<T, R>(Func<MemberInfo, bool> predicate)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
-			MemberInfo mb = typeof(T)
-				.GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.Where(t => t.MemberType == MemberTypes.Field || t.MemberType == MemberTypes.Property)
-				.SingleOrDefault(predicate);
-			if (mb == null)
-				throw new ArgumentException(string.Format("Field or property is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+      MemberInfo mbAccess = typeof(T)
+        .GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(mb => predicate(mb) && (
+          mb.MemberType == MemberTypes.Field && typeof(R).IsAssignableFrom(((FieldInfo)mb).FieldType) ||
+          mb.MemberType == MemberTypes.Property && typeof(R).IsAssignableFrom(((PropertyInfo)mb).PropertyType) && ((PropertyInfo)mb).GetIndexParameters().Length == 0));
+			if (mbAccess == null)
+				throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.FieldOrPropertyNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<T, R>>(Expression.MakeMemberAccess(parInstance, mb), parInstance);
+			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+			return Expression.Lambda<Func<T, R>>(Expression.MakeMemberAccess(parInstance, mbAccess), parInstance);
 		}
 
 		public static Expression<Func<T, R>> InstanceFieldAccess<T, R>(Func<FieldInfo, bool> predicate)
@@ -612,14 +734,14 @@ namespace PowerLib.System.Linq.Builders
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
-			FieldInfo fi = typeof(T)
+			FieldInfo fiAccess = typeof(T)
 				.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (fi == null)
-				throw new ArgumentException(string.Format("Field is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+				.SingleOrDefault(fi => predicate(fi) && typeof(R).IsAssignableFrom(fi.FieldType));
+			if (fiAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.FieldNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<T, R>>(Expression.Field(parInstance, fi), parInstance);
+      ParameterExpression parInstance = Expression.Parameter(typeof(T));
+			return Expression.Lambda<Func<T, R>>(Expression.Field(parInstance, fiAccess), parInstance);
 		}
 
 		public static Expression<Func<T, R>> InstancePropertyAccess<T, R>(Func<PropertyInfo, bool> predicate)
@@ -627,95 +749,81 @@ namespace PowerLib.System.Linq.Builders
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 
-			PropertyInfo pi = typeof(T)
+			PropertyInfo piAccess = typeof(T)
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (pi == null)
-				throw new ArgumentException(string.Format("Property is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+				.SingleOrDefault(pi => predicate(pi) && typeof(R).IsAssignableFrom(pi.PropertyType) && pi.GetIndexParameters().Length == 0);
+			if (piAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.PropertyNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<T, R>>(Expression.Property(parInstance, pi), parInstance);
+      ParameterExpression parInstance = Expression.Parameter(typeof(T));
+			return Expression.Lambda<Func<T, R>>(Expression.Property(parInstance, piAccess), parInstance);
 		}
 
-		public static Expression<Func<T, R>> InstancePropertyAccess<T, R>(Func<PropertyInfo, bool> predicate, Expression<Func<IResult, R>> result)
-		{
-			if (predicate == null)
-				throw new ArgumentNullException("predicate");
-			if (result == null)
-				throw new ArgumentNullException("result");
-
-			PropertyInfo pi = typeof(T)
-				.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (pi == null)
-				throw new ArgumentException(string.Format("Property is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
-
-			return Expression.Lambda<Func<T, R>>(Expression.Property(parInstance, pi), parInstance);
-		}
-
-		public static Expression<Func<T, R>> InstancePropertyAccess<T, R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall<T>, R>> parameters)
+    public static Expression<Func<T, R>> InstancePropertyAccess<T, R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall<T>, R>> parameters)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 			if (parameters == null)
 				throw new ArgumentNullException("parameters");
 
-			PropertyInfo pi = typeof(T)
+			PropertyInfo piAccess = typeof(T)
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (pi == null)
-				throw new ArgumentException(string.Format("Property is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+				.SingleOrDefault(pi => predicate(pi) && typeof(R).IsAssignableFrom(pi.PropertyType));
+			if (piAccess == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.PropertyNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<T, R>>(Expression.Property(parInstance, pi, GetParameters<T, R>(pi.GetIndexParameters(), parameters).Select(p => p.ReplaceParameters(0, parInstance)).ToArray()), parInstance);
+      ParameterExpression parInstance = Expression.Parameter(typeof(T));
+			return Expression.Lambda<Func<T, R>>(Expression.Property(parInstance, piAccess, GetParametersCore<T>(piAccess.GetIndexParameters(), parameters).Select(p => p.ReplaceParameters(0, parInstance)).ToArray()), parInstance);
 		}
-/*
+
 		public static Expression<Action<T>> InstanceMethodCall<T>(Func<MethodInfo, bool> predicate)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
+
 			MethodInfo miCall = typeof(T)
 				.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
 				.SingleOrDefault(predicate);
 			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Action<T>>(Expression.Call(parInstance, miCall, GetParameters<T>(miCall.GetParameters(), null).Select(p => p.ReplaceParameters(0, parInstance))), parInstance);
+      ParameterExpression parInstance = Expression.Parameter(typeof(T));
+			return Expression.Lambda<Action<T>>(Expression.Call(parInstance, miCall), parInstance);
 		}
 
-		public static Expression<Func<T, R>> InstanceMethodCall<T, R>(Func<MethodInfo, bool> predicate)
-		{
-			if (predicate == null)
-				throw new ArgumentNullException("predicate");
-			MethodInfo miCall = typeof(T)
-				.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
-			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
-
-			return Expression.Lambda<Func<T, R>>(Expression.Call(parInstance, miCall, GetParameters<T>(miCall.GetParameters(), null).Select(p => p.ReplaceParameters(0, parInstance))), parInstance);
-		}
-*/
 		public static Expression<Action<T>> InstanceMethodCall<T>(Func<MethodInfo, bool> predicate, Expression<Action<ICall<T>>> call)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
 			if (call == null)
 				throw new ArgumentNullException("parameters");
+
 			MethodInfo miCall = typeof(T)
 				.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
 				.SingleOrDefault(predicate);
 			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
 
+      ParameterExpression parInstance = Expression.Parameter(typeof(T));
 			return Expression.Lambda<Action<T>>(Expression.Call(parInstance, miCall, GetParameters<T>(miCall.GetParameters(), call).Select(p => p.ReplaceParameters(0, parInstance))), parInstance);
 		}
 
-		public static Expression<Func<T, R>> InstanceMethodCall<T, R>(Func<MethodInfo, bool> predicate, Expression<Func<ICall<T>, R>> call)
+    public static Expression<Func<T, R>> InstanceMethodCall<T, R>(Func<MethodInfo, bool> predicate)
+    {
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+
+      MethodInfo miCall = typeof(T)
+        .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        .SingleOrDefault(mi => predicate(mi) && typeof(R).IsAssignableFrom(mi.ReturnType));
+      if (miCall == null)
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
+
+      ParameterExpression parInstance = Expression.Parameter(typeof(T));
+      return Expression.Lambda<Func<T, R>>(Expression.Call(parInstance, miCall), parInstance);
+    }
+
+    public static Expression<Func<T, R>> InstanceMethodCall<T, R>(Func<MethodInfo, bool> predicate, Expression<Func<ICall<T>, R>> call)
 		{
 			if (predicate == null)
 				throw new ArgumentNullException("predicate");
@@ -724,12 +832,12 @@ namespace PowerLib.System.Linq.Builders
 
 			MethodInfo miCall = typeof(T)
 				.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(predicate);
+				.SingleOrDefault(mi => predicate(mi) && typeof(R).IsAssignableFrom(mi.ReturnType));
 			if (miCall == null)
-				throw new ArgumentException(string.Format("Method is not found in type '{0}'", typeof(T).FullName));
-			ParameterExpression parInstance = Expression.Parameter(typeof(T));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.MethodNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<T, R>>(Expression.Call(parInstance, miCall, GetParameters<T, R>(miCall.GetParameters(), call).Select(p => p.ReplaceParameters(0, parInstance))), parInstance);
+      ParameterExpression parInstance = Expression.Parameter(typeof(T));
+			return Expression.Lambda<Func<T, R>>(Expression.Call(parInstance, miCall, GetParametersCore<T>(miCall.GetParameters(), call).Select(p => p.ReplaceParameters(0, parInstance))), parInstance);
 		}
 
 		public static Expression<Func<T>> Construct<T>(Func<ConstructorInfo, bool> predicate)
@@ -739,11 +847,11 @@ namespace PowerLib.System.Linq.Builders
 
 			ConstructorInfo ci = typeof(T)
 				.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(t => t.GetParameters().Length == 0);
+				.SingleOrDefault(predicate);
 			if (ci == null)
-				throw new ArgumentException(string.Format("Constructor is not found in type '{0}'", typeof(T).FullName));
+        throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.ConstructorNotFound, typeof(T).FullName));
 
-			return Expression.Lambda<Func<T>>(Expression.New(ci));
+      return Expression.Lambda<Func<T>>(Expression.New(ci));
 		}
 
 		public static Expression<Func<T>> Construct<T>(Func<ConstructorInfo, bool> predicate, Expression<Action<ICall>> call)
@@ -757,17 +865,33 @@ namespace PowerLib.System.Linq.Builders
 				.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
 				.SingleOrDefault(predicate);
 			if (ci == null)
-				throw new ArgumentException(string.Format("Constructor is not found in type '{0}'", typeof(T).FullName));
+				throw new ArgumentException(BuilderResources.Default.FormatMessage(BuilderMessage.ConstructorNotFound, typeof(T).FullName));
 
 			return Expression.Lambda<Func<T>>(Expression.New(ci, GetParameters(ci.GetParameters(), call).Select(e => e.Body)));
 		}
 
 		#endregion
-	}
+  }
 
-	#region Intarfaces
+  #region Helper classes
 
-	public interface IValue
+  public static class Call<T>
+  {
+    public static Expression<Action<ICall<T>>> Expression(Expression<Action<ICall<T>>> expression)
+    {
+      return expression;
+    }
+
+    public static Expression<Func<ICall<T>, R>> Expression<R>(Expression<Func<ICall<T>, R>> expression)
+    {
+      return expression;
+    }
+  }
+
+  #endregion
+  #region Intarfaces
+
+  public interface IValue
 	{
 		T Val<T>(T result);
 
@@ -802,7 +926,7 @@ namespace PowerLib.System.Linq.Builders
 
 		ICall Range(Func<ParameterInfo, bool> parameter, params dynamic[] values);
 
-		void NoReturn();
+		void Void();
 	}
 
 	public interface ICall<T> : ICall
@@ -818,17 +942,17 @@ namespace PowerLib.System.Linq.Builders
 	{
 		void Member(Func<MemberInfo, bool> predicate);
 
-		void MemberP(Func<MemberInfo, bool> predicate, Expression<Action<ICall>> call);
+		void MemberParam(Func<MemberInfo, bool> predicate, Expression<Action<ICall>> call);
 
-		void MemberPW(Func<MemberInfo, bool> predicate, Expression<Action<ICall<T>>> call);
+		void MemberSelf(Func<MemberInfo, bool> predicate, Expression<Action<ICall<T>>> call);
 
 		R Member<R>(Func<MemberInfo, bool> predicate);
 
 		R Member<R>(Func<MemberInfo, bool> predicate, Expression<Func<IResult, R>> result);
 
-		R MemberP<R>(Func<MemberInfo, bool> predicate, Expression<Func<ICall, R>> call);
+		R MemberParam<R>(Func<MemberInfo, bool> predicate, Expression<Func<ICall, R>> call);
 
-		R MemberPW<R>(Func<MemberInfo, bool> predicate, Expression<Func<ICall<T>, R>> call);
+		R MemberSelf<R>(Func<MemberInfo, bool> predicate, Expression<Func<ICall<T>, R>> call);
 	}
 
 	public interface IAssignableMember<T> : IMember<T>
@@ -851,18 +975,18 @@ namespace PowerLib.System.Linq.Builders
 
 		R Property<R>(Func<PropertyInfo, bool> predicate, Expression<Func<IResult, R>> result);
 
-		R PropertyP<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall, R>> parameters);
+		R PropertyParam<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall, R>> parameters);
 
-		R PropertyPW<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall<T>, R>> parameters);
+		R PropertySelf<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall<T>, R>> parameters);
 	}
 
 	public interface IApplicableMember<T> : IMember<T>
 	{
 		void Method(Func<MethodInfo, bool> predicate);
 
-		void MethodP(Func<MethodInfo, bool> predicate, Expression<Action<ICall>> call);
+		void MethodParam(Func<MethodInfo, bool> predicate, Expression<Action<ICall>> call);
 
-		void MethodPW(Func<MethodInfo, bool> predicate, Expression<Action<ICall<T>>> call);
+		void MethodSelf(Func<MethodInfo, bool> predicate, Expression<Action<ICall<T>>> call);
 	}
 
 	public interface IReturnableMember<T> : IMember<T>
@@ -875,9 +999,9 @@ namespace PowerLib.System.Linq.Builders
 
 		void Method(Func<MethodInfo, bool> predicate);
 
-		void MethodP(Func<MethodInfo, bool> predicate, Expression<Action<ICall>> call);
+		void MethodParam(Func<MethodInfo, bool> predicate, Expression<Action<ICall>> call);
 
-		void MethodPW(Func<MethodInfo, bool> predicate, Expression<Action<ICall<T>>> call);
+		void MethodSelf(Func<MethodInfo, bool> predicate, Expression<Action<ICall<T>>> call);
 
 		R FieldOrProperty<R>(Func<MemberInfo, bool> predicate);
 
@@ -891,17 +1015,17 @@ namespace PowerLib.System.Linq.Builders
 
 		R Property<R>(Func<PropertyInfo, bool> predicate, Expression<Func<IResult, R>> result);
 
-		R PropertyP<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall, R>> call);
+		R PropertyParam<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall, R>> call);
 
-		R PropertyPW<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall<T>, R>> call);
+		R PropertySelf<R>(Func<PropertyInfo, bool> predicate, Expression<Func<ICall<T>, R>> call);
 
 		R Method<R>(Func<MethodInfo, bool> predicate);
 
 		R Method<R>(Func<MethodInfo, bool> predicate, Expression<Func<IResult, R>> result);
 
-		R MethodP<R>(Func<MethodInfo, bool> predicate, Expression<Func<ICall, R>> call);
+		R MethodParam<R>(Func<MethodInfo, bool> predicate, Expression<Func<ICall, R>> call);
 
-		R MethodPW<R>(Func<MethodInfo, bool> predicate, Expression<Func<ICall<T>, R>> call);
+		R MethodSelf<R>(Func<MethodInfo, bool> predicate, Expression<Func<ICall<T>, R>> call);
 	}
 
 	public interface IConstructibleMember<T> : IMember<T>

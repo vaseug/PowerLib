@@ -11,7 +11,7 @@ namespace PowerLib.System.Resources
 		{
 			Type type = typeof(K);
 			if (!type.IsEnum)
-				throw new InvalidOperationException(string.Format("Resourckey type '{0}' is noenum.", type.FullName));
+				throw new InvalidOperationException(string.Format("Resourckey type '{0}' is not enum.", type.FullName));
 		}
 
 		public EnumTypeResourceAccessor(Func<K, string> selector)
