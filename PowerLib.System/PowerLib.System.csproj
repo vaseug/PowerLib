@@ -118,6 +118,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Arrays\ArraySlice.cs" />
+    <None Include="ClassDiagram1.cd" />
+    <Compile Include="Collections\Context\ElementContext.cs" />
+    <Compile Include="Collections\Context\HierarchicalContext.cs" />
+    <Compile Include="Collections\IElementContext.cs" />
+    <Compile Include="Collections\IHierarchicalContext.cs" />
     <Compile Include="Collections\List\PwrKeySortedList.cs" />
     <Compile Include="Collections\List\PwrSortedList.cs" />
     <Compile Include="Collections\Queue\IDeque.cs" />
@@ -138,6 +143,11 @@
       <DependentUpon>ConditionCriteria.resx</DependentUpon>
     </Compile>
     <Compile Include="DateTimeInterval.cs" />
+    <Compile Include="IO\FileSystemHierarchicalContext.cs" />
+    <Compile Include="IO\FileSystemInfoExtension.cs" />
+    <Compile Include="IO\HierarchicalDirectoryInfo.cs" />
+    <Compile Include="IO\HierarchicalFileInfo.cs" />
+    <Compile Include="IO\HierarchicalFileSystemInfo.cs" />
     <Compile Include="IO\RangeStream.cs" />
     <Compile Include="IO\Streamed\BaseFlaggedStreamedArray.cs" />
     <Compile Include="IO\Streamed\BaseFlaggedStreamedCollection.cs" />

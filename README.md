@@ -35,10 +35,74 @@ Contains many classes, structures, interfaces and extension methods that expedit
 **PowerLib.System.Collection.PwrKeySortedDeque\<T>** - A key sorted deque (priority deque).
 
 The **ListExtension** class contains a number of extension methods for working with lists.
-There are many classes in namespace **PowerLib.System.Collection.Matching** for working with items matching and comparison. Also, in namespace **PowerLib.System.Linq.Builders** there are classes that allow you to build complex predicative expressions, comparison expressions, access expressions to fields, properties, and methods. Very useful for compiling predicative Queryable expressions depending on the current filtering conditions.
+There are many classes in namespace **PowerLib.System.Collection.Matching** for working with items matching and comparison. Also, in namespace **PowerLib.System.Linq.Builders** there are classes that allow you to build complex predicative expressions, comparison expressions, access expressions to fields, properties, and methods. Very useful for compiling predicative Queryable expressions depending on the current runtime filtering conditions. For example, predicate expression with anonymous type:
+```csharp
+      DateTime? birthday = new DateTime(1990, 1, 1);
+      var predicate = PredicateBuilder.Matching(() => new { id = default(int), name = default(string), birthday = default(DateTime?) })
+        .Match(t => t.name == "Mike");
+      if (birthday.HasValue)
+        predicate = predicate.And(t => t.birthday.HasValue && t.birthday.Value >= birthday.Value);
+      dc.Persons
+        .Select(t => new { id = t.Id, name = t.Name, birthday = t.Birthday })
+        .Where(predicate.Expression)
+        .ToArray();
+```
+
+The following example demonstrates how to create an object and call its private method using the Reflection Builder class:
+```csharp
+  public class MyExpr
+  {
+    private int _factor;
+
+    private MyExpr(int factor)
+    {
+      _factor = factor;
+    }
+
+    private string Method(int x, int y)
+    {
+      return ((x + y) * _factor).ToString();
+    }
+  }
+  
+  public string Test()
+  {
+    var arguments = Tuple.Create(7, 8, 3);
+
+    var factory = ReflectionBuilder
+      .Construct<MyExpr>(ci => ci.GetParameters().Length == 1, c => c.ByVal(pi => pi.Position == 0, arguments.Item3))
+      .Compile();
+
+    var action = ReflectionBuilder
+      .InstanceMethodCall(mi => mi.Name == "Method" && mi.IsPrivate,
+        Call<MyExpr>.Expression(call => call.ByVal(pi => pi.Position == 0, arguments.Item1).ByVal(pi => pi.Position == 1, arguments.Item2).Return<string>()))
+        .Compile();
+
+    return action(factory());
+  }
+```
 
 For working with arrays jagged and regular (one-dimensional, multidimensional), there are many classes and methods of extensions.
 
+To work with the file system, the **PowerLib.System.IO.FileSystemInfoExtension** class exists, which allows you to display hierarchical information about the file structure using flexible filtering and sorting capabilities. Also, group operations for deleting and moving (renaming) files by condition are supported. For example, search files with max depth: 2 (0 - unrestricted depth), file extension: "\***.csproj**", directory starts with: "**PowerLib.**" and output by directory name *descending order* and file name *ascending order*.
+```csharp
+  foreach (var item in new DirectoryInfo(@"D:\Projects\Github\PowerLib\").EnumerateFiles("*", 2, false, 
+    fi => fi.Extension == ".csproj", (x, y) => Comparable.Compare(x.Name, y.Name, false),
+    di => di.Name.StartsWith(@"PowerLib."), (x, y) => Comparable.Compare(x.Name, y.Name, false) * -1))
+    Console.WriteLine("{0}", Path.Combine(item.DirectoryName, item.Name));
+```
+Console output:
+```
+D:\Projects\Github\PowerLib\PowerLib.System.Data.SqlTypes\PowerLib.System.Data.SqlTypes.csproj
+D:\Projects\Github\PowerLib\PowerLib.System.Data.Linq\PowerLib.System.Data.Linq.csproj
+D:\Projects\Github\PowerLib\PowerLib.System.Data\PowerLib.System.Data.csproj
+D:\Projects\Github\PowerLib\PowerLib.System.ComponentModel.DataAnnotations\PowerLib.System.ComponentModel.DataAnnotations.csproj
+D:\Projects\Github\PowerLib\PowerLib.System\PowerLib.System.csproj
+D:\Projects\Github\PowerLib\PowerLib.SqlServer\PowerLib.SqlServer.csproj
+D:\Projects\Github\PowerLib\PowerLib.SqlClr.Deploy.Utility\PowerLib.SqlClr.Deploy.Utility.csproj
+D:\Projects\Github\PowerLib\PowerLib.SqlClr.Deploy\PowerLib.SqlClr.Deploy.csproj
+D:\Projects\Github\PowerLib\PowerLib.EntityFramework\PowerLib.EntityFramework.csproj
+```
 A large section to working with linked and tree data (trees, graphs) includes many structures for storing tree elements and methods for working with them (including LINQ extensions) to be posted later.
 
 Continued...
