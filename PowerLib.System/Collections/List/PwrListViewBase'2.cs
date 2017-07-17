@@ -8,8 +8,8 @@ namespace PowerLib.System.Collections
 	/// <summary>
 	/// 
 	/// </summary>
-	/// <typeparam name="S">Typof storitem.</typeparam>
-	/// <typeparam name="T">Typof view item.</typeparam>
+	/// <typeparam name="S">Type of store item.</typeparam>
+	/// <typeparam name="T">Type of view item.</typeparam>
 	public abstract class PwrListViewBase<S, T> : PwrReadOnlyListBase<S, T>, IList<T>, IReadOnlyList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
 	{
 		#region Constructors

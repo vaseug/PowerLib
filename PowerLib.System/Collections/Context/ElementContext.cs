@@ -43,4 +43,12 @@ namespace PowerLib.System.Collections.Context
 
 		#endregion
 	}
+
+  public static class ElementContext
+  {
+    public static ElementContext<T, C> Create<T, C>(T element, C context)
+    {
+      return new ElementContext<T, C>(element, context);
+    }
+  }
 }

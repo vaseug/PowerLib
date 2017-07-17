@@ -6,50 +6,46 @@ using PowerLib.System.Collections;
 
 namespace PowerLib.System.Collections.Context
 {
-	/// <summary>
-	/// HierarchicalContext
-	/// </summary>
-	public class HierarchicalContext<T> : IHierarchicalContext<T>
-	{
-		private IList<T> _ancestors;
-		private PwrList<T> _innerList;
+  /// <summary>
+  /// HierarchicalContext
+  /// </summary>
+  public class HierarchicalContext<T> : IHierarchicalContext<T>
+  {
+    private readonly IList<T> _ancestors;
+    private readonly PwrList<T> _innerList;
 
-		#region Constructors
+    #region Constructors
 
-		public HierarchicalContext()
-		{
-			_innerList = new PwrList<T>();
-			_ancestors = new PwrListView<T>(_innerList);
-		}
+    public HierarchicalContext()
+    {
+      _innerList = new PwrList<T>();
+      _ancestors = new PwrListView<T>(_innerList);
+    }
 
-		#endregion
-		#region Properties
+    #endregion
+    #region Properties
 
-		public IList<T> Ancestors
-		{
-			get
-			{
-				return _ancestors;
-			}
-		}
+    public IList<T> Ancestors
+    {
+      get
+      {
+        return _ancestors;
+      }
+    }
 
-		#endregion
-		#region Methods
+    #endregion
+    #region Methods
 
-		internal protected int PushAncestor(T ancestor)
-		{
-			_innerList.Insert(0, ancestor);
-			return _innerList.Count;
-		}
+    public int PushAncestor(T ancestor)
+    {
+      return _innerList.PushFirst(ancestor);
+    }
 
-		internal protected T PopAncestor()
-		{
-			int index = _innerList.Count - 1;
-			T item = _innerList[index];
-			_innerList.RemoveAt(index);
-			return item;
-		}
+    public T PopAncestor()
+    {
+      return _innerList.PopFirst();
+    }
 
-		#endregion
-	}
+    #endregion
+  }
 }

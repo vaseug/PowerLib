@@ -8,7 +8,7 @@ namespace PowerLib.System.Linq.Builders
 {
 	public static class ParametersBuilder
 	{
-		#region - Internal methods -
+		#region Internal methods
 
 		private static bool IsAnonymousDefinition<T>(Expression<Func<T>> definer)
 		{
@@ -16,7 +16,7 @@ namespace PowerLib.System.Linq.Builders
 		}
 
 		#endregion
-		#region - Public methods -
+		#region Public methods
 
 		public static IParametersDeclaration Declare(params Type[] types)
 		{

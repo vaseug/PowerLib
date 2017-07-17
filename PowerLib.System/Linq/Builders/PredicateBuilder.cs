@@ -235,7 +235,7 @@ namespace PowerLib.System.Linq.Builders
 		}
 
 		#endregion
-		#region Composite perations
+		#region Composite operations
 
 		public static IPredicateExpression<T> And<T>(this IPredicateExpression<T> expression, Expression<Func<T, bool>> match)
 		{
@@ -327,7 +327,7 @@ namespace PowerLib.System.Linq.Builders
 		}
 
 		#endregion
-		#region Equals operation
+		#region Equals operations
 
 		public static IPredicateExpression<T> Equals<T, K>(this IPredicateDeclaration<T> parameters, Expression<Func<T, K>> selector, K value)
 			where K : IEquatable<K>

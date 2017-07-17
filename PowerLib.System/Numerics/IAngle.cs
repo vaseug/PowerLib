@@ -1,18 +1,17 @@
 ﻿using System;
 
-
 namespace PowerLib.System.Numerics
 {
 	/// <summary>
-	/// Represents interface focustom angles which cabtransformetradians.
+	/// Represents interface for custom angles which can be transformed to radians.
 	/// </summary>
-	/// <typeparam name="T">Typof scalairadians.</typeparam>
+	/// <typeparam name="T">Type of scalar in radians.</typeparam>
 	public interface IAngle<T>
 	{
 		/// <summary>
-		/// Returscalaanglvaluiradians.
+		/// Return scalar angle value in radians.
 		/// </summary>
-		/// <returns>Scalaanglvaluiradians.</returns>
+		/// <returns>Scalar angle value in radians.</returns>
 		T ToRadian();
 	}
 }

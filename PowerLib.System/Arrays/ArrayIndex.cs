@@ -197,10 +197,20 @@ namespace PowerLib.System
 			return _carry = carry;
 		}
 
-		#endregion
-		#region Public methods
+    #endregion
+    #region Public methods
 
-		public T GetValue<T>(Array array)
+    public object GetValue(Array array)
+    {
+      return _arrayInfo.GetValue(array, _asRanges, _zeroBased, _dimIndices);
+    }
+
+    public void SetValue(Array array, object value)
+    {
+      _arrayInfo.SetValue(array, value, _asRanges, _zeroBased, _dimIndices);
+    }
+
+    public T GetValue<T>(Array array)
 		{
 			return _arrayInfo.GetValue<T>(array, _asRanges, _zeroBased, _dimIndices);
 		}

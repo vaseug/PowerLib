@@ -32,7 +32,7 @@ namespace PowerLib.System.Linq.Builders
 
 		public static IComparisonDeclaration<T> Comparison<T>(Expression<Func<T>> definition)
 		{
-			return  ParametersBuilder.Declare(definition, definition).Comparison();
+			return ParametersBuilder.Declare(definition, definition).Comparison();
 		}
 
 		#endregion

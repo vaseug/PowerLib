@@ -8,5 +8,8 @@ namespace PowerLib.System.IO
 {
 	public sealed class FileSystemHierarchicalContext : HierarchicalContext<DirectoryInfo>
 	{
-	}
+    internal FileSystemHierarchicalContext()
+    {
+    }
+  }
 }

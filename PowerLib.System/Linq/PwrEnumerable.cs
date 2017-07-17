@@ -174,7 +174,7 @@ namespace PowerLib.System.Linq
       }
       TList list = factory(capacity);
       int index = 0;
-      foreach (var item in coll)
+      foreach (var item in source)
         if (list.AddSorted(item, comparison, sortingOption) < 0)
           throw new ArgumentCollectionElementException("source", "Duplicate item found.", index);
       return list;

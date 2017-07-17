@@ -34,7 +34,21 @@ namespace PowerLib.System
 
 		public abstract Array CreateArray(Type elementType);
 
-		public virtual T GetValue<T>(Array array, params long[] dimIndices)
+    public virtual object GetValue(Array array, params long[] dimIndices)
+    {
+      return GetValue(array, false, false, dimIndices);
+    }
+
+    public abstract object GetValue(Array array, bool asRanges, bool zeroBased, params long[] dimIndices);
+
+    public virtual void SetValue(Array array, object value, params long[] dimIndices)
+    {
+      SetValue(array, value, false, false, dimIndices);
+    }
+
+    public abstract void SetValue(Array array, object value, bool asRanges, bool zeroBased, params long[] dimIndices);
+
+    public virtual T GetValue<T>(Array array, params long[] dimIndices)
 		{
 			return GetValue<T>(array, false, false, dimIndices);
 		}
@@ -43,7 +57,7 @@ namespace PowerLib.System
 
 		public virtual void SetValue<T>(Array array, T value, params long[] dimIndices)
 		{
-			SetValue(array, value, false, false, dimIndices);
+			SetValue<T>(array, value, false, false, dimIndices);
 		}
 
 		public abstract void SetValue<T>(Array array, T value, bool asRanges, bool zeroBased, params long[] dimIndices);

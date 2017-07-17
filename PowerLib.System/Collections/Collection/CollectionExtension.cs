@@ -6,8 +6,8 @@ using System.Text;
 
 namespace PowerLib.System.Collections
 {
-	public static class CollectionExtension
-	{
+  public static class CollectionExtension
+  {
     #region Methods
 
     public static void ValidateRange(this ICollection coll, int index, int count)
@@ -71,16 +71,16 @@ namespace PowerLib.System.Collections
     }
 
     public static void AddRange<T>(this ICollection<T> coll, IEnumerable<T> other)
-		{
-			if (coll == null)
-				throw new ArgumentNullException("coll");
-			if (other == null)
-				throw new ArgumentNullException("other");
-			//
-			using (IEnumerator<T> e = other.GetEnumerator())
-				while (e.MoveNext())
-					coll.Add(e.Current);
-		}
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+      if (other == null)
+        throw new ArgumentNullException("other");
+
+      using (IEnumerator<T> e = other.GetEnumerator())
+        while (e.MoveNext())
+          coll.Add(e.Current);
+    }
 
     public static void RemoveRange<T>(this ICollection<T> coll, IEnumerable<T> other)
     {
@@ -88,7 +88,7 @@ namespace PowerLib.System.Collections
         throw new ArgumentNullException("coll");
       if (other == null)
         throw new ArgumentNullException("other");
-      //
+
       using (IEnumerator<T> e = other.GetEnumerator())
         while (e.MoveNext())
           coll.Remove(e.Current);

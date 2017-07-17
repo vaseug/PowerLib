@@ -369,6 +369,56 @@ namespace PowerLib.System.Collections
       return true;
     }
 
+    public static T Take<T>(this IList<T> list, int index)
+    {
+      if (list == null)
+        throw new ArgumentNullException("list");
+      if (index < 0)
+        throw new ArgumentOutOfRangeException("index");
+      if (list.Count == 0)
+        throw new ArgumentException("Empty list", "list");
+      if (index >= list.Count)
+        throw new ArgumentOutOfRangeException("index");
+
+      T item = list[index];
+      list.RemoveAt(index);
+      return item;
+    }
+
+    public static T Pop<T>(this IList<T> list, bool direction)
+    {
+      return list.Take<T>(list != null && list.Count > 0 && direction ? list.Count - 1 : 0);
+    }
+
+    public static T PopFirst<T>(this IList<T> list)
+    {
+      return list.Pop<T>(false);
+    }
+
+    public static T PopLast<T>(this IList<T> list)
+    {
+      return list.Pop<T>(true);
+    }
+
+    public static int Push<T>(this IList<T> list, T item, bool direction)
+    {
+      if (list == null)
+        throw new ArgumentNullException("list");
+
+      list.Insert(direction ? list.Count : 0, item);
+      return list.Count;
+    }
+
+    public static int PushFirst<T>(this IList<T> list, T item)
+    {
+      return list.Push(item, false);
+    }
+
+    public static int PushLast<T>(this IList<T> list, T item)
+    {
+      return list.Push(item, true);
+    }
+
     #endregion
     #region Transformation methods
 

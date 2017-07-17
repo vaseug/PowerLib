@@ -7,8 +7,8 @@ namespace PowerLib.System.Collections
 	/// <summary>
 	/// 
 	/// </summary>
-	/// <typeparam name="T">Typof storitem.</typeparam>
-	/// <typeparam name="V">Typof view item.</typeparam>
+	/// <typeparam name="T">Type of store item.</typeparam>
+	/// <typeparam name="V">Type of view item.</typeparam>
 	public class PwrListView<T, V> : PwrListViewBase<T, V>
 	{
 		private Func<T, V> _selector;

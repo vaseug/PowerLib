@@ -39,9 +39,9 @@ namespace PowerLib.System.Collections.Matching
 			if (second == null)
 				throw new ArgumentNullException("second");
 			if (!typeof(T).IsAssignableFrom(first.GetType().GetElementType()))
-				throw new ArgumentException("Invalid array elementype", "first");
+				throw new ArgumentException("Invalid array element type", "first");
 			if (!typeof(T).IsAssignableFrom(second.GetType().GetElementType()))
-				throw new ArgumentException("Invalid array elementype", "second");
+				throw new ArgumentException("Invalid array element type", "second");
 
 			return first.LongLength == second.LongLength && first.Rank == second.Rank &&
 				first.GetRegularArrayLongLengths().SequenceEqual(second.GetRegularArrayLongLengths()) && first.EnumerateAsRegular<T>().SequenceEqual(second.EnumerateAsRegular<T>());
@@ -52,7 +52,7 @@ namespace PowerLib.System.Collections.Matching
 			if (array == null)
 				throw new ArgumentNullException("array");
 			if (!typeof(T).IsAssignableFrom(array.GetType().GetElementType()))
-				throw new ArgumentException("Invalid array elementype", "array");
+				throw new ArgumentException("Invalid array element type", "array");
 
 			return array.EnumerateAsRegular<T>()
 				.Select(t => t == null ? 0 : t.GetHashCode())

@@ -11,9 +11,9 @@ using PowerLib.System.Linq;
 namespace PowerLib.System
 {
 	/// <summary>
-	/// Array extensiomethods
+	/// Array extension methods
 	/// <remarks>
-	/// Almethods twork with multidimensioanjagged arrays arnonrecursive.
+	/// All methods to work with multidimension and jagged arrays are nonrecursive.
 	/// </remarks>
 	/// </summary>^
 	public static class PwrArray
@@ -269,7 +269,17 @@ namespace PowerLib.System
 			return Array.CreateInstance(typeof(T), dimensions.Select(d => d.Length).ToArray(), dimensions.Select(d => d.LowerBound).ToArray());
 		}
 
-		public static Array CreateAsRegular<T>(int[] lengths, int[] lowerBounds = null)
+    public static Array CreateAsLongRegular<T>(ArrayLongDimension[] dimensions)
+    {
+      if (dimensions == null)
+        throw new ArgumentNullException("arrayDims");
+      if (dimensions.Length == 0)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "dimensions");
+
+      return Array.CreateInstance(typeof(T), dimensions.Select(d => d.Length).ToArray());
+    }
+
+    public static Array CreateAsRegular<T>(int[] lengths, int[] lowerBounds = null)
 		{
 			if (lengths == null)
 				throw new ArgumentNullException("lengths");
@@ -339,15 +349,31 @@ namespace PowerLib.System
 		#endregion
 		#region Clone regular array
 
-		public static Array CloneAsRegular<T>(this Array array)
+		public static Array CloneAsRegular(this Array array)
 		{
-			return array.RangeAsRegular();
-		}
+      if (array == null)
+        throw new ArgumentNullException("array");
 
-		public static Array CloneAsLongRegular<T>(this Array array)
+      var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
+      var targetArray = arrayInfo.CreateArray(array.GetRegularArrayElementType());
+      if (array.Length != 0)
+        for (ArrayIndex arrayIndex = new ArrayIndex(arrayInfo) { FlatIndex = 0 }; arrayIndex.Carry == 0; arrayIndex++)
+          arrayIndex.SetValue(targetArray, arrayIndex.GetValue(array));
+      return targetArray;
+    }
+
+    public static Array CloneAsLongRegular(this Array array)
 		{
-			return array.RangeAsLongRegular();
-		}
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      var arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions());
+      var targetArray = arrayInfo.CreateArray(array.GetRegularArrayElementType());
+      if (array.Length != 0)
+        for (ArrayLongIndex arrayIndex = new ArrayLongIndex(arrayInfo) { FlatIndex = 0 }; arrayIndex.Carry == 0; arrayIndex++)
+          arrayIndex.SetValue(targetArray, arrayIndex.GetValue(array));
+      return targetArray;
+    }
 
     #endregion
     #region Parse regular array
@@ -604,7 +630,7 @@ namespace PowerLib.System
 
     public static IEnumerable<TResult> SelectAsRegular<TSource, TResult>(this Array array, Func<TSource, TResult> selector, bool zeroBased = false, Range? range = null, params Range[] ranges)
     {
-      return array.SelectAsRegular<TSource, TResult>((t, fi, di) => selector(t), null, zeroBased, range, ranges);
+      return array.SelectAsRegular<TSource, TResult>(selector != null ? (t, fi, di) => selector(t) : default(Func<TSource, int, int[], TResult>), null, zeroBased, range, ranges);
     }
 
     public static IEnumerable<TResult> SelectAsRegular<TSource, TResult>(this Array array, Func<TSource, int, int[], TResult> selector, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges)
@@ -640,7 +666,7 @@ namespace PowerLib.System
 
     public static IEnumerable<TResult> SelectAsLongRegular<TSource, TResult>(this Array array, Func<TSource, TResult> selector, LongRange? range = null, params LongRange[] ranges)
     {
-      return array.SelectAsLongRegular<TSource, TResult>((t, fi, di) => selector(t), null, false, range, ranges);
+      return array.SelectAsLongRegular<TSource, TResult>(selector != null ? (t, fi, di) => selector(t) : default(Func<TSource, long, long[], TResult>), null, false, range, ranges);
     }
 
     public static IEnumerable<TResult> SelectAsLongRegular<TSource, TResult>(this Array array, Func<TSource, long, long[], TResult> selector, long[] indices = null, bool zeroBased = false, LongRange? range = null, params LongRange[] ranges)
@@ -1211,7 +1237,7 @@ namespace PowerLib.System
 					throw new ArgumentRegularArrayElementException("ranks", "Ranks sum is out of range", i);
 			//
 			for (int i = 0; i < ranks.Length; i++)
-				elementType = ranks[ranks.Length - - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - - 1]);
+				elementType = ranks[ranks.Length - i - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - i - 1]);
 			return elementType;
 		}
 
@@ -1236,7 +1262,7 @@ namespace PowerLib.System
 			//
 			Type[] types = new Type[ranks.Length];
 			for (int i = 0; i < ranks.Length; i++)
-				types[ranks.Length - - 1] = elementType = ranks[ranks.Length - - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - - 1]);
+				types[ranks.Length - i - 1] = elementType = ranks[ranks.Length - i - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - i - 1]);
 			return types;
 		}
 
@@ -1291,43 +1317,77 @@ namespace PowerLib.System
 			return array.SelectMany(a => a).ToArray();
 		}
 
-		#endregion
-		#region Enumerate jagged array
+    #endregion
+    #region Create jagged array
 
-		/// <summary>
-		/// Enumerate all elements of <paramref name="array"/>.
-		/// </summary>
-		/// <typeparam name="T">Typof enumerateelements i<paramref name="array"/>.</typeparam>
-		/// <param name="array">Jagged array tenumerate.</param>
-		/// <param name="ranges"></param>
-		/// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
-		public static IEnumerable<T> EnumerateAsJagged<T>(this Array array, params Range[][] ranges)
+    public static Array CreateAsJagged<T>(int[] ranks, Func<int, int[], int[][], int[]> lensGetter, int[] bandedIndices = null, int[][] rankedIndices = null)
+    {
+      return new JaggedArrayInfo(ranks, lensGetter, bandedIndices, rankedIndices).CreateArray<T>();
+    }
+
+    public static Array CreateAsJagged<T>(int[] ranks, Func<int, int[], int[][], ArrayDimension[]> dimsGetter, int[] bandedIndices = null, int[][] rankedIndices = null)
+    {
+      return new JaggedArrayInfo(ranks, dimsGetter, bandedIndices, rankedIndices).CreateArray<T>();
+    }
+
+    public static Array CreateAsLongJagged<T>(int[] ranks, Func<int, long[], long[][], long[]> lensGetter, long[] bandedIndices = null, long[][] rankedIndices = null)
+    {
+      return new JaggedArrayLongInfo(ranks, lensGetter, bandedIndices, rankedIndices).CreateArray<T>();
+    }
+
+    public static Array CreateAsLongJagged<T>(int[] ranks, Func<int, long[], long[][], ArrayLongDimension[]> dimsGetter, long[] bandedIndices = null, long[][] rankedIndices = null)
+    {
+      return new JaggedArrayLongInfo(ranks, dimsGetter, bandedIndices, rankedIndices).CreateArray<T>();
+    }
+
+    #endregion
+    #region Enumerate jagged array
+
+    /// <summary>
+    /// Enumerate all elements of <paramref name="array"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of enumerated elements i<paramref name="array"/>.</typeparam>
+    /// <param name="array">Jagged array to enumerate.</param>
+    /// <param name="ranges"></param>
+    /// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
+    public static IEnumerable<T> EnumerateAsJagged<T>(this Array array, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
-      //
-      PwrList<int> ranks = new PwrList<int>();
-			Type t = array.GetType();
-			while (t.IsArray)
-			{
-				ranks.Add(t.GetArrayRank());
-				t = t.GetElementType();
-			}
-			if (typeof(T) != t && !typeof(T).IsSubclassOf(t))
-				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			bool asRanges = false;
-			if (ranges != null && ranges.Length != 0)
-			{
-				if (ranges.Length != ranks.Count)
-					throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "ranges");
-				if (ranges.Where((r, i) => r == null || r.Length != ranks[i]).Any())
-					throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElement], "ranges");
-				asRanges = true;
-			}
-			//
-			int depth = 0;
-			PwrStack<ArrayContext> arrayContexts = new PwrStack<ArrayContext>();
-			ArrayIndex arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { AsRanges = asRanges };
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+
+      int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+      var arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -1335,22 +1395,30 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.LongLength == 0)
 					break;
-				arrayContexts.Push(new ArrayContext(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { AsRanges = asRanges };
-				//depth++;
-				if (depth == ranks.Count - 1 && array.Length != 0)
-				{
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+        arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
+        if (depth == ranks.Count - 1 && array.Length != 0)
 					for (; arrayIndex.Carry == 0; arrayIndex++)
 						yield return arrayIndex.GetValue<T>(array);
-				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContext arrayContext = arrayContexts.Pop();
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -1365,37 +1433,48 @@ namespace PowerLib.System
 		/// <summary>
 		/// Enumerate all elements of <paramref name="array"/>.
 		/// </summary>
-		/// <typeparam name="T">Typof enumerateelements i<paramref name="array"/>.</typeparam>
-		/// <param name="array">Jagged array tenumerate.</param>
+		/// <typeparam name="T">Type of enumerated elements i<paramref name="array"/>.</typeparam>
+		/// <param name="array">Jagged array to enumerate.</param>
 		/// <param name="ranges"></param>
 		/// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
-		public static IEnumerable<T> EnumerateAsJagged<T>(this Array array, params LongRange[][] ranges)
+		public static IEnumerable<T> EnumerateAsLongJagged<T>(this Array array, long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
-      //
-      PwrList<int> ranks = new PwrList<int>();
-			Type t = array.GetType();
-			while (t.IsArray)
-			{
-				ranks.Add(t.GetArrayRank());
-				t = t.GetElementType();
-			}
-			if (typeof(T) != t && !typeof(T).IsSubclassOf(t))
-				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			bool asRanges = false;
-			if (ranges != null && ranges.Length != 0)
-			{
-				if (ranges.Length != ranks.Count)
-					throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "ranges");
-				if (ranges.Where((r, i) => r == null || r.Length != ranks[i]).Any())
-					throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElement], "ranges");
-				asRanges = true;
-			}
-			//
-			int depth = 0;
-			PwrStack<ArrayContextLong> arrayContexts = new PwrStack<ArrayContextLong>();
-			ArrayLongIndex arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions(ranges[depth]))) { AsRanges = asRanges };
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+
+      int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+      var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -1403,22 +1482,30 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.LongLength == 0)
 					break;
-				arrayContexts.Push(new ArrayContextLong(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions(ranges[++depth]))) { AsRanges = asRanges };
-				//depth++;
-				if (depth == ranks.Count - 1 && array.Length != 0)
-				{
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+        arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
+        if (depth == ranks.Count - 1 && array.Length != 0)
 					for (; arrayIndex.Carry == 0; arrayIndex++)
 						yield return arrayIndex.GetValue<T>(array);
-				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContextLong arrayContext = arrayContexts.Pop();
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -1436,139 +1523,166 @@ namespace PowerLib.System
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
 		/// <param name="array"></param>
 		/// <returns></returns>
-		public static Array CloneAsJagged<T>(this Array array)
+		public static Array CloneAsJagged(this Array array)
 		{
-			return ConvertAsJagged<T, T>(array, v => v);
-		}
+      if (array == null)
+        throw new ArgumentNullException("array");
 
-		#endregion
-		#region Format jagged array
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      var types = new PwrList<Type>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+        types.Add(type);
+      }
+      int depth = 0;
+      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+      var targetArrayContexts = new PwrStack<Array>();
+      var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
+      var arrayIndex = new ArrayIndex(arrayInfo);
+      var targetArray = arrayInfo.CreateArray(types[depth]);
+    descent:
+      while (depth < ranks.Count - 1)
+      {
+        if (array.Length > 0)
+          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+        if (arrayIndex.Carry != 0 || array.Length == 0)
+          break;
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
+        targetArrayContexts.Push(targetArray);
+        array = arrayIndex.GetValue<Array>(array);
+        arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
+        var a = arrayInfo.CreateArray(types[depth]);
+        arrayIndex.SetValue<Array>(targetArray, a);
+        targetArray = a;
+        arrayIndex = new ArrayIndex(arrayInfo);
+        if (depth == ranks.Count - 1 && array.Length != 0)
+          for (; arrayIndex.Carry == 0; arrayIndex++)
+            arrayIndex.SetValue(targetArray, arrayIndex.GetValue(array));
+      }
+    ascent:
+      if (depth != 0)
+      {
+        var arrayContext = arrayContexts.Pop();
+        array = arrayContext.Item1;
+        arrayIndex = arrayContext.Item2;
+        targetArray = targetArrayContexts.Pop();
+        depth--;
+        if (arrayIndex.IsMax)
+          goto ascent;
+        else
+        {
+          arrayIndex++;
+          goto descent;
+        }
+      }
+      return targetArray;
+    }
 
-		public static string FormatAsJagged<T>(this Array array, Func<T, string> itemFormatter,
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="array"></param>
+    /// <returns></returns>
+    public static Array CloneAsLongJagged(this Array array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      var types = new PwrList<Type>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+        types.Add(type);
+      }
+      int depth = 0;
+      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+      var targetArrayContexts = new PwrStack<Array>();
+      var arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions());
+      var arrayIndex = new ArrayLongIndex(arrayInfo);
+      var targetArray = arrayInfo.CreateArray(types[depth]);
+    descent:
+      while (depth < ranks.Count - 1)
+      {
+        if (array.Length > 0)
+          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+        if (arrayIndex.Carry != 0 || array.Length == 0)
+          break;
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
+        targetArrayContexts.Push(targetArray);
+        array = arrayIndex.GetValue<Array>(array);
+        arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions());
+        var a = arrayInfo.CreateArray(types[depth]);
+        arrayIndex.SetValue<Array>(targetArray, a);
+        targetArray = a;
+        arrayIndex = new ArrayLongIndex(arrayInfo);
+        if (depth == ranks.Count - 1 && array.Length != 0)
+          for (; arrayIndex.Carry == 0; arrayIndex++)
+            arrayIndex.SetValue(targetArray, arrayIndex.GetValue(array));
+      }
+    ascent:
+      if (depth != 0)
+      {
+        var arrayContext = arrayContexts.Pop();
+        array = arrayContext.Item1;
+        arrayIndex = arrayContext.Item2;
+        targetArray = targetArrayContexts.Pop();
+        depth--;
+        if (arrayIndex.IsMax)
+          goto ascent;
+        else
+        {
+          arrayIndex++;
+          goto descent;
+        }
+      }
+      return targetArray;
+    }
+
+    #endregion
+    #region Format jagged array
+
+    public static string FormatAsJagged<T>(this Array array, Func<T, string> itemFormatter,
 			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
 		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, int, string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, int[], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, dimIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, int, int[], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex, dimIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, rankedIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, int, int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex, rankedIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, int[], int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.None,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, dimIndices, rankedIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, int, int[], int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.None, itemFormatter, nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, bool zeroBased, Func<T, int[], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, dimIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, bool zeroBased, Func<T, int, int[], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex, dimIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, bool zeroBased, Func<T, int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, rankedIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, bool zeroBased, Func<T, int, int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex, rankedIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, bool zeroBased, Func<T, int[], int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, dimIndices, rankedIndices) : (Func<T, int, int[], int[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, bool zeroBased, Func<T, int, int[], int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None, itemFormatter, nullFormatter, itemDelimiter, openBracket, closeBracket);
+			return array.FormatAsJagged<T>(itemFormatter != null ? (t, fi, bi, ri) => itemFormatter(t) : default(Func<T, int, int[], int[][], string>),
+        nullFormatter, itemDelimiter, openBracket, closeBracket);
 		}
 
 		/// <summary>
-		/// Formaarray.
+		/// Format array.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="array">Formatting array.</param>
 		/// <param name="options">Jagged array options.</param>
-		/// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contaiarray item valuanjagged array item indices.</param>
+		/// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contain array item value and jagged array item indices.</param>
 		/// <param name="nullFormatter">Function that returns null array string representation. Parameter is jagged array item indices.</param>
-		/// <param name="itemDelimiter">Function that returns item delimiter. Parameter is currenjagged array depth anregular array rank.</param>
-		/// <param name="openBracket">Function that returns open bracket string. Parameter is currenjagged array depth anregular array rank.</param>
-		/// <param name="closeBracket">Function that returns open bracket string. Parameter is currenjagged array depth anregular array rank.</param>
-		/// <returns>Formattestring representation of array.</returns>
-		private static string FormatAsJagged<T>(this Array array, JaggedArrayOptions options, Func<T, int, int[], int[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
+		/// <param name="itemDelimiter">Function that returns item delimiter. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="openBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="closeBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <returns>Formatted string representation of array.</returns>
+		public static string FormatAsJagged<T>(this Array array, Func<T, int, int[], int[][], string> itemFormatter,
+			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket,
+      int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
@@ -1582,36 +1696,45 @@ namespace PowerLib.System
 				throw new ArgumentNullException("openBracket");
 			if (closeBracket == null)
 				throw new ArgumentNullException("closeBracket");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			int flatIndex = 0;
-			int[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new int[rank] : null;
-			int[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new int[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new int[ranks[i]];
-			//
 			int depth = 0;
 			int brackets = 0;
-			StringBuilder sb = new StringBuilder();
-			PwrList<ArrayContext> arrayContexts = new PwrList<ArrayContext>();
-			RegularArrayInfo arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
-			ArrayIndex arrayIndex = new ArrayIndex(arrayInfo) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-		descent:
+			var sb = new StringBuilder();
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+      var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
+      var arrayIndex = new ArrayIndex(arrayInfo)
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
+    descent:
 			while (depth < ranks.Count - 1)
 			{
 				if (arrayInfo.Length == 0)
@@ -1622,38 +1745,39 @@ namespace PowerLib.System
 						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
 					break;
 				}
-				//
 				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-				//
 				if (arrayIndex.FlatIndex > 0)
 					sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-				//
 				for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
 					sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-				//
-				Array a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
+				var a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
 				if (a == null)
 				{
-					//
 					sb.Append(nullFormatter(depth));
-					//
 					for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
 					for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
 						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-					//
 					if (arrayIndex.Inc())
 						break;
 					else
 						continue;
 				}
-				//
-				arrayContexts.Add(new ArrayContext(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = a;
-				arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
-				arrayIndex = new ArrayIndex(arrayInfo) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-				depth++;
-				//
-				if (depth == ranks.Count - 1)
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+        arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
+        arrayIndex = new ArrayIndex(arrayInfo)
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
+        if (depth == ranks.Count - 1)
 				{
 					if (arrayInfo.Length == 0)
 					{
@@ -1664,36 +1788,19 @@ namespace PowerLib.System
 					}
 					else
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int i = 0; i < depth; i++)
-								for (int j = 0; j < ranks[i]; j++)
-									bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							for (int i = 0; i < depth; i++)
-								arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-						//
 						do
 						{
-							//
-							if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-								for (int j = 0; j < ranks[depth]; j++)
-									bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-							//
-							if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-								arrayIndex.GetDimIndices(rankedIndices[depth]);
-							//
-							for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-							//
+              if (bandedIndices != null)
+                for (int i = 0; i < ranks[depth]; i++)
+                  bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+              if (rankedIndices != null)
+                arrayIndex.GetDimIndices(rankedIndices[depth]);
+              for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
 							if (arrayIndex.FlatIndex > 0)
 								sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-							//
 							for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
 								sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-							//
 							sb.Append(itemFormatter(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices));
-							//
 							for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
 							for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
 								sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
@@ -1705,17 +1812,14 @@ namespace PowerLib.System
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContext arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var  arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				arrayInfo = (RegularArrayInfo)arrayIndex.ArrayInfo;
 				depth--;
-				//
 				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
 				for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
 					sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-				//
 				if (arrayIndex.FlatIndex < arrayIndex.ArrayInfo.Length - 1)
 				{
 					arrayIndex++;
@@ -1727,82 +1831,28 @@ namespace PowerLib.System
 			return sb.ToString();
 		}
 
-		public static string FormatAsJagged<T>(this Array array, Func<T, string> itemFormatter,
+		public static string FormatAsLongJagged<T>(this Array array, Func<T, string> itemFormatter,
 			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
 		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item) : (Func<T, long, long[], long[][], string>)null,
+			return array.FormatAsLongJagged<T>(itemFormatter != null ? (t, fi, bi, ri) => itemFormatter(t) : default(Func<T, long, long[], long[][], string>),
 				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, long, string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex) : (Func<T, long, long[], long[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, long[], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, dimIndices) : (Func<T, long, long[], long[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, long, long[], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex, dimIndices) : (Func<T, long, long[], long[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, long[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, rankedIndices) : (Func<T, long, long[], long[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, long, long[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, flatIndex, rankedIndices) : (Func<T, long, long[], long[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, long[], long[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.None,
-				itemFormatter != null ? (item, flatIndex, dimIndices, rankedIndices) => itemFormatter(item, dimIndices, rankedIndices) : (Func<T, long, long[], long[][], string>)null,
-				nullFormatter, itemDelimiter, openBracket, closeBracket);
-		}
-
-		public static string FormatAsJagged<T>(this Array array, Func<T, long, long[], long[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-		{
-			return FormatAsJagged<T>(array, JaggedArrayOptions.None, itemFormatter, nullFormatter, itemDelimiter, openBracket, closeBracket);
 		}
 
 		/// <summary>
-		/// Formaarray.
+		/// Format array.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="array">Formatting array.</param>
 		/// <param name="options">Jagged array options.</param>
-		/// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contaiarray item valuanjagged array item indices.</param>
+		/// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contain array item value and jagged array item indices.</param>
 		/// <param name="nullFormatter">Function that returns null array string representation. Parameter is jagged array item indices.</param>
-		/// <param name="itemDelimiter">Function that returns item delimiter. Parameter is currenjagged array depth anregular array rank.</param>
-		/// <param name="openBracket">Function that returns open bracket string. Parameter is currenjagged array depth anregular array rank.</param>
-		/// <param name="closeBracket">Function that returns open bracket string. Parameter is currenjagged array depth anregular array rank.</param>
-		/// <returns>Formattestring representation of array.</returns>
-		private static string FormatAsJagged<T>(this Array array, JaggedArrayOptions options, Func<T, long, long[], long[][], string> itemFormatter,
-			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
+		/// <param name="itemDelimiter">Function that returns item delimiter. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="openBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="closeBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <returns>Formatted string representation of array.</returns>
+		public static string FormatAsLongJagged<T>(this Array array, Func<T, long, long[], long[][], string> itemFormatter,
+			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket,
+      long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
@@ -1816,35 +1866,44 @@ namespace PowerLib.System
 				throw new ArgumentNullException("openBracket");
 			if (closeBracket == null)
 				throw new ArgumentNullException("closeBracket");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			long flatIndex = 0;
-			long[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new long[rank] : null;
-			long[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new long[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new long[ranks[i]];
-			//
 			int depth = 0;
 			int brackets = 0;
-			StringBuilder sb = new StringBuilder();
-			PwrList<ArrayContextLong> arrayContexts = new PwrList<ArrayContextLong>();
-			RegularArrayLongInfo arrayInfo = new RegularArrayLongInfo (array.GetRegularArrayLongDimensions());
-			ArrayLongIndex arrayIndex = new ArrayLongIndex(arrayInfo);
+			var sb = new StringBuilder();
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+      var arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
+      var arrayIndex = new ArrayLongIndex(arrayInfo)
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -1856,37 +1915,38 @@ namespace PowerLib.System
 						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
 					break;
 				}
-				//
 				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-				//
 				if (arrayIndex.FlatIndex > 0)
 					sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-				//
 				for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
 					sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-				//
-				Array a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
+				var a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
 				if (a == null)
 				{
-					//
 					sb.Append(nullFormatter(depth));
-					//
 					for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
 					for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
 						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-					//
 					if (arrayIndex.Inc())
 						break;
 					else
 						continue;
 				}
-				//
-				arrayContexts.Add(new ArrayContextLong(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = a;
-				arrayInfo = new RegularArrayLongInfo (array.GetRegularArrayLongDimensions());
-				arrayIndex = new ArrayLongIndex(arrayInfo);
-				depth++;
-				//
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+        arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
+        arrayIndex = new ArrayLongIndex(arrayInfo)
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
 				if (depth == ranks.Count - 1)
 				{
 					if (arrayInfo.Length == 0)
@@ -1898,36 +1958,19 @@ namespace PowerLib.System
 					}
 					else
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int i = 0; i < depth; i++)
-								for (int j = 0; j < ranks[i]; j++)
-									bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							for (int i = 0; i < depth; i++)
-								arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-						//
 						do
 						{
-							//
-							if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
+							if (bandedIndices != null)
 								for (int j = 0; j < ranks[depth]; j++)
 									bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-							//
-							if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
+							if (rankedIndices != null)
 								arrayIndex.GetDimIndices(rankedIndices[depth]);
-							//
 							for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-							//
 							if (arrayIndex.FlatIndex > 0)
 								sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-							//
 							for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
 								sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-							//
 							sb.Append(itemFormatter(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices));
-							//
 							for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
 							for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
 								sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
@@ -1939,18 +1982,14 @@ namespace PowerLib.System
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContextLong arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
-				arrayInfo = (RegularArrayLongInfo )arrayIndex.ArrayInfo;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				arrayInfo = (RegularArrayLongInfo)arrayIndex.ArrayInfo;
 				depth--;
-				//
 				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
 				for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
 					sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-				//
-				
 				if (arrayIndex.IsMax)
 					goto ascent;
 				else
@@ -1967,246 +2006,154 @@ namespace PowerLib.System
 
 		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, TResult> selector)
 		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item) : (Func<TSource, long, long[], long[][], TResult>)null);
+      return array.SelectAsJagged<TSource, TResult>(selector != null ? (t, fi, bi, ri) => selector(t) : default(Func<TSource, int, int[], int[][], TResult>));
 		}
 
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, TResult> selector)
+    public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> selector,
+      int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (selector == null)
+        throw new ArgumentNullException("selector");
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+
+      int flatIndex = 0;
+      int depth = 0;
+      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+      var arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
+    descent:
+      while (depth < ranks.Count - 1)
+      {
+        if (array.Length > 0)
+          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+        if (arrayIndex.Carry != 0 || array.Length == 0)
+          break;
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
+        array = arrayIndex.GetValue<Array>(array);
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+        arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
+        if (depth == ranks.Count - 1 && array.Length != 0)
+        {
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
+          {
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            yield return selector(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices);
+          }
+        }
+      }
+    ascent:
+      if (depth != 0)
+      {
+        var arrayContext = arrayContexts.Pop();
+        array = arrayContext.Item1;
+        arrayIndex = arrayContext.Item2;
+        depth--;
+        if (arrayIndex.IsMax)
+          goto ascent;
+        else
+        {
+          arrayIndex++;
+          goto descent;
+        }
+      }
+    }
+
+    public static IEnumerable<TResult> SelectAsLongJagged<TSource, TResult>(this Array array, Func<TSource, TResult> selector)
 		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex) : (Func<TSource, int, int[], int[][], TResult>)null);
+			return array.SelectAsLongJagged<TSource, TResult>(selector != null ? (t, fi, bi, ri) => selector(t) : default(Func<TSource, long, long[], long[][], TResult>));
 		}
 
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int[], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int[], int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.None,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, dimIndices, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.None, selector);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int[], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int, int[], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int, int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int[], int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, dimIndices, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int, int[], int[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None, selector);
-		}
-
-		private static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, JaggedArrayOptions options, Func<TSource, int, int[], int[][], TResult> selector)
+		public static IEnumerable<TResult> SelectAsLongJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> selector,
+      long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (selector == null)
 				throw new ArgumentNullException("selector");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
 			if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
-			int flatIndex = 0;
-			int[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new int[rank] : null;
-			int[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new int[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new int[ranks[i]];
-			//
-			int depth = 0;
-			PwrList<ArrayContext> arrayContexts = new PwrList<ArrayContext>();
-			ArrayIndex arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-		descent:
-			while (depth < ranks.Count - 1)
-			{
-				if (array.Length > 0)
-					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-				if (arrayIndex.Carry != 0 || array.Length == 0)
-					break;
-				arrayContexts.Add(new ArrayContext(array, arrayIndex));
-				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-				depth++;
-				if (depth == ranks.Count - 1 && array.Length != 0)
-				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
-					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						yield return selector(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices);
-					}
-				}
-			}
-		ascent:
-			if (depth != 0)
-			{
-				ArrayContext arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
-				depth--;
-				if (arrayIndex.IsMax)
-					goto ascent;
-				else
-				{
-					arrayIndex++;
-					goto descent;
-				}
-			}
-		}
 
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, long, TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, long[], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, dimIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex, dimIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, long[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, rankedIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, long, long[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, flatIndex, rankedIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, long[], long[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.None,
-				selector != null ? (item, flatIndex, dimIndices, rankedIndices) => selector(item, dimIndices, rankedIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> selector)
-		{
-			return SelectAsJagged<TSource, TResult>(array, JaggedArrayOptions.None, selector);
-		}
-
-		private static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, JaggedArrayOptions options, Func<TSource, long, long[], long[][], TResult> selector)
-		{
-      if (array == null)
-        throw new ArgumentNullException("array");
-      if (selector == null)
-				throw new ArgumentNullException("selector");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
-				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
 			long flatIndex = 0;
-			long[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new long[rank] : null;
-			long[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new long[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new long[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContextLong> arrayContexts = new PwrList<ArrayContextLong>();
-			ArrayLongIndex arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+      var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -2214,32 +2161,34 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContextLong(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
-				depth++;
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+        arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
 				if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
+						if (bandedIndices != null)
 							for (int j = 0; j < ranks[depth]; j++)
 								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
+						if (rankedIndices != null)
 							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
 						yield return selector(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices);
 					}
 				}
@@ -2247,10 +2196,9 @@ namespace PowerLib.System
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContextLong arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -2267,165 +2215,98 @@ namespace PowerLib.System
 
 		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, bool> predicate)
 		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item) : (Func<T, long, long[], long[][], bool>)null);
+			return array.WhereAsJagged<T>(predicate != null ? (t, fi, bi, ri) => predicate(t) : default(Func<T, int, int[], int[][], bool>));
 		}
 
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int[], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, dimIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex, dimIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, rankedIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex, rankedIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int[], int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.None,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, dimIndices, rankedIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[], int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.None, predicate);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, bool zeroBased, Func<T, int[], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, dimIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, bool zeroBased, Func<T, int, int[], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex, dimIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, bool zeroBased, Func<T, int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, rankedIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, bool zeroBased, Func<T, int, int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex, rankedIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, bool zeroBased, Func<T, int[], int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, dimIndices, rankedIndices) : (Func<T, int, int[], int[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, bool zeroBased, Func<T, int, int[], int[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None, predicate);
-		}
-
-		private static IEnumerable<T> WhereAsJagged<T>(this Array array, JaggedArrayOptions options, Func<T, int, int[], int[][], bool> predicate)
+		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[], int[][], bool> predicate,
+      int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (predicate == null)
 				throw new ArgumentNullException("predicate");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> offsets = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				offsets.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			int flatIndex = 0;
-			int[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new int[rank] : null;
-			int[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new int[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new int[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContext> arrayContexts = new PwrList<ArrayContext>();
-			ArrayIndex arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-		descent:
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+      var arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
+      descent:
 			while (depth < ranks.Count - 1)
 			{
 				if (array.Length > 0)
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContext(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-				depth++;
-				if (depth == ranks.Count - 1 && array.Length != 0)
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+        arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
+        if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[offsets[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[offsets[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						T value = arrayIndex.GetValue<T>(array);
-						//
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            T value = arrayIndex.GetValue<T>(array);
 						if (predicate(value, flatIndex++, bandedIndices, rankedIndices))
-							yield return value ;
+							yield return value;
 					}
 				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContext arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -2437,79 +2318,53 @@ namespace PowerLib.System
 			}
 		}
 
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, long, bool> predicate)
+		public static IEnumerable<T> WhereAsLongJagged<T>(this Array array, Func<T, bool> predicate)
 		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex) : (Func<T, long, long[], long[][], bool>)null);
+			return array.WhereAsLongJagged<T>(predicate != null ? (t, fi, bi, ri) => predicate(t) : default(Func<T, long, long[], long[][], bool>));
 		}
 
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, long[], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, dimIndices) : (Func<T, long, long[], long[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, long, long[], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex, dimIndices) : (Func<T, long, long[], long[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, long[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, rankedIndices) : (Func<T, long, long[], long[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, long, long[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, flatIndex, rankedIndices) : (Func<T, long, long[], long[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, long[], long[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.None,
-				predicate != null ? (item, flatIndex, dimIndices, rankedIndices) => predicate(item, dimIndices, rankedIndices) : (Func<T, long, long[], long[][], bool>)null);
-		}
-
-		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, long, long[], long[][], bool> predicate)
-		{
-			return WhereAsJagged<T>(array, JaggedArrayOptions.None, predicate);
-		}
-
-		private static IEnumerable<T> WhereAsJagged<T>(this Array array, JaggedArrayOptions options, Func<T, long, long[], long[][], bool> predicate)
+		public static IEnumerable<T> WhereAsLongJagged<T>(this Array array, Func<T, long, long[], long[][], bool> predicate,
+      long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (predicate == null)
 				throw new ArgumentNullException("predicate");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			long flatIndex = 0;
-			long[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new long[rank] : null;
-			long[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new long[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new long[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContextLong> arrayContexts = new PwrList<ArrayContextLong>();
-			ArrayLongIndex arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+      var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -2517,34 +2372,35 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContextLong(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
-				depth++;
-				if (depth == ranks.Count - 1 && array.Length != 0)
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+        arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
+        if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						T value = arrayIndex.GetValue<T>(array);
-						//
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            T value = arrayIndex.GetValue<T>(array);
 						if (predicate(value, flatIndex++, bandedIndices, rankedIndices))
 							yield return value ;
 					}
@@ -2553,10 +2409,9 @@ namespace PowerLib.System
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContextLong arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -2573,124 +2428,56 @@ namespace PowerLib.System
 
 		public static void FillAsJagged<T>(this Array array, T value)
 		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				(long flatIndex, long[] dimIndices, long[][] rankedIndices) => value);
+			array.FillAsJagged<T>((fi, bi, ri) => value);
 		}
 
 		public static void FillAsJagged<T>(this Array array, Func<T> valuator)
 		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator() : (Func<long, long[], long[][], T>)null);
+			array.FillAsJagged<T>(valuator != null ? (fi, bi, ri) => valuator() : default(Func<int, int[], int[][], T>));
 		}
 
-		public static void FillAsJagged<T>(this Array array, Func<int, T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<int[], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(dimIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<int, int[], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex, dimIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(rankedIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<int, int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex, rankedIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<int[], int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.None,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(dimIndices, rankedIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<int, int[], int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.None, valuator);
-		}
-
-		public static void FillAsJagged<T>(this Array array, bool zeroBased, Func<int[], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(dimIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, bool zeroBased, Func<int, int[], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex, dimIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, bool zeroBased, Func<int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(rankedIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, bool zeroBased, Func<int, int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex, rankedIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, bool zeroBased, Func<int[], int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(dimIndices, rankedIndices) : (Func<int, int[], int[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, bool zeroBased, Func<int, int[], int[][], T> valuator)
-		{
-			FillAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None, valuator);
-		}
-
-		private static void FillAsJagged<T>(this Array array, JaggedArrayOptions options, Func<int, int[], int[][], T> valuator)
+		public static void FillAsJagged<T>(this Array array, Func<int, int[], int[][], T> valuator,
+      int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (valuator == null)
 				throw new ArgumentNullException("valuator");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      PwrList<int> ranks = new PwrList<int>();
+      PwrList<int> biases = new PwrList<int>();
+      int totalRank = 0;
+      Type type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			int flatIndex = 0;
-			int[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new int[rank] : null;
-			int[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new int[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new int[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContext> arrayContexts = new PwrList<ArrayContext>();
-			ArrayIndex arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+      ArrayIndex arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -2698,43 +2485,44 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContext(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-				depth++;
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+        arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
 				if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						arrayIndex.SetValue<T>(array, valuator(flatIndex++, bandedIndices, rankedIndices));
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            arrayIndex.SetValue<T>(array, valuator(flatIndex++, bandedIndices, rankedIndices));
 					}
 				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContext arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -2746,123 +2534,103 @@ namespace PowerLib.System
 			}
 		}
 
-		public static void FillAsJagged<T>(this Array array, Func<long, T> valuator)
+    public static void FillAsLongJagged<T>(this Array array, T value)
+    {
+      array.FillAsLongJagged<T>((fi, bi, ri) => value);
+    }
+
+    public static void FillAsLongJagged<T>(this Array array, Func<T> valuator)
 		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex) : (Func<long, long[], long[][], T>)null);
+			array.FillAsLongJagged<T>(valuator != null ? (fi, bi, ri) => valuator() : default(Func<long, long[], long[][], T>));
 		}
 
-		public static void FillAsJagged<T>(this Array array, Func<long[], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(dimIndices) : (Func<long, long[], long[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<long, long[], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex, dimIndices) : (Func<long, long[], long[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<long[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(rankedIndices) : (Func<long, long[], long[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<long, long[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(flatIndex, rankedIndices) : (Func<long, long[], long[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<long[], long[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.None,
-				valuator != null ? (flatIndex, dimIndices, rankedIndices) => valuator(dimIndices, rankedIndices) : (Func<long, long[], long[][], T>)null);
-		}
-
-		public static void FillAsJagged<T>(this Array array, Func<long, long[], long[][], T> valuator)
-		{
-			FillAsJagged<T>(array, JaggedArrayOptions.None, valuator);
-		}
-
-		private static void FillAsJagged<T>(this Array array, JaggedArrayOptions options, Func<long, long[], long[][], T> valuator)
+		public static void FillAsLongJagged<T>(this Array array, Func<long, long[], long[][], T> valuator,
+      long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (valuator == null)
 				throw new ArgumentNullException("valuator");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      PwrList<int> ranks = new PwrList<int>();
+      PwrList<int> biases = new PwrList<int>();
+      int totalRank = 0;
+      Type type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			long flatIndex = 0;
-			long[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new long[rank] : null;
-			long[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new long[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new long[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContextLong> arrayContexts = new PwrList<ArrayContextLong>();
-			ArrayLongIndex arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
-		descent:
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+      var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
+    descent:
 			while (depth < ranks.Count - 1)
 			{
 				if (array.Length > 0)
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContextLong(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
-				depth++;
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+        arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
 				if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						arrayIndex.SetValue<T>(array, valuator(flatIndex++, bandedIndices, rankedIndices));
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            arrayIndex.SetValue<T>(array, valuator(flatIndex++, bandedIndices, rankedIndices));
 					}
 				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContextLong arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -2879,151 +2647,86 @@ namespace PowerLib.System
 
 		public static void ApplyAsJagged<T>(this Array array, Action<T> action)
 		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item) : (Action<T, long, long[], long[][]>)null);
+			array.ApplyAsJagged<T>(action != null ? (t, fi, bi, ri) => action(t) : default(Action<T, int, int[], int[][]>));
 		}
 
-		public static void ApplyAsJagged<T>(this Array array, Action<T, int> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, int[]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, dimIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex, dimIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, int[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, rankedIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex, rankedIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, int[], int[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.None,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, dimIndices, rankedIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[], int[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.None, action);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, bool zeroBased, Action<T, int[]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, dimIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, bool zeroBased, Action<T, int, int[]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex, dimIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, bool zeroBased, Action<T, int[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, rankedIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, bool zeroBased, Action<T, int, int[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex, rankedIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, bool zeroBased, Action<T, int[], int[][]> action)
-		{
-			ApplyAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, dimIndices, rankedIndices) : (Action<T, int, int[], int[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, bool zeroBased, Action<T, int, int[], int[][]> action)
-		{
-			ApplyAsJagged<T>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None, action);
-		}
-
-		private static void ApplyAsJagged<T>(this Array array, JaggedArrayOptions options, Action<T, int, int[], int[][]> action)
+		public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[], int[][]> action,
+      int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
 				throw new ArgumentNullException("action");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			int flatIndex = 0;
-			int[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new int[rank] : null;
-			int[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new int[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new int[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContext> arrayContexts = new PwrList<ArrayContext>();
-			ArrayIndex arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+      var arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
 		descent:
 			while (depth < ranks.Count - 1)
 			{
-				if (array.Length > 0)
-					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+        if (array.Length > 0)
+          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContext(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions())) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-				depth++;
-				if (depth == ranks.Count - 1 && array.Length != 0)
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+        arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
+        if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
+					if (bandedIndices != null)
+					  for (int i = 0; i < ranks[depth]; i++)
+						  bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+					if (rankedIndices != null)
+					  arrayIndex.GetDimIndices(rankedIndices[depth]);
 					for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
+						if (bandedIndices != null)
+							for (int i = 0; i < ranks[depth]; i++)
+								bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+						if (rankedIndices != null)
 							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
 						action(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices);
 					}
 				}
@@ -3031,10 +2734,9 @@ namespace PowerLib.System
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContext arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -3046,123 +2748,98 @@ namespace PowerLib.System
 			}
 		}
 
-		public static void ApplyAsJagged<T>(this Array array, Action<T, long> action)
+		public static void ApplyAsLongJagged<T>(this Array array, Action<T> action)
 		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex) : (Action<T, long, long[], long[][]>)null);
+			array.ApplyAsLongJagged<T>(action != null ? (t, fi, bi, ri) => action(t) : default(Action<T, long, long[], long[][]>));
 		}
 
-		public static void ApplyAsJagged<T>(this Array array, Action<T, long[]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, dimIndices) : (Action<T, long, long[], long[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, long, long[]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressRankedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex, dimIndices) : (Action<T, long, long[], long[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, long[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, rankedIndices) : (Action<T, long, long[], long[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, long, long[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.SuppressBandedIndices,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, flatIndex, rankedIndices) : (Action<T, long, long[], long[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, long[], long[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.None,
-				action != null ? (item, flatIndex, dimIndices, rankedIndices) => action(item, dimIndices, rankedIndices) : (Action<T, long, long[], long[][]>)null);
-		}
-
-		public static void ApplyAsJagged<T>(this Array array, Action<T, long, long[], long[][]> action)
-		{
-			ApplyAsJagged<T>(array, JaggedArrayOptions.None, action);
-		}
-
-		private static void ApplyAsJagged<T>(this Array array, JaggedArrayOptions options, Action<T, long, long[], long[][]> action)
+		public static void ApplyAsLongJagged<T>(this Array array, Action<T, long, long[], long[][]> action,
+      long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
 				throw new ArgumentNullException("action");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
+
 			long flatIndex = 0;
-			long[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new long[rank] : null;
-			long[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new long[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new long[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContextLong> arrayContexts = new PwrList<ArrayContextLong>();
-			ArrayLongIndex arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
-		descent:
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+      ArrayLongIndex arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
+    descent:
 			while (depth < ranks.Count - 1)
 			{
 				if (array.Length > 0)
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContextLong(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+        arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
-				arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo (array.GetRegularArrayLongDimensions()));
-				depth++;
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+        arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
 				if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						action(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices);
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            action(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices);
 					}
 				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContextLong arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				depth--;
 				if (arrayIndex.IsMax)
 					goto ascent;
@@ -3179,126 +2856,59 @@ namespace PowerLib.System
 
 		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, TResult> convertor)
 		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item) : (Func<TSource, long, long[], long[][], TResult>)null);
+			return array.ConvertAsJagged<TSource, TResult>(convertor != null ? (t, fi, bi, ri) => convertor(t) : default(Func<TSource, int, int[], int[][], TResult>));
 		}
 
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int[], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int[], int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.None,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, dimIndices, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.None, convertor);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int[], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int, int[], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex, dimIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int, int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | (zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None),
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int[], int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, dimIndices, rankedIndices) : (Func<TSource, int, int[], int[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, bool zeroBased, Func<TSource, int, int[], int[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, zeroBased ? JaggedArrayOptions.ZeroBasedIndices : JaggedArrayOptions.None, convertor);
-		}
-
-		private static Array ConvertAsJagged<TSource, TResult>(this Array array, JaggedArrayOptions options, Func<TSource, int, int[], int[][], TResult> converter)
+		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> converter,
+      int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (converter == null)
 				throw new ArgumentNullException("converter");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
-			Type[] targetArrayTypes = new Type[ranks.Count];
+
+			var targetArrayTypes = new Type[ranks.Count];
 			targetArrayTypes[ranks.Count - 1] = typeof(TResult);
 			for (int i = 1; i < ranks.Count; i++)
-				targetArrayTypes[ranks.Count - - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
-			//
+				targetArrayTypes[ranks.Count - i - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
+
 			int flatIndex = 0;
-			int[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new int[rank] : null;
-			int[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new int[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new int[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContext> arrayContexts = new PwrList<ArrayContext>();
-			PwrStack<Array> targetArrayContexts = new PwrStack<Array>();
-			ArrayInfo arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
-			ArrayIndex arrayIndex = new ArrayIndex(arrayInfo) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
-			Array targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+			var targetArrayContexts = new PwrStack<Array>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+      var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
+      var arrayIndex = new ArrayIndex(arrayInfo)
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
+			var targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -3306,47 +2916,49 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContext(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				targetArrayContexts.Push(targetArray);
 				array = arrayIndex.GetValue<Array>(array);
-				arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
-				Array t = arrayInfo.CreateArray(targetArrayTypes[++depth]);
-				arrayIndex.SetValue<Array>(targetArray, t);
-				targetArray = t;
-				arrayIndex = new ArrayIndex(arrayInfo) { ZeroBased = (options & JaggedArrayOptions.ZeroBasedIndices) != 0 };
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
+        arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
+				var a = arrayInfo.CreateArray(targetArrayTypes[depth]);
+				arrayIndex.SetValue<Array>(targetArray, a);
+				targetArray = a;
+        arrayIndex = new ArrayIndex(arrayInfo)
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
 				if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						arrayIndex.SetValue<TResult>(targetArray, converter(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices));
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            arrayIndex.SetValue<TResult>(targetArray, converter(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices));
 					}
 				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContext arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				targetArray = targetArrayContexts.Pop();
 				depth--;
 				if (arrayIndex.IsMax)
@@ -3360,87 +2972,61 @@ namespace PowerLib.System
 			return targetArray;
 		}
 
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, long, TResult> convertor)
+		public static Array ConvertAsLongJagged<TSource, TResult>(this Array array, Func<TSource, TResult> convertor)
 		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices | JaggedArrayOptions.SuppressRankedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex) : (Func<TSource, long, long[], long[][], TResult>)null);
+			return array.ConvertAsLongJagged<TSource, TResult>(convertor != null ? (t, fi, bi, ri) => convertor(t) : default(Func<TSource, long, long[], long[][], TResult>));
 		}
 
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, long[], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, dimIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressRankedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex, dimIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, long[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, rankedIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, long, long[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.SuppressBandedIndices,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, flatIndex, rankedIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, long[], long[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.None,
-				convertor != null ? (item, flatIndex, dimIndices, rankedIndices) => convertor(item, dimIndices, rankedIndices) : (Func<TSource, long, long[], long[][], TResult>)null);
-		}
-
-		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> convertor)
-		{
-			return ConvertAsJagged<TSource, TResult>(array, JaggedArrayOptions.None, convertor);
-		}
-
-		private static Array ConvertAsJagged<TSource, TResult>(this Array array, JaggedArrayOptions options, Func<TSource, long, long[], long[][], TResult> converter)
+		public static Array ConvertAsLongJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> converter,
+      long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
 		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (converter == null)
 				throw new ArgumentNullException("converter");
-			//
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			int rank = 0;
-			Type type = array.GetType();
-			for (int i = 0; type.IsArray; i++)
-			{
-				biases.Add(rank);
-				rank += type.GetArrayRank();
-				ranks.Add(type.GetArrayRank());
-				type = type.GetElementType();
-			}
-			//
-			if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
+
+      var ranks = new PwrList<int>();
+      var biases = new PwrList<int>();
+      int totalRank = 0;
+      var type = array.GetType();
+      for (int i = 0; type.IsArray; i++)
+      {
+        int rank = type.GetArrayRank();
+        if (rankedIndices != null)
+        {
+          if (rankedIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (rankedIndices[i].Length != rank)
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        biases.Add(totalRank);
+        ranks.Add(rank);
+        totalRank += rank;
+        type = type.GetElementType();
+      }
+      if (bandedIndices != null && bandedIndices.Length != totalRank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
+
+      if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
-			//
-			Type[] targetArrayTypes = new Type[ranks.Count];
+
+			var targetArrayTypes = new Type[ranks.Count];
 			targetArrayTypes[ranks.Count - 1] = typeof(TResult);
 			for (int i = 1; i < ranks.Count; i++)
-				targetArrayTypes[ranks.Count - - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
-			//
+				targetArrayTypes[ranks.Count - i - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
+
 			long flatIndex = 0;
-			long[] bandedIndices = (options & JaggedArrayOptions.SuppressBandedIndices) == 0 ? new long[rank] : null;
-			long[][] rankedIndices = (options & JaggedArrayOptions.SuppressRankedIndices) == 0 ? new long[ranks.Count][] : null;
-			if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-				for (int i = 0; i < ranks.Count; i++)
-					rankedIndices[i] = new long[ranks[i]];
-			//
 			int depth = 0;
-			PwrList<ArrayContextLong> arrayContexts = new PwrList<ArrayContextLong>();
-			PwrStack<Array> targetArrayContexts = new PwrStack<Array>();
-			ArrayLongInfo arrayInfo = new RegularArrayLongInfo (array.GetRegularArrayLongDimensions());
-			ArrayLongIndex arrayIndex = new ArrayLongIndex(arrayInfo);
-			Array targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			var targetArrayContexts = new PwrStack<Array>();
+      var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+      var arrayInfo = new RegularArrayLongInfo (array.GetRegularArrayLongDimensions(ranges));
+      var arrayIndex = new ArrayLongIndex(arrayInfo)
+      {
+        ZeroBased = zeroBased,
+        AsRanges = ranges != null && ranges.Length > 0
+      };
+			var targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
 		descent:
 			while (depth < ranks.Count - 1)
 			{
@@ -3448,47 +3034,49 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Add(new ArrayContextLong(array, arrayIndex));
+        if (bandedIndices != null)
+          for (int i = 0; i < ranks[depth]; i++)
+            bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+        if (rankedIndices != null)
+          arrayIndex.GetDimIndices(rankedIndices[depth]);
+        depth++;
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
 				targetArrayContexts.Push(targetArray);
 				array = arrayIndex.GetValue<Array>(array);
-				arrayInfo = new RegularArrayLongInfo (array.GetRegularArrayLongDimensions());
-				Array t = arrayInfo.CreateArray(targetArrayTypes[++depth]);
-				arrayIndex.SetValue<Array>(targetArray, t);
-				targetArray = t;
-				arrayIndex = new ArrayLongIndex(arrayInfo);
+        ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
+        arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
+        var a = arrayInfo.CreateArray(targetArrayTypes[depth]);
+        arrayIndex.SetValue<Array>(targetArray, a);
+				targetArray = a;
+        arrayIndex = new ArrayLongIndex(arrayInfo)
+        {
+          ZeroBased = zeroBased,
+          AsRanges = ranges != null && ranges.Length > 0
+        };
 				if (depth == ranks.Count - 1 && array.Length != 0)
 				{
-					//
-					if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							for (int j = 0; j < ranks[i]; j++)
-								bandedIndices[biases[i] + j] = arrayContexts[i].Index.DimIndices[j];
-					//
-					if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-						for (int i = 0; i < depth; i++)
-							arrayContexts[i].Index.GetDimIndices(rankedIndices[i]);
-					//
-					for (; arrayIndex.Carry == 0; arrayIndex++)
+          if (bandedIndices != null)
+            for (int i = 0; i < ranks[depth]; i++)
+              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+          if (rankedIndices != null)
+            arrayIndex.GetDimIndices(rankedIndices[depth]);
+          for (; arrayIndex.Carry == 0; arrayIndex++)
 					{
-						//
-						if ((options & JaggedArrayOptions.SuppressBandedIndices) == 0)
-							for (int j = 0; j < ranks[depth]; j++)
-								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-						//
-						if ((options & JaggedArrayOptions.SuppressRankedIndices) == 0)
-							arrayIndex.GetDimIndices(rankedIndices[depth]);
-						//
-						arrayIndex.SetValue<TResult>(targetArray, converter(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices));
+            if (bandedIndices != null)
+              for (int i = 0; i < ranks[depth]; i++)
+                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+            if (rankedIndices != null)
+              arrayIndex.GetDimIndices(rankedIndices[depth]);
+            arrayIndex.SetValue<TResult>(targetArray, converter(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices));
 					}
 				}
 			}
 		ascent:
 			if (depth != 0)
 			{
-				ArrayContextLong arrayContext = arrayContexts[arrayContexts.Count - 1];
-				arrayContexts.RemoveAt(arrayContexts.Count - 1);
-				array = arrayContext.Array;
-				arrayIndex = arrayContext.Index;
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
 				targetArray = targetArrayContexts.Pop();
 				depth--;
 				if (arrayIndex.IsMax)
@@ -3502,168 +3090,16 @@ namespace PowerLib.System
 			return targetArray;
 		}
 
-		#endregion
-		#region Embedded types
+    #endregion
+    #region
 
-		/// <summary>
-		/// 
-		/// </summary>
-		[Flags]
-		private enum JaggedArrayOptions
-		{
-			None = 0,
-			ZeroBasedIndices = 1,
-			SuppressBandedIndices = 2,
-			SuppressRankedIndices = 4
-		}
 
-		/// <summary>
-		/// Array context
-		/// </summary>
-		private class ArrayContext
-		{
-			public ArrayContext(Array array, ArrayIndex index)
-			{
-				Array = array;
-				Index = index;
-			}
+    #endregion
+    #endregion
+    #region Flat array extensions
+    #region Validation methods
 
-			public Array Array { get; private set; }
-
-			public ArrayIndex Index { get; private set; }
-		}
-
-		/// <summary>
-		/// Array contexwith addressing by long
-		/// </summary>
-		private class ArrayContextLong
-		{
-			public ArrayContextLong(Array array, ArrayLongIndex index)
-			{
-				Array = array;
-				Index = index;
-			}
-
-			public Array Array { get; private set; }
-
-			public ArrayLongIndex Index { get; private set; }
-		}
-
-		#endregion
-		#endregion
-/*
-		#region General array extensions
-		#region Enumerate general array
-
-		/// <summary>
-		/// Enumerate all elements of <paramref name="array"/>.
-		/// </summary>
-		/// <typeparam name="T">Typof enumerateelements i<paramref name="array"/>.</typeparam>
-		/// <param name="array">Jagged array tenumerate.</param>
-		/// <param name="ranges"></param>
-		/// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
-		public static IEnumerable<T> Enumerate<T>(this Array array, params Range[] ranges)
-		{
-			return array.IsJaggedArray() ? 
-				array.EnumerateAsJagged<T>(ranges != null && ranges.Length > 0 ? ranges.ToRankedArray(array.GetJaggedArrayRanks()) : null) : array.EnumerateAsRegular<T>(ranges);
-		}
-
-		/// <summary>
-		/// Enumerate all elements of <paramref name="array"/>.
-		/// </summary>
-		/// <typeparam name="T">Typof enumerateelements i<paramref name="array"/>.</typeparam>
-		/// <param name="array">Jagged array tenumerate.</param>
-		/// <param name="ranges"></param>
-		/// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
-		public static IEnumerable<T> EnumerateLong<T>(this Array array, params LongRange[] ranges)
-		{
-			return array.IsJaggedArray() ? array.EnumerateAsJagged<T>(ranges != null && ranges.Length > 0 ? ranges.ToRankedArray(array.GetJaggedArrayRanks()) : null) : array.EnumerateAsLongRegular<T>(ranges);
-		}
-
-		#endregion
-		#region Clone general array
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="array"></param>
-		/// <returns></returns>
-		public static Array Clone<T>(this Array array)
-		{
-			return array.IsJaggedArray() ? array.CloneAsJagged<T>() : array.CloneAsRegular<T>();
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="array"></param>
-		/// <returns></returns>
-		public static Array CloneLong<T>(this Array array)
-		{
-			return array.IsJaggedArray() ? array.CloneAsJagged<T>() : array.CloneAsLongRegular<T>();
-		}
-
-		#endregion
-		#region Select general array
-
-		public static IEnumerable<TResult> Select<TSource, TResult>(this Array array, Func<TSource, int, int[], TResult> selector, int[] indices, bool zeroBased)
-		{
-			return array.IsJaggedArray() ?
-				SelectAsJagged<TSource, TResult>(array, zeroBased, selector) :
-				SelectAsRegular<TSource, TResult>(array, zeroBased: zeroBased, dimIndices: indices, selector: selector);
-		}
-
-		#endregion
-		#region Where general array
-
-		public static IEnumerable<T> Where<T>(this Array array, bool zeroBased, int[] indices, Func<T, int, int[], bool> predicate)
-    {
-			return array.IsJaggedArray() ?
-				WhereAsJagged<T>(array, zeroBased, predicate) :
-				WhereAsRegular<T>(array, zeroBased: zeroBased, indices: indices, predicate: predicate);
-		}
-
-		#endregion
-		#region Fill general array
-
-		public static void Fill<T>(this Array array, Func<int, int[], T> valuator, int[] indices, bool zeroBased)
-		{
-			if (array.IsJaggedArray())
-				FillAsJagged<T>(array, zeroBased, valuator);
-			else
-				FillAsRegular<T>(array, zeroBased: zeroBased, indices: indices, valuator: valuator);
-		}
-
-		#endregion
-		#region Apply general array
-
-		public static void Apply<T>(this Array array, Action<T, int, int[]> action, int[] indices, bool zeroBased)
-		{
-			if (array.IsJaggedArray())
-				ApplyAsJagged<T>(array, zeroBased, action);
-			else
-				ApplyAsRegular<T>(array, zeroBased: zeroBased, indices: indices, action: action);
-		}
-
-		#endregion
-		#region Convert general array
-
-		//public static Array Convert<TSource, TResult>(this Array array, Func<TSource, int, int[], TResult> converter, bool zeroBased)
-		//{
-		//	return array.IsJaggedArray() ?
-		//		ConvertAsJagged<TSource, TResult>(array, zeroBased, converter) :
-		//		ConvertAsRegular<TSource, TResult>(array, converter, );
-		//}
-
-		#endregion
-		#endregion
-*/
-		#region Flat array extensions
-		#region Validation methods
-
-		public static void ValidateRange<T>(this T[] array, int index, int count)
+    public static void ValidateRange<T>(this T[] array, int index, int count)
 		{
       if (array == null)
         throw new ArgumentNullException("array");

@@ -7,7 +7,7 @@ namespace PowerLib.System.Collections
 	/// <summary>
 	/// 
 	/// </summary>
-	/// <typeparam name="T">Typof item</typeparam>
+	/// <typeparam name="T">Type of item</typeparam>
 	public class PwrReadOnlyList<T> : PwrReadOnlyListBase<T>
 	{
 		private Func<int, int> _indexer;

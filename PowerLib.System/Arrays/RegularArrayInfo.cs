@@ -189,13 +189,77 @@ namespace PowerLib.System
 			return Array.CreateInstance(elementType, _lengths, _bases);
 		}
 
-		public override T GetValue<T>(Array array, bool asRanges, bool zeroBased, params int[] dimIndices)
+    public override object GetValue(Array array, bool asRanges, bool zeroBased, params int[] dimIndices)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (array.Rank != _rank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayRank], "array");
+      else if (!asRanges && array.Length != _length || asRanges && array.Length < _length)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "array");
+      for (int i = 0; i < _rank; i++)
+        if (!asRanges && array.GetLowerBound(i) != _bases[i] || asRanges && array.GetLowerBound(i) > _bases[i])
+          throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimBase], i));
+        else if (!asRanges && array.GetLength(i) != _lengths[i] || asRanges && array.GetLowerBound(i) + array.GetLength(i) < _bases[i] + _lengths[i])
+          throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimLength], i));
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      if (dimIndices.Length != _rank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
+      for (int i = 0; i < _rank; i++)
+        if (dimIndices[i] < (zeroBased ? 0 : _bases[i]) || dimIndices[i] >= _lengths[i] + (zeroBased ? 0 : _bases[i]))
+          throw new ArgumentRegularArrayElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.ArrayElementOutOfRange], i);
+
+      if (!zeroBased)
+        return array.GetValue(dimIndices);
+      else
+      {
+        int[] indices = new int[_rank];
+        for (int i = 0; i < _rank; i++)
+          indices[i] = dimIndices[i] + _bases[i];
+        return array.GetValue(indices);
+      }
+    }
+
+    public override void SetValue(Array array, object value, bool asRanges, bool zeroBased, params int[] dimIndices)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (array.Rank != _rank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayRank], "array");
+      else if (!asRanges && array.Length != _length || asRanges && array.Length < _length)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "array");
+      for (int i = 0; i < _rank; i++)
+        if (!asRanges && array.GetLowerBound(i) != _bases[i] || asRanges && array.GetLowerBound(i) > _bases[i])
+          throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimBase], i));
+        else if (!asRanges && array.GetLength(i) != _lengths[i] || asRanges && array.GetLowerBound(i) + array.GetLength(i) < _bases[i] + _lengths[i])
+          throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimLength], i));
+      if (!array.GetType().GetElementType().IsValueAssignable(value))
+        throw new ArgumentException("Inassignable value", "value");
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      if (dimIndices.Length != _rank)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
+      for (int i = 0; i < _rank; i++)
+        if (dimIndices[i] < (zeroBased ? 0 : _bases[i]) || dimIndices[i] >= _lengths[i] + (zeroBased ? 0 : _bases[i]))
+          throw new ArgumentRegularArrayElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.ArrayElementOutOfRange], i);
+
+      if (!zeroBased)
+        array.SetValue(value, dimIndices);
+      else
+      {
+        int[] indices = new int[_rank];
+        for (int i = 0; i < _rank; i++)
+          indices[i] = dimIndices[i] + _bases[i];
+        array.SetValue(value, indices);
+      }
+    }
+
+    public override T GetValue<T>(Array array, bool asRanges, bool zeroBased, params int[] dimIndices)
 		{
 			if (array == null)
 				throw new ArgumentNullException("array");
-			else if (!typeof(T).IsAssignableFrom(array.GetType().GetElementType()))
-				throw new ArgumentException("Inconsistent array elementype", "array");
-			else if (array.Rank != _rank)
+			if (array.Rank != _rank)
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayRank], "array");
 			else if (!asRanges && array.Length != _length || asRanges && array.Length < _length)
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "array");
@@ -204,15 +268,14 @@ namespace PowerLib.System
 					throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimBase], i));
 				else if (!asRanges && array.GetLength(i) != _lengths[i] || asRanges && array.GetLowerBound(i) + array.GetLength(i) < _bases[i] + _lengths[i])
 					throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimLength], i));
-			//
-			if (dimIndices == null)
+      if (dimIndices == null)
 				throw new ArgumentNullException("dimIndices");
 			if (dimIndices.Length != _rank)
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
 			for (int i = 0; i < _rank; i++)
 				if (dimIndices[i] < (zeroBased ? 0 : _bases[i]) || dimIndices[i] >= _lengths[i] + (zeroBased ? 0 : _bases[i]))
 					throw new ArgumentRegularArrayElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.ArrayElementOutOfRange], i);
-			//
+
 			if (!zeroBased)
 				return (T)array.GetValue(dimIndices);
 			else
@@ -228,9 +291,7 @@ namespace PowerLib.System
 		{
 			if (array == null)
 				throw new ArgumentNullException("array");
-			else if (!array.GetType().GetElementType().IsAssignableFrom(value != null ? value.GetType() : typeof(T)))
-				throw new ArgumentException("Inconsistent array elementype", "array");
-			else if (array.Rank != _rank)
+			if (array.Rank != _rank)
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayRank], "array");
 			else if (!asRanges && array.Length != _length || asRanges && array.Length < _length)
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "array");
@@ -239,20 +300,16 @@ namespace PowerLib.System
 					throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimBase], i));
 				else if (!asRanges && array.GetLength(i) != _lengths[i] || asRanges && array.GetLowerBound(i) + array.GetLength(i) < _bases[i] + _lengths[i])
 					throw new ArgumentException("array", string.Format(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayDimLength], i));
-			//
-			Type elementType = array.GetType().GetElementType();
-			if (!(value != null && elementType.IsInstanceOfType(value) || value == null &&
-				(elementType.IsClass || elementType.IsValueType && elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(Nullable<>))))
-				throw new ArgumentException("Invalivalue ", "value ");
-			//
-			if (dimIndices == null)
+      if (!array.GetType().GetElementType().IsValueAssignable(value))
+        throw new ArgumentException("Inassignable value", "value");
+      if (dimIndices == null)
 				throw new ArgumentNullException("dimIndices");
 			if (dimIndices.Length != _rank)
 				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
 			for (int i = 0; i < _rank; i++)
 				if (dimIndices[i] < (zeroBased ? 0 : _bases[i]) || dimIndices[i] >= _lengths[i] + (zeroBased ? 0 : _bases[i]))
 					throw new ArgumentRegularArrayElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.ArrayElementOutOfRange], i);
-			//
+
 			if (!zeroBased)
 				array.SetValue(value, dimIndices);
 			else

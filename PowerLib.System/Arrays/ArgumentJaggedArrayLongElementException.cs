@@ -23,31 +23,31 @@ namespace PowerLib.System
 		public ArgumentJaggedArrayLongElementException(params long[][] indices)
 			: base(string.Format(DefaultMessage, PwrArray.FormatAsLongJaggedIndices(indices)))
 		{
-			_indices = (long[][])indices.CloneAsJagged<long>();
+			_indices = (long[][])indices.CloneAsJagged();
 		}
 
 		public ArgumentJaggedArrayLongElementException(string paramName, params long[][] indices)
 			: base(string.Format(DefaultMessage, PwrArray.FormatAsLongJaggedIndices(indices)), paramName)
 		{
-			_indices = (long[][])indices.CloneAsJagged<long>();
+			_indices = (long[][])indices.CloneAsJagged();
 		}
 
 		public ArgumentJaggedArrayLongElementException(string paramName, Exception innerException, params long[][] indices)
 			: base(string.Format(DefaultMessage, PwrArray.FormatAsLongJaggedIndices(indices)), paramName, innerException)
 		{
-			_indices = (long[][])indices.CloneAsJagged<long>();
+			_indices = (long[][])indices.CloneAsJagged();
 		}
 
 		public ArgumentJaggedArrayLongElementException(string paramName, string message, params long[][] indices)
 			: base(string.Format(message, PwrArray.FormatAsLongJaggedIndices(indices)), paramName)
 		{
-			_indices = (long[][])indices.CloneAsJagged<long>();
+			_indices = (long[][])indices.CloneAsJagged();
 		}
 
 		public ArgumentJaggedArrayLongElementException(string paramName, string message, Exception innerException, params long[][] indices)
 			: base(string.Format(message, PwrArray.FormatAsLongJaggedIndices(indices)), paramName, innerException)
 		{
-			_indices = (long[][])indices.CloneAsJagged<long>();
+			_indices = (long[][])indices.CloneAsJagged();
 		}
 
 		protected ArgumentJaggedArrayLongElementException(SerializationInfo info, StreamingContext context)

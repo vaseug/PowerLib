@@ -27,9 +27,9 @@ namespace PowerLib.System
 			if (array == null)
 				throw new ArgumentNullException("array");
 
-			PwrList<int> ranks = new PwrList<int>();
-			PwrList<int> biases = new PwrList<int>();
-			Type type = array.GetType();
+			var ranks = new PwrList<int>();
+			var biases = new PwrList<int>();
+			var type = array.GetType();
 			for (; type.IsArray; type = type.GetElementType())
 			{
 				int rank = type.GetArrayRank();
@@ -38,12 +38,12 @@ namespace PowerLib.System
 				_rank += rank;
 			}
 			_ranks = ranks.ToArray();
-			//
+
 			int depth = 0;
-			PwrStack<ArrayInfoNodeContext> arrayContexts = new PwrStack<ArrayInfoNodeContext>();
-			RegularArrayInfo arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
-			ArrayIndex arrayIndex = new ArrayIndex(arrayInfo);
-			ArrayInfoNode node = new ArrayInfoNode(arrayInfo, _length, depth == _ranks.Length - 1);
+			var arrayContexts = new PwrStack<ArrayInfoNodeContext>();
+			var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
+			var arrayIndex = new ArrayIndex(arrayInfo);
+			var node = new ArrayInfoNode(arrayInfo, _length, depth == _ranks.Length - 1);
 		descent:
 			while (depth < _ranks.Length - 1)
 			{
@@ -51,10 +51,10 @@ namespace PowerLib.System
 					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
 				if (arrayIndex.Carry != 0 || array.Length == 0)
 					break;
-				arrayContexts.Push(new ArrayInfoNodeContext(node, array, arrayIndex));
+        depth++;
+        arrayContexts.Push(new ArrayInfoNodeContext(node, array, arrayIndex));
 				array = arrayIndex.GetValue<Array>(array);
 				arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
-				depth++;
 				arrayIndex.SetValue<ArrayInfoNode>(node.Nodes, new ArrayInfoNode(arrayInfo, _length, depth == _ranks.Length - 1));
 				if (depth == _ranks.Length - 1)
 					_length += array.Length;
@@ -67,7 +67,7 @@ namespace PowerLib.System
 		ascent:
 			if (depth != 0)
 			{
-				ArrayInfoNodeContext nodeContext = arrayContexts.Pop();
+				var nodeContext = arrayContexts.Pop();
 				array = nodeContext.Array;
 				node = nodeContext.Node;
 				arrayIndex = nodeContext.Index;
@@ -83,72 +83,58 @@ namespace PowerLib.System
 			_node = node;
 		}
 
-		public JaggedArrayInfo(int[] ranks, Func<int, int[], int[]> getLengths)
-			: this(ranks, getLengths != null ?
-				(depth, rankedFlatIndices, rankedDimindices) => getLengths(depth, rankedFlatIndices).Select<int, ArrayDimension>(length => new ArrayDimension(length)).ToArray() :
-				(Func<int, int[], int[][], ArrayDimension[]>)null)
+		public JaggedArrayInfo(int[] ranks, Func<int, int[], int[][], int[]> lensGetter, int[] flatIndices, int[][] dimIndices)
+			: this(ranks, lensGetter != null ?
+				(depth, rankedFlatIndices, rankedDimindices) => lensGetter(depth, rankedFlatIndices, rankedDimindices).Select<int, ArrayDimension>(length => new ArrayDimension(length)).ToArray() :
+				default(Func<int, int[], int[][], ArrayDimension[]>), flatIndices, dimIndices)
 		{
 		}
 
-		public JaggedArrayInfo(int[] ranks, Func<int, int[][], int[]> getLengths)
-			: this(ranks, getLengths != null ?
-				(depth, rankedFlatIndices, rankedDimindices) => getLengths(depth, rankedDimindices).Select<int, ArrayDimension>(length => new ArrayDimension(length)).ToArray() :
-				(Func<int, int[], int[][], ArrayDimension[]>)null)
-		{
-		}
-
-		public JaggedArrayInfo(int[] ranks, Func<int, int[], int[][], int[]> getLengths)
-			: this(ranks, getLengths != null ?
-				(depth, rankedFlatIndices, rankedDimindices) => getLengths(depth, rankedFlatIndices, rankedDimindices).Select<int, ArrayDimension>(length => new ArrayDimension(length)).ToArray() :
-				(Func<int, int[], int[][], ArrayDimension[]>)null)
-		{
-		}
-
-		public JaggedArrayInfo(int[] ranks, Func<int, int[], ArrayDimension[]> getArrayDims)
-			: this(ranks, getArrayDims != null ? (depth, rankedFlatIndices, rankedDimIndices) => getArrayDims(depth, rankedFlatIndices) : (Func<int, int[], int[][], ArrayDimension[]>)null)
-		{
-		}
-
-		public JaggedArrayInfo(int[] ranks, Func<int, int[][], ArrayDimension[]> getArrayDims)
-			: this(ranks, getArrayDims != null ? (depth, rankedFlatIndices, rankedDimIndices) => getArrayDims(depth, rankedDimIndices) : (Func<int, int[], int[][], ArrayDimension[]>)null)
-		{
-		}
-
-		public JaggedArrayInfo(int[] ranks, Func<int, int[], int[][], ArrayDimension[]> getArrayDims)
+		public JaggedArrayInfo(int[] ranks, Func<int, int[], int[][], ArrayDimension[]> dimsGetter, int[] flatIndices, int[][] dimIndices)
 		{
 			if (ranks == null)
 				throw new ArgumentNullException("ranks");
-			if (getArrayDims == null)
-				throw new ArgumentNullException("getArrayDims");
-			for (int i = 0; i < ranks.Length; i++)
-				if (ranks[i] < 0)
-					throw new ArgumentRegularArrayElementException("ranks", ArrayResources.Default.Strings[ArrayMessage.ArrayElementOutOfRange], i);
-				else
-					_rank += ranks[i];
+			if (dimsGetter == null)
+				throw new ArgumentNullException("dimsGetter");
+
+      int rank = 0;
+      for (int i = 0; i < ranks.Length; i++)
+      {
+        if (ranks[i] < 0)
+          throw new ArgumentCollectionElementException("ranks", ArrayResources.Default.Strings[ArrayMessage.ArrayElementOutOfRange], i);
+
+        if (dimIndices != null)
+        {
+          if (dimIndices[i] == null)
+            throw new ArgumentCollectionElementException("rankedIndices", "Argument has NULL value.", i);
+          if (dimIndices[i].Length != ranks[i])
+            throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "rankedIndices");
+        }
+        rank += ranks[i];
+      }
+      if (flatIndices != null && flatIndices.Length != ranks.Length)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "flatIndices");
+
+      _rank = rank;
 			_ranks = (int[])ranks.Clone();
-			//
 			int depth = 0;
-			int[] rankedFlatIndices = new int[_ranks.Length];
-			int[][] rankedDimIndices = new int[_ranks.Length][];
-			for (int i = 0; i < _ranks.Length; i++)
-				rankedDimIndices[i] = new int[_ranks[i]];
-			PwrStack<ArrayInfoNodeContext> arrayContexts = new PwrStack<ArrayInfoNodeContext>();
-			RegularArrayInfo arrayInfo = new RegularArrayInfo(getArrayDims(0, rankedFlatIndices, rankedDimIndices));
-			ArrayIndex arrayIndex = new ArrayIndex(arrayInfo);
-			ArrayInfoNode node = new ArrayInfoNode(arrayInfo, _length, depth == _ranks.Length - 1);
+			var arrayContexts = new PwrStack<ArrayInfoNodeContext>();
+			var arrayInfo = new RegularArrayInfo(dimsGetter(depth, flatIndices, dimIndices));
+			var arrayIndex = new ArrayIndex(arrayInfo);
+			var node = new ArrayInfoNode(arrayInfo, _length, depth == _ranks.Length - 1);
 		descent:
 			while (depth < _ranks.Length - 1)
 			{
 				ArrayDimension[] arrayDims = null;
 				if (arrayInfo.Length > 0)
-					for (rankedFlatIndices[depth] = arrayIndex.FlatIndex, arrayIndex.GetDimIndices(rankedDimIndices[depth]);
-						arrayIndex.Carry == 0 && (arrayDims = getArrayDims(depth + 1, rankedFlatIndices, rankedDimIndices)) == null;
-						arrayIndex++, rankedFlatIndices[depth] = arrayIndex.FlatIndex, arrayIndex.GetDimIndices(rankedDimIndices[depth])) ;
+					for (flatIndices[depth] = arrayIndex.FlatIndex, arrayIndex.GetDimIndices(dimIndices[depth]);
+						arrayIndex.Carry == 0 && (arrayDims = dimsGetter(depth + 1, flatIndices, dimIndices)) == null;
+						arrayIndex++, flatIndices[depth] = arrayIndex.FlatIndex, arrayIndex.GetDimIndices(dimIndices[depth])) ;
 				if (arrayIndex.Carry != 0 || arrayInfo.Length == 0)
 					break;
-				arrayContexts.Push(new ArrayInfoNodeContext(node, null, arrayIndex));
+        depth++;
+        arrayContexts.Push(new ArrayInfoNodeContext(node, null, arrayIndex));
 				arrayInfo = new RegularArrayInfo(arrayDims);
-				depth++;
 				arrayIndex.SetValue<ArrayInfoNode>(node.Nodes, new ArrayInfoNode(arrayInfo, _length, depth == _ranks.Length - 1));
 				if (depth == _ranks.Length - 1)
 					_length += arrayInfo.Length;
@@ -161,7 +147,7 @@ namespace PowerLib.System
 		ascent:
 			if (depth != 0)
 			{
-				ArrayInfoNodeContext nodeContext = arrayContexts.Pop();
+				var nodeContext = arrayContexts.Pop();
 				node = nodeContext.Node;
 				arrayIndex = nodeContext.Index;
 				depth--;
@@ -218,7 +204,7 @@ namespace PowerLib.System
 			get
 			{
 				if (_dimArrayInfosAccessor == null)
-					_dimArrayInfosAccessor = new ParamsAccessor<int, RegularArrayInfo>(dimIndices => GetDimArrayInfor (false, dimIndices));
+					_dimArrayInfosAccessor = new ParamsAccessor<int, RegularArrayInfo>(dimIndices => GetDimArrayInfo(false, dimIndices));
 				return _dimArrayInfosAccessor;
 			}
 		}
@@ -228,7 +214,7 @@ namespace PowerLib.System
 			get
 			{
 				if (_zeroBasedDimArrayInfosAccessor == null)
-					_zeroBasedDimArrayInfosAccessor = new ParamsAccessor<int, RegularArrayInfo>(dimIndices => GetDimArrayInfor (true, dimIndices));
+					_zeroBasedDimArrayInfosAccessor = new ParamsAccessor<int, RegularArrayInfo>(dimIndices => GetDimArrayInfo(true, dimIndices));
 				return _zeroBasedDimArrayInfosAccessor;
 			}
 		}
@@ -238,7 +224,7 @@ namespace PowerLib.System
 			get
 			{
 				if (_rankedDimArrayInfosAccessor == null)
-					_rankedDimArrayInfosAccessor = new ParamsAccessor<int[], RegularArrayInfo>(dimIndices => GetDimArrayInfor (false, dimIndices));
+					_rankedDimArrayInfosAccessor = new ParamsAccessor<int[], RegularArrayInfo>(dimIndices => GetDimArrayInfo(false, dimIndices));
 				return _rankedDimArrayInfosAccessor;
 			}
 		}
@@ -248,7 +234,7 @@ namespace PowerLib.System
 			get
 			{
 				if (_zeroBasedRankedDimArrayInfosAccessor == null)
-					_zeroBasedRankedDimArrayInfosAccessor = new ParamsAccessor<int[], RegularArrayInfo>(dimIndices => GetDimArrayInfor (true, dimIndices));
+					_zeroBasedRankedDimArrayInfosAccessor = new ParamsAccessor<int[], RegularArrayInfo>(dimIndices => GetDimArrayInfo(true, dimIndices));
 				return _zeroBasedRankedDimArrayInfosAccessor;
 			}
 		}
@@ -549,7 +535,37 @@ namespace PowerLib.System
 			return false;
 		}
 
-		private T GetValueCore<T>(Array array, bool asRanges, bool zeroBased, int[][] indices)
+    private object GetValueCore(Array array, bool asRanges, bool zeroBased, int[][] indices)
+    {
+      ArrayInfoNode node = _node;
+      for (int i = 0; i < _ranks.Length - 1 && node != null && array != null; i++)
+      {
+        array = node.ArrayInfo.GetValue<Array>(array, asRanges, zeroBased, indices[i]);
+        node = node.ArrayInfo.GetValue<ArrayInfoNode>(node.Nodes, false, zeroBased, indices[i]);
+      }
+
+      if (node == null || array == null)
+        throw new InvalidOperationException("Invalid internal array index");
+
+      return node.ArrayInfo.GetValue(array, asRanges, zeroBased, indices[_ranks.Length - 1]);
+    }
+
+    private void SetValueCore(Array array, object value, bool asRanges, bool zeroBased, int[][] indices)
+    {
+      ArrayInfoNode node = _node;
+      for (int i = 0; i < _ranks.Length - 1 && node != null && array != null; i++)
+      {
+        array = node.ArrayInfo.GetValue<Array>(array, asRanges, zeroBased, indices[i]);
+        node = node.ArrayInfo.GetValue<ArrayInfoNode>(node.Nodes, false, zeroBased, indices[i]);
+      }
+
+      if (node == null || array == null)
+        throw new InvalidOperationException("Invalid internal array index");
+
+      node.ArrayInfo.SetValue(array, value, asRanges, zeroBased, indices[_ranks.Length - 1]);
+    }
+
+    private T GetValueCore<T>(Array array, bool asRanges, bool zeroBased, int[][] indices)
 		{
 			ArrayInfoNode node = _node;
 			for (int i = 0; i < _ranks.Length - 1 && node != null && array != null; i++)
@@ -557,10 +573,10 @@ namespace PowerLib.System
 				array = node.ArrayInfo.GetValue<Array>(array, asRanges, zeroBased, indices[i]);
 				node = node.ArrayInfo.GetValue<ArrayInfoNode>(node.Nodes, false, zeroBased, indices[i]);
 			}
-			//
+
 			if (node == null || array == null)
 				throw new InvalidOperationException("Invalid internal array index");
-			//
+
 			return node.ArrayInfo.GetValue<T>(array, asRanges, zeroBased, indices[_ranks.Length - 1]);
 		}
 
@@ -572,10 +588,10 @@ namespace PowerLib.System
 				array = node.ArrayInfo.GetValue<Array>(array, asRanges, zeroBased, indices[i]);
 				node = node.ArrayInfo.GetValue<ArrayInfoNode>(node.Nodes, false, zeroBased, indices[i]);
 			}
-			//
+
 			if (node == null || array == null)
 				throw new InvalidOperationException("Invalid internal array index");
-			//
+
 			node.ArrayInfo.SetValue<T>(array, value, asRanges, zeroBased, indices[_ranks.Length - 1]);
 		}
 
@@ -651,26 +667,117 @@ namespace PowerLib.System
 			return array;
 		}
 
-		public override T GetValue<T>(Array array, bool asRanges, bool zeroBased, params int[] dimIndices)
+    public override object GetValue(Array array, bool asRanges, bool zeroBased, params int[] dimIndices)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != _rank)
+        throw new ArgumentException("Invalid array length", "indices");
+      if (_length == 0)
+        throw new InvalidOperationException("Array has zero length");
+
+      int[][] indices = new int[_ranks.Length][];
+      for (int i = 0, j = 0; i < _ranks.Length && j < _rank; j += _ranks[i++])
+      {
+        indices[i] = new int[_ranks[i]];
+        Array.Copy(dimIndices, j, indices[i], 0, _ranks[i]);
+      }
+      return GetValueCore(array, asRanges, zeroBased, indices);
+    }
+
+    public override void SetValue(Array array, object value, bool asRanges, bool zeroBased, params int[] dimIndices)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (!array.GetJaggedArrayElementType().IsValueAssignable(value))
+        throw new ArgumentException("Inassignable value", "value");
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != _rank)
+        throw new ArgumentException("Invalid array length", "indices");
+      if (_length == 0)
+        throw new InvalidOperationException("Array has zero length");
+
+      int[][] indices = new int[_ranks.Length][];
+      for (int i = 0, j = 0; i < _ranks.Length && j < _rank; j += _ranks[i++])
+      {
+        indices[i] = new int[_ranks[i]];
+        Array.Copy(dimIndices, j, indices[i], 0, _ranks[i]);
+      }
+      SetValueCore(array, value, asRanges, zeroBased, indices);
+    }
+
+    public object GetValue(Array array, int[][] dimIndices)
+    {
+      return GetValue(array, false, false, dimIndices);
+    }
+
+    public object GetValue(Array array, bool asRanges, bool zeroBased, int[][] dimIndices)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != _ranks.Length)
+        throw new ArgumentException("Invalid array length", "indices");
+      else
+        for (int i = 0; i < dimIndices.Length; i++)
+          if (dimIndices[i] == null)
+            throw new ArgumentRegularArrayElementException("dimIndices", "Value cannot be null", i);
+          else if (dimIndices[i].Length != _ranks[i])
+            throw new ArgumentRegularArrayElementException("dimIndices", "Invalid array length", i);
+      if (_length == 0)
+        throw new InvalidOperationException("Array has zero length");
+
+      return GetValueCore(array, asRanges, zeroBased, dimIndices);
+    }
+
+    public void SetValue(Array array, object value, int[][] dimIndices)
+    {
+      SetValue(array, value, false, false, dimIndices);
+    }
+
+    public void SetValue(Array array, object value, bool asRanges, bool zeroBased, int[][] dimIndices)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (!array.GetJaggedArrayElementType().IsValueAssignable(value))
+        throw new ArgumentException("Inassignable value", "value");
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != _ranks.Length)
+        throw new ArgumentException("Invalid array length", "indices");
+      else
+        for (int i = 0; i < dimIndices.Length; i++)
+          if (dimIndices[i] == null)
+            throw new ArgumentRegularArrayElementException("dimIndices", "Nulvalue ", i);
+          else if (dimIndices[i].Length != _ranks[i])
+            throw new ArgumentRegularArrayElementException("dimIndices", "Invalid array length", i);
+      if (_length == 0)
+        throw new InvalidOperationException("Array has zero length");
+
+      SetValueCore(array, value, asRanges, zeroBased, dimIndices);
+    }
+
+    public override T GetValue<T>(Array array, bool asRanges, bool zeroBased, params int[] dimIndices)
 		{
 			if (array == null)
 				throw new ArgumentNullException("array");
-			else if (!typeof(T).IsAssignableFrom(array.GetJaggedArrayElementType()))
-				throw new ArgumentNullException("Inconsistent array elementype");
-			else if (dimIndices == null)
+			if (dimIndices == null)
 				throw new ArgumentNullException("dimIndices");
 			else if (dimIndices.Length != _rank)
 				throw new ArgumentException("Invalid array length", "indices");
 			else if (_length == 0)
 				throw new InvalidOperationException("Array has zero length");
-			//
+
 			int[][] indices = new int[_ranks.Length][];
 			for (int i = 0, j = 0; i < _ranks.Length && j < _rank; j += _ranks[i++])
 			{
 				indices[i] = new int[_ranks[i]];
 				Array.Copy(dimIndices, j, indices[i], 0, _ranks[i]);
 			}
-			//
 			return GetValueCore<T>(array, asRanges, zeroBased, indices);
 		}
 
@@ -678,20 +785,21 @@ namespace PowerLib.System
 		{
 			if (array == null)
 				throw new ArgumentNullException("array");
-			else if (!array.GetJaggedArrayElementType().IsAssignableFrom(value != null ? value.GetType() : typeof(T)))
-				throw new ArgumentNullException("Inconsistent array elementype");
-			else if (dimIndices.Length != _rank)
+      if (!array.GetType().GetElementType().IsValueAssignable(value))
+        throw new ArgumentException("Inassignable value", "value");
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != _rank)
 				throw new ArgumentException("Invalid array length", "indices");
 			else if (_length == 0)
 				throw new InvalidOperationException("Array has zero length");
-			//
+
 			int[][] indices = new int[_ranks.Length][];
 			for (int i = 0, j = 0; i < _ranks.Length && j < _rank; j += _ranks[i++])
 			{
 				indices[i] = new int[_ranks[i]];
 				Array.Copy(dimIndices, j, indices[i], 0, _ranks[i]);
 			}
-			//
 			SetValueCore<T>(array, value, asRanges, zeroBased, indices);
 		}
 
@@ -704,9 +812,9 @@ namespace PowerLib.System
 		{
 			if (array == null)
 				throw new ArgumentNullException("array");
-			else if (typeof(T).IsAssignableFrom(array.GetJaggedArrayElementType()))
-				throw new ArgumentNullException("Inconsistent array elementype");
-			else if (dimIndices.Length != _ranks.Length)
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != _ranks.Length)
 				throw new ArgumentException("Invalid array length", "indices");
 			else
 				for (int i = 0; i < dimIndices.Length; i++)
@@ -716,22 +824,24 @@ namespace PowerLib.System
 						throw new ArgumentRegularArrayElementException("dimIndices", "Invalid array length", i);
 			if (_length == 0)
 				throw new InvalidOperationException("Array has zero length");
-			//
+
 			return GetValueCore<T>(array, asRanges, zeroBased, dimIndices);
 		}
 
 		public void SetValue<T>(Array array, T value, int[][] dimIndices)
 		{
-			SetValue(array, value, false, false, dimIndices);
+			SetValue<T>(array, value, false, false, dimIndices);
 		}
 
 		public void SetValue<T>(Array array, T value, bool asRanges, bool zeroBased, int[][] dimIndices)
 		{
 			if (array == null)
 				throw new ArgumentNullException("array");
-			else if (array.GetJaggedArrayElementType().IsAssignableFrom(value != null ? value.GetType() : typeof(T)))
-				throw new ArgumentNullException("Inconsistent array elementype");
-			else if (dimIndices.Length != _ranks.Length)
+      if (!array.GetJaggedArrayElementType().IsValueAssignable(value))
+        throw new ArgumentException("Inassignable value", "value");
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != _ranks.Length)
 				throw new ArgumentException("Invalid array length", "indices");
 			else
 				for (int i = 0; i < dimIndices.Length; i++)
@@ -741,8 +851,8 @@ namespace PowerLib.System
 						throw new ArgumentRegularArrayElementException("dimIndices", "Invalid array length", i);
 			if (_length == 0)
 				throw new InvalidOperationException("Array has zero length");
-			//
-			SetValueCore(array, value, asRanges, zeroBased, dimIndices);
+
+			SetValueCore<T>(array, value, asRanges, zeroBased, dimIndices);
 		}
 
 		public override int CalcFlatIndex(bool zeroBased, params int[] dimIndices)
@@ -1060,7 +1170,7 @@ namespace PowerLib.System
 			return carry;
 		}
 
-		public RegularArrayInfo GetDimArrayInfor (bool zeroBased, params int[] dimIndices)
+		public RegularArrayInfo GetDimArrayInfo(bool zeroBased, params int[] dimIndices)
 		{
 			if (dimIndices == null)
 				throw new ArgumentNullException("dimIndices");
@@ -1071,18 +1181,18 @@ namespace PowerLib.System
 			for (; depth < _ranks.Length - 1 && length >= _ranks[depth]; length -= _ranks[depth], depth++) ;
 			if (length != 0)
 				throw new ArgumentException("Invalid array length", "dimIndices");
-			//
+
 			int[][] indices = new int[depth][];
 			for (int i = 0, j = 0; i < depth && j < dimIndices.Length; j += _ranks[i++])
 			{
 				indices[i] = new int[_ranks[i]];
 				Array.Copy(dimIndices, j, indices[i], 0, _ranks[i]);
 			}
-			//
+
 			return GetDimArrayInfoCore(zeroBased, indices);
 		}
 
-		public RegularArrayInfo GetDimArrayInfor (bool zeroBased, int[][] dimIndices)
+		public RegularArrayInfo GetDimArrayInfo(bool zeroBased, params int[][] dimIndices)
 		{
 			if (dimIndices == null)
 				throw new ArgumentNullException("dimIndices");
@@ -1094,7 +1204,7 @@ namespace PowerLib.System
 						throw new ArgumentRegularArrayElementException("Array is null", "dimIndices", j);
 					else if (dimIndices[j].Length != _ranks[j])
 						throw new ArgumentRegularArrayElementException("Invalid array length", "dimIndices", j);
-			//
+
 			return GetDimArrayInfoCore(zeroBased, dimIndices);
 		}
 

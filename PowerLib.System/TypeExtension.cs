@@ -31,7 +31,7 @@ namespace PowerLib.System
 			if (type == null)
 				throw new NullReferenceException();
 
-			return value != null && type.IsInstanceOfType(value) || (value == null && type.IsNullAssignable());
+			return value != null && type.IsAssignableFrom(value.GetType()) || (value == null && type.IsNullAssignable());
 		}
 
 		public static bool IsValueAssignable<T>(this Type type, T value)
@@ -39,7 +39,7 @@ namespace PowerLib.System
 			if (type == null)
 				throw new NullReferenceException();
 
-			return value != null && type.IsAssignableFrom(typeof(T)) || (value == null && type.IsNullAssignable());
+			return value != null && (type.IsAssignableFrom(value.GetType()) || type.IsAssignableFrom(typeof(T))) || (value == null && type.IsNullAssignable());
 		}
 
 		public static bool IsOfType(this Type type, string typeFullName, params Type[] typeArgs)
