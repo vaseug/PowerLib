@@ -16,26 +16,209 @@ This solution contains the following projects:
 
 Contains many classes, structures, interfaces and extension methods that expedite and optimize the development process.
 
+### Arrays
+
+For working with arrays jagged and regular (one-dimensional, multidimensional), there are many classes and extension methods. For example, the following are the extension methods for working with regular arrays.
+```csharp
+// Creates regular array with specified lengths and lowerBounds.
+public static Array CreateAsRegular<T>(int[] lengths, int[] lowerBounds = null);
+
+// Enumerates regular array elements.
+public static IEnumerable<T> EnumerateAsRegular<T>(this Array array, bool zeroBased = false, Range? range = null, params Range[] ranges);
+
+// Creates a shallow copy of the regular array.
+public static Array CloneAsRegular(this Array array);
+
+// Returns a regular array from its string representation.
+public static Array ParseAsRegular<T>(string s, Func<string, int, int[], T> itemParser, string itemPattern, char[] delimitChars, char[] spaceChars, char[] escapeChars, char[] openingChars, char[] closingChars);
+
+// Converts a regular array to its string representation.
+public static string FormatAsRegular<T>(this Array array, Func<T, int, int[], string> itemFormatter, Func<int, string> itemDelimiter, Func<int, string> openBracket, Func<int, string> closeBracket, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
+
+// Enumerates a regular array elements and projects each element of the array into a new form.
+public static IEnumerable<TResult> SelectAsRegular<TSource, TResult>(this Array array, Func<TSource, int, int[], TResult> selector, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
+
+// Enumerates a regular array elements and filters elements based on a predicate.
+public static IEnumerable<T> WhereAsRegular<T>(this Array array, Func<T, int, int[], bool> predicate, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
+
+// Apply action to elements of a regular array.
+public static void ApplyAsRegular<T>(this Array array, Action<T, int, int[]> action, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
+
+// Initialize elements of a regular array.
+public static void FillAsRegular<T>(this Array array, Func<int, int[], T> valuator, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
+
+// Converts one regular array to another with the possibility of applying transposition and the conversion of the values of the elements.
+public static Array ConvertAsRegular<TSource, TResult>(this Array array, Func<TSource, int, int[], int, int[], TResult> converter, int[] transposition = null, int[] lowerBounds = null, int[] targetIndices = null, int[] sourceIndices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
+
+// 
+public static Array RangeAsRegular(this Array array, int[] transposition = null, int[] lowerBounds = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
+```
+The following are the extension methods for working with jagged arrays.
+```csharp
+// Creates jagged array with specified structures.
+public static Array CreateAsJagged<T>(int[] ranks, Func<int, int[], int[][], int[]> lensGetter, int[] bandedIndices = null, int[][] rankedIndices = null);
+
+// Enumerate jagged array elements
+public static IEnumerable<T> EnumerateAsJagged<T>(this Array array, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
+
+// Converts a jagged array to its string representation.
+public static string FormatAsJagged<T>(this Array array, Func<T, int, int[], int[][], string> itemFormatter, Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
+
+// Enumerates a jagged array elements and projects each element of the array into a new form.
+public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> selector, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
+
+// Enumerates a jagged array elements and filters elements based on a predicate.
+public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[], int[][], bool> predicate, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
+
+// Initialize elements of a jagged array.
+public static void FillAsJagged<T>(this Array array, Func<int, int[], int[][], T> valuator, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
+
+// Apply action to elements of a jagged array.
+public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[], int[][]> action, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
+
+// Converts one jagged array to another with conversion of the values of the elements.
+public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> converter, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
+```
+The following simple code shows the enumeration of the jagged array elements
+```csharp
+  var ja = new int[][][,]
+  {
+    new[]
+    {
+      new int[,]
+      {
+        { 1, 2 },
+        { 3, 4 },
+        { 5, 6 },
+        { 7, 8 },
+      },
+      new int[,]
+      {
+        { 11, 12, 13, 14 },
+        { 21, 22, 23, 24 },
+        { 31, 32, 33, 34 },
+      }
+    },
+    new[]
+    {
+      new int[,]
+      {
+        { 111, 112, 113, 114, 115 },
+        { 121, 122, 123, 124, 125 },
+        { 131, 132, 133, 134, 135 },
+      }
+    }
+  };
+  
+  Console.WriteLine(string.Join(",", ja.EnumerateAsJagged<int>()));
+```
+and produces the following result:
+```
+1,2,3,4,5,6,7,8,11,12,13,14,21,22,23,24,31,32,33,34,111,112,113,114,115,121,122,123,124,125,131,132,133,134,135
+```
+### Collections
+
+The **ListExtension** class contains a number of extension methods for working with lists.
+
+#### Lists
+
 **PowerLib.System.Collection.PwrList\<T>** - A list whose operation with an internal buffer is based on the round-robin algorithm. It implements the memory allocation and deallocation management interfaces and contains many methods for working with its elements.
 
 **PowerLib.System.Collection.PwrSortedList\<T>** - Sorted list based on the comparator of elements represented by the interface *IComparer\<T>* or the delegate *Comparison\<T>*. The values of the elements participating in the comparison must be unchanged during the storage in the list. The list can be restricted by storing only unique values. There are also options that control the addition of duplicate values: to the beginning of the chain, to the end, or arbitrarily.
 
 **PowerLib.System.Collection.PwrKeySortedList\<K, T>** - Sorted list based on the element key comparator represented by the *IComparer\<K>* interface or the *Comparison\<K>* delegate. The key extraction is specified by the delegate *Func\<T, K>*. The key values of the elements participating in the comparison must be unchanged during the storage in the list. The list can be restricted by storing only unique values. There are also options that control the addition of duplicate values: to the beginning of the chain, to the end, or arbitrarily.
 
+#### Stacks
+
 **PowerLib.System.Collection.PwrStack\<T>** - A general stack with additional range operations.
 **PowerLib.System.Collection.PwrSortedStack\<T>** - A sorted stack (priority stack).
 **PowerLib.System.Collection.PwrKeySortedStack\<T>** - A key sorted stack (priority stack).
+
+#### Queues
 
 **PowerLib.System.Collection.PwrQueue\<T>** - A general queue with additional range operations.
 **PowerLib.System.Collection.PwrSortedQueue\<T>** - A sorted queue (priority queue).
 **PowerLib.System.Collection.PwrKeySortedQueue\<T>** - A key sorted queue (priority queue).
 
+#### Deques
+
 **PowerLib.System.Collection.PwrDeque\<T>** - A general deque with additional range operations.
 **PowerLib.System.Collection.PwrSortedDeque\<T>** - A sorted deque (priority deque).
 **PowerLib.System.Collection.PwrKeySortedDeque\<T>** - A key sorted deque (priority deque).
 
-The **ListExtension** class contains a number of extension methods for working with lists.
+#### Bitwise
+...
+#### Linked list
+...
+#### Trees
+...
+#### Graphs
+...
+#### Matching
 There are many classes in namespace **PowerLib.System.Collection.Matching** for working with items matching and comparison.
+
+### IO
+#### Streaming
+...
+#### Filesystem
+
+To work with the file system, the **PowerLib.System.IO.FileSystemInfoExtension** class exists, which allows you to display hierarchical information about the file structure using flexible filtering and sorting capabilities. Also, group operations for deleting and moving (renaming) files by condition are supported. For example, search files with max depth: 2 (0 - unrestricted depth), file extension: "\***.csproj**", directory starts with: "**PowerLib.**" and output by directory name *descending order* and file name *ascending order*.
+```csharp
+  foreach (var item in new DirectoryInfo(@"D:\Projects\Github\PowerLib\").EnumerateFiles("*", 2, false, 
+    fi => fi.Extension == ".csproj", (x, y) => Comparable.Compare(x.Name, y.Name, false),
+    di => di.Name.StartsWith(@"PowerLib."), (x, y) => Comparable.Compare(x.Name, y.Name, false) * -1))
+    Console.WriteLine("{0}", Path.Combine(item.DirectoryName, item.Name));
+```
+Console output:
+```
+D:\Projects\Github\PowerLib\PowerLib.System.Data.SqlTypes\PowerLib.System.Data.SqlTypes.csproj
+D:\Projects\Github\PowerLib\PowerLib.System.Data.Linq\PowerLib.System.Data.Linq.csproj
+D:\Projects\Github\PowerLib\PowerLib.System.Data\PowerLib.System.Data.csproj
+D:\Projects\Github\PowerLib\PowerLib.System.ComponentModel.DataAnnotations\PowerLib.System.ComponentModel.DataAnnotations.csproj
+D:\Projects\Github\PowerLib\PowerLib.System\PowerLib.System.csproj
+D:\Projects\Github\PowerLib\PowerLib.SqlServer\PowerLib.SqlServer.csproj
+D:\Projects\Github\PowerLib\PowerLib.SqlClr.Deploy.Utility\PowerLib.SqlClr.Deploy.Utility.csproj
+D:\Projects\Github\PowerLib\PowerLib.SqlClr.Deploy\PowerLib.SqlClr.Deploy.csproj
+D:\Projects\Github\PowerLib\PowerLib.EntityFramework\PowerLib.EntityFramework.csproj
+```
+Below are the prototypes of functions for working with the elements of the file system with the most complete number of arguments:
+```csharp
+//	Enumerate abstract filesystem items
+public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren)
+where DI : FileSystemInfo;
+
+//	Enumerate filesystem items
+public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison);
+
+//	Enumerate files
+public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction, Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison, Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison);
+
+//	Enumerate directories
+public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparer);
+
+// Move (rename) filesystem items
+public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,  Func<FileSystemInfo, bool> predicate, Func<FileSystemInfo, string> replacing);
+
+// Delete filesytem items
+public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, bool recursive);
+```
+There are also functions with a predicate, the parameter of which, together with the element, is the context of the hierarchy of type IHierarchicalContext\<DirectoryInfo\> containing the list of ancestors:
+```csharp
+//	Enumerate abstract filesystem items
+public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, bool excludeEmpty, HierarchicalContext<DI> context, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DI>>, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren) where DI : FileSystemInfo;
+
+//	Enumerate files
+public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction, Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, IComparer<FileInfo> fileComparer, Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison);
+
+//	Enumerate directories
+public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison);
+
+// Move (rename) filesystem items
+public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Func<FileSystemInfo, string> replacing);
+            
+// Delete filesytem items
+public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, bool recursive);
+```
 
 ### Builders
 
@@ -107,150 +290,44 @@ The following example demonstrates how to create an object and call its private 
     return action(factory());
   }
 ```
-### Arrays
-
-For working with arrays jagged and regular (one-dimensional, multidimensional), there are many classes and extension methods. For example, the following are the extension methods for working with regular arrays.
-```csharp
-// Creates regular array with specified lengths and lowerBounds.
-public static Array CreateAsRegular<T>(int[] lengths, int[] lowerBounds = null);
-
-// Enumerates regular array elements.
-public static IEnumerable<T> EnumerateAsRegular<T>(this Array array, bool zeroBased = false, Range? range = null, params Range[] ranges);
-
-// Creates a shallow copy of the regular array.
-public static Array CloneAsRegular(this Array array);
-
-// Returns a regular array from its string representation.
-public static Array ParseAsRegular<T>(string s, Func<string, int, int[], T> itemParser, string itemPattern, char[] delimitChars, char[] spaceChars, char[] escapeChars, char[] openingChars, char[] closingChars);
-
-// Converts a regular array to its string representation.
-public static string FormatAsRegular<T>(this Array array, Func<T, int, int[], string> itemFormatter, Func<int, string> itemDelimiter, Func<int, string> openBracket, Func<int, string> closeBracket, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
-
-// Enumerates a regular array elements and projects each element of the array into a new form.
-public static IEnumerable<TResult> SelectAsRegular<TSource, TResult>(this Array array, Func<TSource, int, int[], TResult> selector, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
-
-// Enumerates a regular array elements and filters elements based on a predicate.
-public static IEnumerable<T> WhereAsRegular<T>(this Array array, Func<T, int, int[], bool> predicate, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
-
-// Apply action to elements of a regular array.
-public static void ApplyAsRegular<T>(this Array array, Action<T, int, int[]> action, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
-
-// Initialize elements of a regular array.
-public static void FillAsRegular<T>(this Array array, Func<int, int[], T> valuator, int[] indices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
-
-// Converts one regular array to another with the possibility of applying transposition and the conversion of the values of the elements.
-public static Array ConvertAsRegular<TSource, TResult>(this Array array, Func<TSource, int, int[], int, int[], TResult> converter, int[] transposition = null, int[] lowerBounds = null, int[] targetIndices = null, int[] sourceIndices = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
-
-// 
-public static Array RangeAsRegular(this Array array, int[] transposition = null, int[] lowerBounds = null, bool zeroBased = false, Range? range = null, params Range[] ranges);
-```
-The following are the extension methods for working with jagged arrays.
-```csharp
-//
-public static Array CreateAsJagged<T>(int[] ranks, Func<int, int[], int[][], int[]> lensGetter, int[] bandedIndices = null, int[][] rankedIndices = null);
-
-//
-public static IEnumerable<T> EnumerateAsJagged<T>(this Array array, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
-
-// Converts a jagged array to its string representation.
-public static string FormatAsJagged<T>(this Array array, Func<T, int, int[], int[][], string> itemFormatter, Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
-
-// Enumerates a jagged array elements and projects each element of the array into a new form.
-public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> selector, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
-
-// Enumerates a jagged array elements and filters elements based on a predicate.
-public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[], int[][], bool> predicate, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
-
-// Initialize elements of a jagged array.
-public static void FillAsJagged<T>(this Array array, Func<int, int[], int[][], T> valuator, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
-
-// Apply action to elements of a jagged array.
-public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[], int[][]> action, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
-
-// Converts one jagged array to another with conversion of the values of the elements.
-public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> converter, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null);
-```
-
-### Bitwise
-...
-### Linked list
-...
-### Trees
-...
-### Graphs
-...
-### Streaming
-...
-### Filesystem
-
-To work with the file system, the **PowerLib.System.IO.FileSystemInfoExtension** class exists, which allows you to display hierarchical information about the file structure using flexible filtering and sorting capabilities. Also, group operations for deleting and moving (renaming) files by condition are supported. For example, search files with max depth: 2 (0 - unrestricted depth), file extension: "\***.csproj**", directory starts with: "**PowerLib.**" and output by directory name *descending order* and file name *ascending order*.
-```csharp
-  foreach (var item in new DirectoryInfo(@"D:\Projects\Github\PowerLib\").EnumerateFiles("*", 2, false, 
-    fi => fi.Extension == ".csproj", (x, y) => Comparable.Compare(x.Name, y.Name, false),
-    di => di.Name.StartsWith(@"PowerLib."), (x, y) => Comparable.Compare(x.Name, y.Name, false) * -1))
-    Console.WriteLine("{0}", Path.Combine(item.DirectoryName, item.Name));
-```
-Console output:
-```
-D:\Projects\Github\PowerLib\PowerLib.System.Data.SqlTypes\PowerLib.System.Data.SqlTypes.csproj
-D:\Projects\Github\PowerLib\PowerLib.System.Data.Linq\PowerLib.System.Data.Linq.csproj
-D:\Projects\Github\PowerLib\PowerLib.System.Data\PowerLib.System.Data.csproj
-D:\Projects\Github\PowerLib\PowerLib.System.ComponentModel.DataAnnotations\PowerLib.System.ComponentModel.DataAnnotations.csproj
-D:\Projects\Github\PowerLib\PowerLib.System\PowerLib.System.csproj
-D:\Projects\Github\PowerLib\PowerLib.SqlServer\PowerLib.SqlServer.csproj
-D:\Projects\Github\PowerLib\PowerLib.SqlClr.Deploy.Utility\PowerLib.SqlClr.Deploy.Utility.csproj
-D:\Projects\Github\PowerLib\PowerLib.SqlClr.Deploy\PowerLib.SqlClr.Deploy.csproj
-D:\Projects\Github\PowerLib\PowerLib.EntityFramework\PowerLib.EntityFramework.csproj
-```
-Below are the prototypes of functions for working with the elements of the file system with the most complete number of arguments:
-```csharp
-//	Enumerate abstract filesystem items
-public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren)
-where DI : FileSystemInfo;
-
-//	Enumerate filesystem items
-public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison);
-
-//	Enumerate files
-public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction, Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison, Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison);
-
-//	Enumerate directories
-public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparer);
-
-// Move (rename) filesystem items
-public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,  Func<FileSystemInfo, bool> predicate, Func<FileSystemInfo, string> replacing);
-
-// Delete filesytem items
-public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, bool recursive);
-```
-There are also functions with a predicate, the parameter of which, together with the element, is the context of the hierarchy of type IHierarchicalContext\<DirectoryInfo\> containing the list of ancestors:
-```csharp
-//	Enumerate abstract filesystem items
-public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, bool excludeEmpty, HierarchicalContext<DI> context, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DI>>, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren) where DI : FileSystemInfo;
-
-//	Enumerate files
-public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction, Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, IComparer<FileInfo> fileComparer, Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison);
-
-//	Enumerate directories
-public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison);
-
-// Move (rename) filesystem items
-public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Func<FileSystemInfo, string> replacing);
-            
-// Delete filesytem items
-public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, bool recursive);
-```
-
-A large section to working with linked and tree data (trees, graphs) includes many structures for storing tree elements and methods for working with them (including LINQ extensions) to be posted later.
-
 Continued...
 
 ---
 ## PowerLib.System.Data
 
 Contains code to working with data objects.
+The DataTypeAdapter class is intended to organize the conversion between the storage type and the representation type of data object. The class is abstract and declares two public properties: StoreValue - for the value on the storage side and ViewValue - for the value on the view side. Conversion between values is carried out on demand. The following classes are derived from the DataTypeAdapter:
+* __BytesBinaryFormatterAdapter__
+* __BytesBinarySerializeAdapter\<T\>__
+* __StreamedCollectionAdapter\<T, V\>__
+* __StringXmlSerializableAdapter\<T\>__
+* __StringXmlSerializerAdapter__
+* __XElementXmlSerializableAdapter\<T\>__
+* __XElementXmlSerializerAdapter__
 
-Continued...
+The PowerLib.SqlServer library provides a functional that allows you to work with regular (one-dimensional or multidimensional) arrays or collections of simple data types stored in a binary data type. On the client side, work with these types of data can be done either by calling the functions of the PowerLib.SqlServer library through EntityFramework or LINQ2SQL, or by converting to the representing type and vice versa. The following example shows the use of the StreamedCollectionAdapter for these purposes.
+```csharp
+public class SampleEntity
+{
+    private StreamedCollectionAdapter<int?, int[]> _indicesAdapter = new StreamedCollectionAdapter<int?, int[]>(null, null, false,
+      s => new NulInt32StreamedArray(s, false, false), c => c.Select(t => t.Value).ToArray(),
+      (s, c) => new NulInt32StreamedArray(s, SizeEncoding.B1, true, c.Select(v => (int?)v).Counted(c.Length), false, false));
+
+    [Column("DimIndices")]
+    public Byte[] RawIndices
+    {
+      get { return _indicesAdapter.StoreValue; }
+      set { _indicesAdapter.StoreValue = value; }
+    }
+
+    [NotMapped]
+    public int[] DimIndices
+    {
+      get { return _indicesAdapter.ViewValue; }
+      set { _indicesAdapter.ViewValue = value; }
+    }
+}
+```
 
 ---
 ## PowerLib.System.Data.Linq

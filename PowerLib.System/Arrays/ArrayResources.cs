@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Resources;
 using System.Globalization;
 using PowerLib.System.Resources;
-
 
 namespace PowerLib.System
 {
@@ -27,35 +24,35 @@ namespace PowerLib.System
     }
   }
 
-	internal enum ArrayMessage
-	{
-		IndexOpenBracket,
-		IndexCloseBracket,
-		IndexItemDelimiter,
-		IndexItemFormat,
-		IndexLevelDelimiter,
-		ArrayIsEmpty,
-		InvalidArrayRank,
-		InvalidArrayLength,
-		InvalidArrayDimLength,
-		InvalidArrayDimBase,
-		InvalidArrayElementType,
-		InvalidArrayElement,
+  internal enum ArrayMessage
+  {
+    IndexOpenBracket,
+    IndexCloseBracket,
+    IndexItemDelimiter,
+    IndexItemFormat,
+    IndexLevelDelimiter,
+    ArrayIsEmpty,
+    InvalidArrayRank,
+    InvalidArrayLength,
+    InvalidArrayDimLength,
+    InvalidArrayDimBase,
+    InvalidArrayElementType,
+    InvalidArrayElement,
 
     OneOrMoreInvalidArrayElements,
     OneOrMoreArrayElementsOutOfRange,
 
-		TypeIsNotArray,
-		ArrayIsNotJagged,
-		ArrayElementOutOfRange,
+    TypeIsNotArray,
+    ArrayIsNotJagged,
+    ArrayElementOutOfRange,
     ArrayIndexOutOfRange,
-		ArrayDimIndicesOutOfRange,
+    ArrayDimIndicesOutOfRange,
 
-		ArrayElementIndexOutOfRange,
-		RegularArrayElementIndexOutOfRange,
-		JaggedArrayElementIndexOutOfRange,
-		JaggedRegularArrayElementIndexOutOfRange,
+    ArrayElementIndexOutOfRange,
+    RegularArrayElementIndexOutOfRange,
+    JaggedArrayElementIndexOutOfRange,
+    JaggedRegularArrayElementIndexOutOfRange,
 
-		JaggedArrayElementIndexLevelNotSpecified,
-	}
+    JaggedArrayElementIndexLevelNotSpecified,
+  }
 }

@@ -211,7 +211,7 @@ namespace PowerLib.System
         throw new ArgumentOutOfRangeException("sIndex");
       if (dIndex < 0 || dIndex > buffer.Length)
         throw new ArgumentOutOfRangeException("dIndex");
-      if (length < 0 || length > buffer.Length - sIndex  || length > buffer.Length - dIndex)
+      if (length < 0 || length > buffer.Length - sIndex || length > buffer.Length - dIndex)
         throw new ArgumentOutOfRangeException("length");
       if (sIndex == dIndex || length == 0)
         return;
@@ -222,7 +222,7 @@ namespace PowerLib.System
     public static void Copy<T>(T[] sBuffer, int sOffset, int sIndex, T[] dBuffer, int dOffset, int dIndex, int length)
     {
       if (sBuffer == null)
-        throw new ArgumentNullException("sBuffer"); 
+        throw new ArgumentNullException("sBuffer");
       if (dBuffer == null)
         throw new ArgumentNullException("dBuffer");
       if (sOffset < 0 || sOffset >= sBuffer.Length)
@@ -310,7 +310,7 @@ namespace PowerLib.System
               int part = dBuffer.Length - (dStart + dIndex);
               Array.Copy(sBuffer, sIndex - (sBuffer.Length - sStart) + part, dBuffer, 0, length - part);
               Array.Copy(sBuffer, sIndex - (sBuffer.Length - sStart), dBuffer, dStart + dIndex, part);
-            } 
+            }
           }
           else if (sIndex + length <= sBuffer.Length - sStart)
           {
@@ -527,7 +527,7 @@ namespace PowerLib.System
         for (int j = 0, itemPos = rangePos; j < length; j++, itemPos += jump + 1)
         {
           int index = itemPos >= array.Length - start ? itemPos - (array.Length - start) : start + itemPos;
-          array[index] = value ;
+          array[index] = value;
         }
     }
 
@@ -546,7 +546,7 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
 
-      for (int i = 0, index = 0, length = range, spa= gap; i < count; i++, index += spa+ length, spa+= skew, length += delta)
+      for (int i = 0, index = 0, length = range, spa = gap; i < count; i++, index += spa + length, spa += skew, length += delta)
       {
         if (index >= array.Length - start)
           Array.Clear(array, index - (array.Length - start), range);

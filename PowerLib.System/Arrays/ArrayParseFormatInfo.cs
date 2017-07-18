@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Globalization;
 using PowerLib.System.Text;
 
 namespace PowerLib.System
@@ -14,7 +12,7 @@ namespace PowerLib.System
 
     private const string arrayDelimiterFormat = @"[{3}]*(?<![{4}]){0}[{3}]*"; // parameters: 0 - delimiter, 1 - open brackets, 2 - close brackets, 3 - spaces, 4 - escapes
 
-    private const string arrayPatternFormat = 
+    private const string arrayPatternFormat =
       @"^(?:" +
         @"(?'Open'{2}[{4}]*)" +
           @"(?'Items'(?:(?:(?<![^{5}]{2})[{4}]*(?<![{5}]){1}[{4}]*)?{0})*)" +

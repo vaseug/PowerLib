@@ -6,88 +6,88 @@ using PowerLib.System.Collections;
 namespace PowerLib.System
 {
   public struct ArraySlice<T> : IList<T>, IEnumerable<T>, IEnumerable
-	{
-		private readonly T[] _array;
-		private readonly Range _range;
+  {
+    private readonly T[] _array;
+    private readonly Range _range;
 
-		#region Constructors
+    #region Constructors
 
-		public ArraySlice(T[] array)
+    public ArraySlice(T[] array)
       : this(array, 0, array != null ? array.Length : 0)
-		{
-		}
+    {
+    }
 
-		public ArraySlice(T[] array, int index, int count)
-		{
-			if (array == null)
-				throw new ArgumentNullException("array");
-			if (index < 0 || index > array.Length)
-				throw new ArgumentOutOfRangeException("index");
-			if (count < 0 || count > array.Length - index)
-				throw new ArgumentOutOfRangeException("count");
+    public ArraySlice(T[] array, int index, int count)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (index < 0 || index > array.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > array.Length - index)
+        throw new ArgumentOutOfRangeException("count");
 
-			_array = array;
-			_range = new Range(index, count);
-		}
+      _array = array;
+      _range = new Range(index, count);
+    }
 
-		public ArraySlice(T[] array, Range range)
-			: this(array, range.Index, range.Count)
-		{
-		}
+    public ArraySlice(T[] array, Range range)
+      : this(array, range.Index, range.Count)
+    {
+    }
 
-		#endregion
-		#region Properties
+    #endregion
+    #region Properties
 
-		public T[] Array
-		{
-			get { return _array; }
-		}
+    public T[] Array
+    {
+      get { return _array; }
+    }
 
     public Range Range
     {
       get { return _range; }
     }
 
-		public T this[int index]
-		{
-			get
-			{
+    public T this[int index]
+    {
+      get
+      {
         if (_array == null)
           throw new InvalidOperationException("Array is null");
         if (index < 0 || index >= _range.Count)
-					throw new ArgumentOutOfRangeException("index");
+          throw new ArgumentOutOfRangeException("index");
 
         return _array[_range.Index + index];
-			}
-			set
-			{
+      }
+      set
+      {
         if (_array == null)
           throw new InvalidOperationException("Array is null");
         if (index < 0 || index >= _range.Count)
-					throw new ArgumentOutOfRangeException();
+          throw new ArgumentOutOfRangeException();
 
-				_array[_range.Index + index] = value ;
-			}
-		}
+        _array[_range.Index + index] = value;
+      }
+    }
 
-		#endregion
-		#region IEnumerable<T> implementation
+    #endregion
+    #region IEnumerable<T> implementation
 
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			if (_array == null)
-				throw new InvalidOperationException("Array is null");
+    IEnumerator<T> IEnumerable<T>.GetEnumerator()
+    {
+      if (_array == null)
+        throw new InvalidOperationException("Array is null");
 
-			for (int i = _range.Index, c = _range.Index + _range.Count; i < c; i++)
-				yield return _array[i];
-		}
+      for (int i = _range.Index, c = _range.Index + _range.Count; i < c; i++)
+        yield return _array[i];
+    }
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return ((IEnumerable<T>)this).GetEnumerator();
-		}
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return ((IEnumerable<T>)this).GetEnumerator();
+    }
 
-		#endregion
+    #endregion
     #region ICollection<T> implementation
 
     int ICollection<T>.Count
@@ -106,7 +106,7 @@ namespace PowerLib.System
       }
     }
 
-   void ICollection<T>.Add(T item)
+    void ICollection<T>.Add(T item)
     {
       throw new NotSupportedException();
     }
@@ -116,7 +116,7 @@ namespace PowerLib.System
       throw new NotSupportedException();
     }
 
-   void ICollection<T>.Clear()
+    void ICollection<T>.Clear()
     {
       throw new NotSupportedException();
     }
@@ -129,7 +129,7 @@ namespace PowerLib.System
       return _array.FindIndex(_range.Index, _range.Count, t => EqualityComparer<T>.Default.Equals(item, t)) >= 0;
     }
 
-   void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+    void ICollection<T>.CopyTo(T[] array, int arrayIndex)
     {
       _array.CopyTo(array, arrayIndex, _range.Index, _range.Count);
     }
@@ -137,12 +137,12 @@ namespace PowerLib.System
     #endregion
     #region IList<T> implementation
 
-   void IList<T>.Insert(int index, T item)
+    void IList<T>.Insert(int index, T item)
     {
       throw new NotSupportedException();
     }
 
-   void IList<T>.RemoveAt(int index)
+    void IList<T>.RemoveAt(int index)
     {
       throw new NotSupportedException();
     }

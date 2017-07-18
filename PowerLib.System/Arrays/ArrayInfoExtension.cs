@@ -6,10 +6,10 @@ using PowerLib.System.Linq;
 
 namespace PowerLib.System
 {
-	public static class ArrayInfoExtension
-	{
-		public static void ValidateRanges(this RegularArrayInfo arrayInfo, params Range[] ranges)
-		{
+  public static class ArrayInfoExtension
+  {
+    public static void ValidateRanges(this RegularArrayInfo arrayInfo, params Range[] ranges)
+    {
       if (arrayInfo == null)
         throw new ArgumentNullException("arrayInfo");
       if (ranges == null)
@@ -18,12 +18,12 @@ namespace PowerLib.System
         throw new ArgumentException("Invalid array length", "ranges");
       if (Enumerable.Range(0, ranges.Length)
         .Any(i => ranges[i].Index < arrayInfo.LowerBounds[i] || ranges[i].Index + ranges[i].Count > arrayInfo.LowerBounds[i] + arrayInfo.Lengths[i]))
-				throw new ArgumentException("Out of range dimension exists");
-			//return new RegularArrayInfo(ranges.Select(r => new ArrayDimension(r.Count, r.Index)).ToArray());
-		}
+        throw new ArgumentException("Out of range dimension exists");
+      //return new RegularArrayInfo(ranges.Select(r => new ArrayDimension(r.Count, r.Index)).ToArray());
+    }
 
-		public static void ValidateRanges(this RegularArrayLongInfo arrayInfo, params LongRange[] ranges)
-		{
+    public static void ValidateRanges(this RegularArrayLongInfo arrayInfo, params LongRange[] ranges)
+    {
       if (arrayInfo == null)
         throw new ArgumentNullException("arrayInfo");
       if (ranges == null)
@@ -32,57 +32,57 @@ namespace PowerLib.System
         throw new ArgumentException("Invalid array length", "ranges");
       if (Enumerable.Range(0, ranges.Length)
         .Any(i => ranges[i].Index < arrayInfo.LowerBounds[i] || ranges[i].Index + ranges[i].Count > arrayInfo.LowerBounds[i] + arrayInfo.Lengths[i]))
-				throw new ArgumentException("Out of range dimension exists");
-			//return new RegularArrayLongInfo (ranges.Select(r => new ArrayLongDimension(r.Count, r.Index)).ToArray());
-		}
+        throw new ArgumentException("Out of range dimension exists");
+      //return new RegularArrayLongInfo (ranges.Select(r => new ArrayLongDimension(r.Count, r.Index)).ToArray());
+    }
 
-		public static void GetDimIndices(this ArrayIndex arrayIndex, int[][] dimIndices)
-		{
-			if (arrayIndex == null)
-				throw new NullReferenceException("arrayIndex");
-			JaggedArrayInfo arrayInfo = arrayIndex.ArrayInfo as JaggedArrayInfo;
-			if (arrayInfo == null)
-				throw new InvalidOperationException("Indexearray is nojagged");
-			//
-			if (dimIndices == null)
-				throw new ArgumentNullException("dimIndices");
-			else if (dimIndices.Length != arrayInfo.Depths)
-				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
-			else
-				for (int i = 0; i < arrayInfo.Depths; i++)
-					if (dimIndices[i] == null)
-						throw new ArgumentRegularArrayElementException("dimIndices", "Value is null", i);
-					else if (dimIndices[i].Length != arrayInfo.GetRank(i))
-						throw new ArgumentRegularArrayElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], i);
-			//
-			for (int i = 0, j = 0; i < arrayInfo.Depths; j += arrayInfo.GetRank(i), i++)
-				for (int k = 0; k < arrayInfo.GetRank(i); k++)
-					dimIndices[i][k] = arrayIndex.GetDimIndex(j + k);
-		}
+    public static void GetDimIndices(this ArrayIndex arrayIndex, int[][] dimIndices)
+    {
+      if (arrayIndex == null)
+        throw new NullReferenceException("arrayIndex");
+      JaggedArrayInfo arrayInfo = arrayIndex.ArrayInfo as JaggedArrayInfo;
+      if (arrayInfo == null)
+        throw new InvalidOperationException("Indexearray is nojagged");
+      //
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != arrayInfo.Depths)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
+      else
+        for (int i = 0; i < arrayInfo.Depths; i++)
+          if (dimIndices[i] == null)
+            throw new ArgumentRegularArrayElementException("dimIndices", "Value is null", i);
+          else if (dimIndices[i].Length != arrayInfo.GetRank(i))
+            throw new ArgumentRegularArrayElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], i);
+      //
+      for (int i = 0, j = 0; i < arrayInfo.Depths; j += arrayInfo.GetRank(i), i++)
+        for (int k = 0; k < arrayInfo.GetRank(i); k++)
+          dimIndices[i][k] = arrayIndex.GetDimIndex(j + k);
+    }
 
-		public static void GetDimIndices(this ArrayLongIndex arrayIndex, long[][] dimIndices)
-		{
-			if (arrayIndex == null)
-				throw new NullReferenceException("arrayIndex");
-			JaggedArrayLongInfo arrayInfo = arrayIndex.ArrayInfo as JaggedArrayLongInfo;
-			if (arrayInfo == null)
-				throw new InvalidOperationException("Indexearray is nojagged");
-			//
-			if (dimIndices == null)
-				throw new ArgumentNullException("dimIndices");
-			else if (dimIndices.Length != arrayInfo.Depths)
-				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
-			else
-				for (int i = 0; i < arrayInfo.Depths; i++)
-					if (dimIndices[i] == null)
-						throw new ArgumentRegularArrayLongElementException("dimIndices", "Value is null", i);
-					else if (dimIndices[i].Length != arrayInfo.GetRank(i))
-						throw new ArgumentRegularArrayLongElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], i);
-			//
-			for (int i = 0, j = 0; i < arrayInfo.Depths; j += arrayInfo.GetRank(i), i++)
-				for (int k = 0; k < arrayInfo.GetRank(i); k++)
-					dimIndices[i][k] = arrayIndex.GetLongDimIndex(j + k);
-		}
+    public static void GetDimIndices(this ArrayLongIndex arrayIndex, long[][] dimIndices)
+    {
+      if (arrayIndex == null)
+        throw new NullReferenceException("arrayIndex");
+      JaggedArrayLongInfo arrayInfo = arrayIndex.ArrayInfo as JaggedArrayLongInfo;
+      if (arrayInfo == null)
+        throw new InvalidOperationException("Indexearray is nojagged");
+      //
+      if (dimIndices == null)
+        throw new ArgumentNullException("dimIndices");
+      else if (dimIndices.Length != arrayInfo.Depths)
+        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
+      else
+        for (int i = 0; i < arrayInfo.Depths; i++)
+          if (dimIndices[i] == null)
+            throw new ArgumentRegularArrayLongElementException("dimIndices", "Value is null", i);
+          else if (dimIndices[i].Length != arrayInfo.GetRank(i))
+            throw new ArgumentRegularArrayLongElementException("dimIndices", ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], i);
+      //
+      for (int i = 0, j = 0; i < arrayInfo.Depths; j += arrayInfo.GetRank(i), i++)
+        for (int k = 0; k < arrayInfo.GetRank(i); k++)
+          dimIndices[i][k] = arrayIndex.GetLongDimIndex(j + k);
+    }
 
     public static int TransformFlatIndex(this RegularArrayInfo arrayInfo, int flatIndex, params Range[] ranges)
     {
