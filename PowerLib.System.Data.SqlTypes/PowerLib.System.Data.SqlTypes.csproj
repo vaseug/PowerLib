@@ -127,6 +127,13 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)\PWRLIB"
+copy /y "$(TargetPath)" "$(SolutionDir)$(ConfigurationName)\PWRLIB\$(TargetFileName)"
+mkdir "$(SolutionDir)$(ConfigurationName)\PWRSQL"
+copy /y "$(TargetPath)" "$(SolutionDir)$(ConfigurationName)\PWRSQL\$(TargetFileName)"
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

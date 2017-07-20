@@ -4,4 +4,5 @@ PowerLib.System.Data.SqlTypes.Numerics.SqlGradAngle;pwrlib
 PowerLib.System.Data.SqlTypes.Numerics.SqlHourAngle;pwrlib
 PowerLib.System.Data.SqlTypes.Numerics.SqlSexagesimalAngle;pwrlib
 PowerLib.System.Data.SqlTypes.Text.SqlRegex;pwrlib
+PowerLib.System.Data.SqlTypes.Compression.SqlZipArchive;pwrlib
 PowerLib.System.Data.SqlTypes.SqlRange;pwrlib

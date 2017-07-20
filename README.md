@@ -11,6 +11,11 @@ This solution contains the following projects:
 * **[PowerLib.SqlClr.Deploy](#PowerLib.SqlClr.Deploy)**
 * **[PowerLib.SqlClr.Deploy.Utility](#PowerLib.SqlClr.Deploy.Utility)**
 
+After successfully building the solution, a folder with the configuration name will be located at its root. It will contains the following folders:
+* **PWRLIB** - PowerLib general assemblies,
+* **PWRSQL** - SQLCLR assemblies for deploying on MSSQL Server,
+* **SQLCLRDU** - utility for deploying any SQLCLR assemblies on MSSQL Server.
+
 ---
 ## PowerLib.System
 
@@ -224,15 +229,16 @@ public static int Delete(this DirectoryInfo diStart, string searchPattern, int m
 
 Also, in namespace **PowerLib.System.Linq.Builders** there are classes that allow you to build complex predicative expressions, comparison expressions, access (initializetion, copy, call) expressions to fields, properties, and methods. Very useful for compiling predicative Queryable expressions depending on the current runtime filtering conditions. For example, predicate expression with anonymous type:
 ```csharp
-      DateTime? birthday = new DateTime(1990, 1, 1);
-      var predicate = PredicateBuilder.Matching(() => new { id = default(int), name = default(string), birthday = default(DateTime?) })
-        .Match(t => t.name == "Mike");
-      if (birthday.HasValue)
-        predicate = predicate.And(t => t.birthday.HasValue && t.birthday.Value >= birthday.Value);
-      dc.Persons
-        .Select(t => new { id = t.Id, name = t.Name, birthday = t.Birthday })
-        .Where(predicate.Expression)
-        .ToArray();
+  DateTime? birthday = new DateTime(1990, 1, 1);
+  var predicate = PredicateBuilder
+    .Matching(() => new { id = default(int), name = default(string), birthday = default(DateTime?) })
+    .Match(t => t.name == "Mike");
+  if (birthday.HasValue)
+    predicate = predicate.And(t => t.birthday.HasValue && t.birthday.Value >= birthday.Value);
+  dc.Persons
+    .Select(t => new { id = t.Id, name = t.Name, birthday = t.Birthday })
+    .Where(predicate.Expression)
+    .ToArray();
 ```
 The following example demonstrates how to create complex comparer using ComparerBuilder class:
 ```csharp
@@ -339,21 +345,15 @@ Samples:
 1. Getting an entity person who has a phone number in XML containing three digits `555` before the four end digits. All filtering actions are performed on the SQL server side.
 
 ```csharp
-
-	using (var dc = new MyDataContext())
-	{
-		var ns = @"def=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"
-			+ @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
-			+ @";act=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes";
-
-		var persons = dc.Person
-			.Where(t => dc.regexIsMatch(
-            	dc.xmlEvaluateAsString(t.AdditionalContactInfo,
-					"/def:AdditionalContactInfo/crm:ContactRecord/act:telephoneNumber/act:number/text()", ns),
-				@"555-\d{4}$", RegexOptions.None) == true)
-			.ToArray();
-	}
-
+  using (var dc = new MyDataContext())
+  {
+    var ns = @"def=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"
+           + @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
+           + @";act=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes";
+    var persons = dc.Person
+      .Where(t => dc.regexIsMatch(dc.xmlEvaluateAsString(t.AdditionalContactInfo, "/def:AdditionalContactInfo/crm:ContactRecord/act:telephoneNumber/act:number/text()", ns), @"555-\d{4}$", RegexOptions.None) == true)
+      .ToArray();
+    }
 ```
 Continued...
 
@@ -367,21 +367,15 @@ Samples:
 1. Getting an entity person who has a phone number in XML containing three digits `555` before the four end digits. All filtering actions are performed on the SQL server side.
 
 ```csharp
-
-	using (var dc = new PwrDbContext())
-	{
-		var ns = @"def=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"
-			+ @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
-			+ @";act=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes";
-
-		var persons = dc.Person
-			.Where(t => dc.regexIsMatch(
-            	dc.xmlEvaluateAsString(t.AdditionalContactInfo,
-					"/def:AdditionalContactInfo/crm:ContactRecord/act:telephoneNumber/act:number/text()", ns),
-				@"555-\d{4}$", RegexOptions.None) == true)
-			.ToArray();
-	}
-
+  using (var dc = new PwrDbContext())
+  {
+    var ns = @"def=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"
+           + @";crm=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactRecord"
+           + @";act=http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes";
+    var persons = dc.Person
+      .Where(t => dc.regexIsMatch(dc.xmlEvaluateAsString(t.AdditionalContactInfo,  "/def:AdditionalContactInfo/crm:ContactRecord/act:telephoneNumber/act:number/text()", ns), @"555-\d{4}$", RegexOptions.None) == true)
+      .ToArray();
+  }
 ```
 
 Continued...

@@ -44,6 +44,12 @@
     <StartupObject>
     </StartupObject>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.BatchParserClient">
       <SpecificVersion>False</SpecificVersion>
@@ -83,6 +89,12 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)\SQLCLRDU"
+del /s /q "$(SolutionDir)$(ConfigurationName)\SQLCLRDU"
+copy /y "$(TargetPath)" "$(SolutionDir)$(ConfigurationName)\SQLCLRDU\$(TargetFileName)"
+xcopy "$(TargetDir)*.dll" "$(SolutionDir)$(ConfigurationName)\SQLCLRDU\"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

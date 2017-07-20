@@ -25,7 +25,7 @@ namespace PowerLib.System.Math.Combinatorial
 			if (cardinal < 0)
 				throw new ArgumentOutOfRangeException("cardinal");
 			if (variation < 0 || variation > cardinal)
-				throw new ArgumentOutOfRangeException("variance");
+				throw new ArgumentOutOfRangeException("variation");
 
 			_cardinal = cardinal;
 			_variation = variation;

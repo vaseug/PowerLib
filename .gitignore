@@ -24,3 +24,5 @@
 /PowerLib.EntityFramework/obj
 /PowerLib.EntityFramework/bin
 /packages
+/Debug
+/Release
