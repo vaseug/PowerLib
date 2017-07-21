@@ -84,6 +84,7 @@
     <Compile Include="Collections\SqlCollectionFunctions.cs" />
     <Compile Include="Compression\SqlCompressionFunctions.cs" />
     <Compile Include="Math\SqlCombinatorialFunctions.cs" />
+    <Compile Include="Net\SqlUriFunctions.cs" />
     <Compile Include="SqlRuntime.cs" />
     <Compile Include="SqlConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -110,7 +111,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DateTime\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)\PWRSQL"

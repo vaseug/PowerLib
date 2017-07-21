@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PowerLib.System.Data.SqlTypes")]
-[assembly: AssemblyCopyright("Copyright ©  2016, Evgeniy P. Vashchenko")]
+[assembly: AssemblyCopyright("Copyright © 2016, Evgeniy P. Vashchenko")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

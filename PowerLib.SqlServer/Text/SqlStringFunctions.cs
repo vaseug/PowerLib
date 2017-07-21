@@ -13,6 +13,16 @@ namespace PowerLib.SqlServer.Text
     #region Scalar-valued functions
     #region Manipulation functions
 
+    [SqlFunction(Name = "strAppend", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
+    public static SqlString Append([SqlFacet(MaxSize = -1)] SqlString input, [SqlFacet(MaxSize = -1)] SqlString value)
+    {
+      if (input.IsNull || value.IsNull)
+        return SqlString.Null;
+
+      return string.Concat(input.Value, value.Value);
+    }
+
     [SqlFunction(Name = "strInsert", IsDeterministic = true)]
     [return: SqlFacet(MaxSize = -1)]
     public static SqlString Insert([SqlFacet(MaxSize = -1)] SqlString input, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlString value)

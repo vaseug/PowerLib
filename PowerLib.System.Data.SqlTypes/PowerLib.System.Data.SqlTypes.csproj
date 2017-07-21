@@ -55,6 +55,8 @@
     <Compile Include="Compression\SqlZipArchiveFunctions.cs" />
     <Compile Include="IO\SqlTypesIOExtension.cs" />
     <Compile Include="SqlRange.cs" />
+    <Compile Include="Net\SqlUriFunctions.cs" />
+    <Compile Include="Net\SqlUri.cs" />
     <Compile Include="Text\SqlRegex.cs" />
     <Compile Include="Collections\SqlBigIntegerArray.cs" />
     <Compile Include="Collections\SqlBigIntegerCollection.cs" />
