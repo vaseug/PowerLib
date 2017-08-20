@@ -7,7 +7,7 @@ using PowerLib.System.Linq;
 
 namespace PowerLib.System.IO
 {
-	public static class PwrBinaryReaderExtension
+	public static class BinaryReaderExtension
 	{
     public static bool ThrowDataInfo = false;
 
@@ -65,6 +65,25 @@ namespace PowerLib.System.IO
           default:
             throw new ArgumentOutOfRangeException("sizeEncoding");
         }
+    }
+
+    #endregion
+    #region Read boolean
+
+    public static Boolean ReadBoolean(this BinaryReader reader, TypeCode typeCode)
+    {
+      if (reader == null)
+        throw new ArgumentNullException("reader");
+
+      return reader.BaseStream.ReadBoolean(typeCode);
+    }
+
+    public static Boolean ReadBoolean(this BinaryReader reader, TypeCode typeCode, Endian endian)
+    {
+      if (reader == null)
+        throw new ArgumentNullException("reader");
+
+      return reader.BaseStream.ReadBoolean(typeCode, endian);
     }
 
     #endregion
@@ -235,6 +254,11 @@ namespace PowerLib.System.IO
         throw new ArgumentException("Value is not specified", "terminator");
 
       return encoding.GetString(reader.BaseStream.ReadBytes(encoding.GetBytes(terminator), omitTerm));
+    }
+
+    public static IEnumerable<String> ReadLines(this BinaryReader reader, Encoding encoding, IList<String> terminatorsList, String terminatorStub, int maxCount)
+    {
+      return reader.BaseStream.ReadLines(encoding, terminatorsList, terminatorStub, maxCount);
     }
 
     #endregion

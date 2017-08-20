@@ -205,8 +205,8 @@ namespace PowerLib.System.IO.Streamed
       get
       {
         return base.HeaderOffset +
-          sizeof(byte) + (FixedDataSize.HasValue ? PwrBitConverter.GetSizeEncodingSize(ItemSizing, int.MaxValue) : 0) +
-          sizeof(byte) + (FixedFlagSize.HasValue ? PwrBitConverter.GetSizeEncodingSize(FlagSizing, int.MaxValue) : 0);
+          sizeof(byte) + (FixedDataSize.HasValue ? PwrBitConverter.GetSizeEncodingSize(int.MaxValue, ItemSizing) : 0) +
+          sizeof(byte) + (FixedFlagSize.HasValue ? PwrBitConverter.GetSizeEncodingSize(int.MaxValue, FlagSizing) : 0);
       }
     }
 

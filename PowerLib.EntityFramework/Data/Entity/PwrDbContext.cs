@@ -1,19 +1,21 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Core.Metadata.Edm;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using PowerLib.System.ComponentModel.DataAnnotations;
 using PowerLib.System.Linq;
+using PowerLib.System.IO;
 
 namespace PowerLib.System.Data.Entity
 {
@@ -5059,6 +5061,641 @@ namespace PowerLib.System.Data.Entity
     public IQueryable<RegularIndexedBinaryRow> binArrayEnumerateDim(byte[] array, byte[] ranges)
     {
       return CreateQuery<RegularIndexedBinaryRow>(MethodInfo.GetCurrentMethod(), array, ranges);
+    }
+
+    #endregion
+    #endregion
+    #region Uri functions
+
+    [DbFunctionEx(StoreNamespace, "uriCheckHostName", IsComposable = true)]
+    public UriHostNameType uriCheckHostName(String hostName)
+    {
+      return ExecuteScalarQuery<UriHostNameType>(MethodBase.GetCurrentMethod(), hostName);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriCheckSchemeName", IsComposable = true)]
+    public Boolean uriCheckSchemeName(String schemeName)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), schemeName);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriFromHex", IsComposable = true)]
+    public Int32 uriFromHex(String digit)
+    {
+      return ExecuteScalarQuery<Int32>(MethodBase.GetCurrentMethod(), digit);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriHexEscape", IsComposable = true)]
+    public String uriHexEscape(String str)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), str);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriHexUnescape", IsComposable = true)]
+    public String uriHexUnescape(String pattern, Int32? index, Int32? count)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), pattern, index, count);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsHexDigit", IsComposable = true)]
+    public Boolean uriIsHexDigit(String character)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), character);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsHexEncoding", IsComposable = true)]
+    public Boolean uriIsHexEncoding(String pattern, Int32 index)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), pattern, index);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsWellFormedUriString", IsComposable = true)]
+    public Boolean uriIsWellFormedUriString(String uriString, UriKind uriKind)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), uriString, uriKind);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriEscape", IsComposable = true)]
+    public String uriEscapeUri(String str)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), str);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriEscapeData", IsComposable = true)]
+    public String uriEscapeData(String str)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), str);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriUnescapeData", IsComposable = true)]
+    public String uriUnescapeData(String str)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), str);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetAbsolutePath", IsComposable = true)]
+    public String uriGetAbsolutePath(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetAbsoluteUri", IsComposable = true)]
+    public String uriGetAbsoluteUri(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetAuthority", IsComposable = true)]
+    public String uriGetAuthority(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetDnsSafeHost", IsComposable = true)]
+    public String uriGetDnsSafeHost(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetFragment", IsComposable = true)]
+    public String uriGetFragment(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetHost", IsComposable = true)]
+    public String uriGetHost(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetHostNameType", IsComposable = true)]
+    public UriHostNameType uriGetHostNameType(String uriString)
+    {
+      return ExecuteScalarQuery<UriHostNameType>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsAbsoluteUri", IsComposable = true)]
+    public Boolean uriIsAbsoluteUri(String uriString)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsDefaultPort", IsComposable = true)]
+    public Boolean uriIsDefaultPort(String uriString)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsFile", IsComposable = true)]
+    public Boolean uriIsFile(String uriString)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsLoopback", IsComposable = true)]
+    public Boolean uriIsLoopback(String uriString)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriIsUnc", IsComposable = true)]
+    public Boolean uriIsUnc(String uriString)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetLocalPath", IsComposable = true)]
+    public String uriGetLocalPath(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetOriginalString", IsComposable = true)]
+    public String uriGetOriginalString(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetPathAndQuery", IsComposable = true)]
+    public String uriGetPathAndQuery(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetPort", IsComposable = true)]
+    public Int32 uriGetPort(String uriString)
+    {
+      return ExecuteScalarQuery<Int32>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetQuery", IsComposable = true)]
+    public String uriGetQuery(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetScheme", IsComposable = true)]
+    public String uriGetScheme(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriUserEscaped", IsComposable = true)]
+    public Boolean uriUserEscaped(String uriString)
+    {
+      return ExecuteScalarQuery<Boolean>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriGetUserInfo", IsComposable = true)]
+    public String uriGetUserInfo(String uriString)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    [DbFunctionEx(StoreNamespace, "uriBuildString", IsComposable = true)]
+    public String uriBuild(String scheme, String userName, String password, String host, Int32? port, String path, String query, String fragment)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), scheme, userName, password, host, port, path, query, fragment);
+    }
+
+    [DbFunctionEx(ContextNamespace, "uriGetSegments", IsComposable = true)]
+    public IQueryable<StringRow> uriGetSegments(String uriString)
+    {
+      return CreateQuery<StringRow>(MethodBase.GetCurrentMethod(), uriString);
+    }
+
+    #endregion
+    #region File functions
+    #region Xml file functions
+
+    [DbFunctionEx(StoreNamespace, "fileReadAllXml", IsComposable = true)]
+    public String fileReadAllXml(String path)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteAllXml", IsComposable = true)]
+    public Int64? fileWriteAllXml(String path, String xml)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, xml);
+    }
+
+    #endregion
+    #region Binary file functions
+
+    [DbFunctionEx(StoreNamespace, "fileReadAllBinary", IsComposable = true)]
+    public byte[] fileReadAllBinary(String path)
+    {
+      return ExecuteScalarQuery<byte[]>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReadBinary", IsComposable = true)]
+    public byte[] fileReadBinary(String path, Int64? offset, Int64? count)
+    {
+      return ExecuteScalarQuery<byte[]>(MethodBase.GetCurrentMethod(), path, offset, count);
+    }
+
+    [DbFunctionEx(ContextNamespace, "fileReadSizedBlocks", IsComposable = true)]
+    public IQueryable<FileBlockRow> fileReadSizedBlocks(String path, Int64? offset, SizeEncoding sizing, Int32? maxCount)
+    {
+      return CreateQuery<FileBlockRow>(MethodBase.GetCurrentMethod(), path, offset, sizing, maxCount);
+    }
+
+    [DbFunctionEx(ContextNamespace, "fileReadTerminatedBlocks", IsComposable = true)]
+    public IQueryable<FileBlockRow> fileReadTerminatedBlocks(String path, Int64? offset, byte[] searchTerminator, Boolean omitTerminator, Int32? maxCount)
+    {
+      return CreateQuery<FileBlockRow>(MethodBase.GetCurrentMethod(), path, offset, searchTerminator, omitTerminator, maxCount);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteAllBinary", IsComposable = true)]
+    public Int64? fileWriteAllBinary(String path, byte[] bytes)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, bytes);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteBinary", IsComposable = true)]
+    public Int64? fileWriteBinary(String path, byte[] bytes, Int64? offset, Boolean insert)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, bytes, offset, insert);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteSizedBlock", IsComposable = true)]
+    public Int64? fileWriteSizedBlock(String path, byte[] bytes, SizeEncoding sizing, Int64? offset, Boolean insert)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, bytes, sizing, offset, insert);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteTerminatedBlock", IsComposable = true)]
+    public Int64? fileWriteTerminatedBlock(String path, byte[] bytes, byte[] terminator, Int64? offset, Boolean insert)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, bytes, terminator, offset, insert);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileRemoveBlock", IsComposable = true)]
+    public Boolean? fileRemoveBlock(String path, Int64 offset, Int64? length)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, offset, length);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSearchBinary", IsComposable = true)]
+    public Int64? fileSearchBinary(String path, Int64? offset, byte[] pattern)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, offset, pattern);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSearchBinaryLast", IsComposable = true)]
+    public Int64? fileSearchBinaryLast(String path, Int64? offset, byte[] pattern)
+    {
+      return ExecuteScalarQuery<Int64>(MethodBase.GetCurrentMethod(), path, offset, pattern);
+    }
+
+    #endregion
+    #region Text file functions
+
+    [DbFunctionEx(StoreNamespace, "fileDetectCodePage", IsComposable = true)]
+    public Int32? fileDetectCodePage(String path)
+    {
+      return ExecuteScalarQuery<Int32?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReadAllText", IsComposable = true)]
+    public String fileReadAllText(String path, Boolean detectEncoding)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path, detectEncoding);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReadAllTextByCpId", IsComposable = true)]
+    public String fileReadAllTextByCpId(String path, Boolean detectEncoding, Int32? cpId)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path, detectEncoding, cpId);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReadAllTextByCpName", IsComposable = true)]
+    public String fileReadAllTextByCpName(String path, Boolean detectEncoding, String cpName)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path, detectEncoding, cpName);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReadText", IsComposable = true)]
+    public String fileReadText(String path, Int64? offset, Int64? count, Boolean detectEncoding)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path, offset, count, detectEncoding);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReadTextByCpId", IsComposable = true)]
+    public String fileReadTextByCpId(String path, Int64? offset, Int64? count, Boolean detectEncoding, Int32? cpId)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path, offset, count, detectEncoding, cpId);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReadTextByCpName", IsComposable = true)]
+    public String fileReadTextByCpName(String path, Int64? offset, Int64? count, Boolean detectEncoding, String cpName)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path, offset, count, detectEncoding, cpName);
+    }
+
+    [DbFunctionEx(ContextNamespace, "fileReadLines", IsComposable = true)]
+    public IQueryable<FileLineRow> fileReadLines(String path, Int64? offset, String searchTerminator, String delimiter, String newTerminator, Int32? maxCount, Boolean detectEncoding)
+    {
+      return CreateQuery<FileLineRow>(MethodBase.GetCurrentMethod(), path, offset, searchTerminator, delimiter, newTerminator, maxCount, detectEncoding);
+    }
+
+    [DbFunctionEx(ContextNamespace, "fileReadLinesByCpId", IsComposable = true)]
+    public IQueryable<FileLineRow> fileReadLinesByCpId(String path, Int64? offset, String searchTerminator, String delimiter, String newTerminator, Int32? maxCount, Boolean detectEncoding, Int32? cpId)
+    {
+      return CreateQuery<FileLineRow>(MethodBase.GetCurrentMethod(), path, offset, searchTerminator, delimiter, newTerminator, maxCount, detectEncoding, cpId);
+    }
+
+    [DbFunctionEx(ContextNamespace, "fileReadLinesByCpName", IsComposable = true)]
+    public IQueryable<FileLineRow> fileReadLinesByCpName(String path, Int64? offset, String searchTerminator, String delimiter, String newTerminator, Int32? maxCount, Boolean detectEncoding, String cpName)
+    {
+      return CreateQuery<FileLineRow>(MethodBase.GetCurrentMethod(), path, offset, searchTerminator, delimiter, newTerminator, maxCount, detectEncoding, cpName);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteAllText", IsComposable = true)]
+    public Int64? fileWriteAllText(String path, String chars, Boolean writeEncoding)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, chars, writeEncoding);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteAllTextByCpId", IsComposable = true)]
+    public Int64? fileWriteAllTextByCpId(String path, String chars, Boolean writeEncoding, Int32? cpId)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, chars, writeEncoding, cpId);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteAllTextByCpName", IsComposable = true)]
+    public Int64? fileWriteAllTextByCpName(String path, String chars, Boolean writeEncoding, String cpName)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, chars, writeEncoding, cpName);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteText", IsComposable = true)]
+    public Int64? fileWriteText(String path, String chars, String terminator, Int64? offset, Boolean insert, Byte useEncoding)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, chars, terminator, offset, insert, useEncoding);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteTextByCpId", IsComposable = true)]
+    public Int64? fileWriteTextByCpId(String path, String chars, String terminator, Int64? offset, Boolean insert, Byte useEncoding, Int32? cpId)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, chars, terminator, offset, insert, useEncoding, cpId);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileWriteTextByCpName", IsComposable = true)]
+    public Int64? fileWriteTextByCpName(String path, String chars, String terminator, Int64? offset, Boolean insert, Byte useEncoding, String cpName)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, chars, terminator, offset, insert, useEncoding, cpName);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSearchText", IsComposable = true)]
+    public Int64? fileSearchText(String path, Int64? offset, Int32? skip, String pattern, Boolean detectEncoding)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, offset, skip, pattern, detectEncoding);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSearchTextByCpId", IsComposable = true)]
+    public Int64? fileSearchTextByCpId(String path, Int64? offset, Int32? skip, String pattern, Boolean detectEncoding, Int32? cpId)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, offset, skip, pattern, detectEncoding, cpId);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSearchTextByCpName", IsComposable = true)]
+    public Int64? fileSearchTextByCpName(String path, Int64? offset, Int32? skip, String pattern, Boolean detectEncoding, String cpName)
+    {
+      return ExecuteScalarQuery<Int64?>(MethodBase.GetCurrentMethod(), path, offset, skip, pattern, detectEncoding, cpName);
+    }
+
+    #endregion
+    #region Directory manipulation functions
+
+    [DbFunctionEx(StoreNamespace, "dirCreate", IsComposable = true)]
+    public Boolean? dirCreate(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "dirDelete", IsComposable = true)]
+    public Boolean? dirDelete(String path, Boolean? recursive)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, recursive);
+    }
+
+    [DbFunctionEx(StoreNamespace, "dirMove", IsComposable = true)]
+    public Boolean? dirMove(String sourcePath, String targetPath)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), sourcePath, targetPath);
+    }
+
+    [DbFunctionEx(StoreNamespace, "dirExists", IsComposable = true)]
+    public Boolean? dirExists(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(ContextNamespace, "dirEnumerate", IsComposable = true)]
+    public IQueryable<FileSystemRow> dirEnumerate(String path, String searchPattern, Int32? maxDepth, FileSystemTraversalOptions? traversalOptions)
+    {
+      return CreateQuery<FileSystemRow>(MethodBase.GetCurrentMethod(), path, searchPattern, maxDepth, traversalOptions);
+    }
+
+    #endregion
+    #region File manipulation functions
+
+    [DbFunctionEx(StoreNamespace, "fileDelete", IsComposable = true)]
+    public Boolean? fileDelete(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileCopy", IsComposable = true)]
+    public Boolean? fileCopy(String sourcePath, String targetPath, Boolean overwrite)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), sourcePath, targetPath, overwrite);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileMove", IsComposable = true)]
+    public Boolean? fileMove(String sourcePath, String targetPath)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), sourcePath, targetPath);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileReplace", IsComposable = true)]
+    public Boolean? fileReplace(String sourcePath, String targetPath, String targetBackupFilename)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), sourcePath, targetPath, targetBackupFilename);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileEncrypt", IsComposable = true)]
+    public Boolean? fileEncrypt(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileDecrypt", IsComposable = true)]
+    public Boolean? fileDecrypt(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileExists", IsComposable = true)]
+    public Boolean? fileExists(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileTruncate", IsComposable = true)]
+    public Boolean? fileTruncate(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileGetAttributes", IsComposable = true)]
+    public FileAttributes? fileGetAttributes(String path)
+    {
+      return ExecuteScalarQuery<FileAttributes?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileGetCreationTime", IsComposable = true)]
+    public DateTime? fileGetCreationTime(String path)
+    {
+      return ExecuteScalarQuery<DateTime?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileGetCreationTimeUtc", IsComposable = true)]
+    public DateTime? fileGetCreationTimeUtc(String path)
+    {
+      return ExecuteScalarQuery<DateTime?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileGetLastAccessTime", IsComposable = true)]
+    public DateTime? fileGetLastAccessTime(String path)
+    {
+      return ExecuteScalarQuery<DateTime?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileGetLastAccessTimeUtc", IsComposable = true)]
+    public DateTime? fileGetLastAccessTimeUtc(String path)
+    {
+      return ExecuteScalarQuery<DateTime?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileGetLastWriteTime", IsComposable = true)]
+    public DateTime? fileGetLastWriteTime(String path)
+    {
+      return ExecuteScalarQuery<DateTime?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileGetLastWriteTimeUtc", IsComposable = true)]
+    public DateTime? fileGetLastWriteTimeUtc(String path)
+    {
+      return ExecuteScalarQuery<DateTime?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSetAttributes", IsComposable = true)]
+    public Boolean? fileSetAttributes(String path, FileAttributes attributes)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, attributes);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSetCreationTime", IsComposable = true)]
+    public Boolean? fileSetCreationTime(String path, DateTime creationTime)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, creationTime);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSetCreationTimeUtc", IsComposable = true)]
+    public Boolean? fileSetCreationTimeUtc(String path, DateTime creationTimeUtc)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, creationTimeUtc);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSetLastAccessTime", IsComposable = true)]
+    public Boolean? fileSetLastAccessTime(String path, DateTime lastAccessTime)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, lastAccessTime);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSetLastAccessTimeUtc", IsComposable = true)]
+    public Boolean? fileSetLastAccessTimeUtc(String path, DateTime lastAccessTimeUtc)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, lastAccessTimeUtc);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSetLastWriteTime", IsComposable = true)]
+    public Boolean? fileSetLastWriteTime(String path, DateTime lastWriteTime)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, lastWriteTime);
+    }
+
+    [DbFunctionEx(StoreNamespace, "fileSetLastWriteTimeUtc", IsComposable = true)]
+    public Boolean? fileSetLastWriteTimeUtc(String path, DateTime lastWriteTimeUtc)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path, lastWriteTimeUtc);
+    }
+
+    #endregion
+    #region Path manipulation functions
+
+    [DbFunctionEx(StoreNamespace, "pathChangeExtension", IsComposable = true)]
+    public String pathChangeExtension(String path, String extension)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path, extension);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathGetDirectoryName", IsComposable = true)]
+    public String pathGetDirectoryName(String path)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathGetExtension", IsComposable = true)]
+    public String pathGetExtension(String path)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathGetFileName", IsComposable = true)]
+    public String pathGetFileName(String path)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathGetFileNameWithoutExtension", IsComposable = true)]
+    public String pathGetFileNameWithoutExtension(String path)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathGetRoot", IsComposable = true)]
+    public String pathGetPathRoot(String path)
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathGetRandomFileName", IsComposable = true)]
+    public String pathGetRandomFileName()
+    {
+      return ExecuteScalarQuery<String>(MethodBase.GetCurrentMethod());
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathHasExtension", IsComposable = true)]
+    public Boolean? pathHasExtension(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathIsRooted", IsComposable = true)]
+    public Boolean? pathIsPathRooted(String path)
+    {
+      return ExecuteScalarQuery<Boolean?>(MethodBase.GetCurrentMethod(), path);
+    }
+
+    [DbFunctionEx(StoreNamespace, "pathCombine", IsComposable = true)]
+    public String pathCombine(String path)
+    {
+      return ExecuteScalarQuery<String>(MethodInfo.GetCurrentMethod(), path);
     }
 
     #endregion

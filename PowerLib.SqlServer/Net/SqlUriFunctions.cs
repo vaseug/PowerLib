@@ -46,7 +46,7 @@ namespace PowerLib.SqlServer.Net
     [return: SqlFacet(MaxSize = -1)]
     public static SqlString HexUnescape([SqlFacet(MaxSize = -1)]SqlString pattern, SqlInt32 index, SqlInt32 count)
     {
-      if (pattern.IsNull || index.IsNull)
+      if (pattern.IsNull)
         return SqlString.Null;
       if (index.Value < 0)
         throw new ArgumentOutOfRangeException();

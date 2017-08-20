@@ -32,7 +32,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "bCollParse", IsDeterministic = true)]
-    public static SqlBytes BooleanCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BooleanCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing)
     {
       if (str.IsNull || countSizing.IsNull)
@@ -46,6 +46,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "bCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BooleanCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -346,7 +347,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "tiCollParse", IsDeterministic = true)]
-    public static SqlBytes ByteCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes ByteCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -361,6 +362,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "tiCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString ByteCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -661,7 +663,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "siCollParse", IsDeterministic = true)]
-    public static SqlBytes Int16CollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int16CollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -676,6 +678,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "siCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int16CollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -976,7 +979,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "iCollParse", IsDeterministic = true)]
-    public static SqlBytes Int32CollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int32CollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -991,6 +994,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "iCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int32CollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -1291,7 +1295,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "biCollParse", IsDeterministic = true)]
-    public static SqlBytes Int64CollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int64CollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -1306,6 +1310,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "biCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int64CollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -1606,7 +1611,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "sfCollParse", IsDeterministic = true)]
-    public static SqlBytes SingleCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes SingleCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -1621,6 +1626,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "sfCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString SingleCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -1921,7 +1927,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dfCollParse", IsDeterministic = true)]
-    public static SqlBytes DoubleCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes DoubleCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -1936,6 +1942,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dfCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString DoubleCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -2236,7 +2243,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dtCollParse", IsDeterministic = true)]
-    public static SqlBytes DateTimeCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes DateTimeCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -2251,6 +2258,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dtCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString DateTimeCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -2551,7 +2559,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "uidCollParse", IsDeterministic = true)]
-    public static SqlBytes GuidCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes GuidCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -2566,6 +2574,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "uidCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString GuidCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -2861,7 +2870,7 @@ namespace PowerLib.SqlServer.Collections
         return SqlBytes.Null;
 
       var coll = new SqlBytes(new MemoryStream());
-      using (new StringStreamedCollection(coll.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, Encoding.Unicode, null, true, false)) ;
+      using (new StringStreamedCollection(coll.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, SqlRuntime.TextEncoding, null, true, false)) ;
       return coll;
     }
 
@@ -2875,7 +2884,7 @@ namespace PowerLib.SqlServer.Collections
         return SqlBytes.Null;
 
       var coll = new SqlBytes(new MemoryStream());
-      using (new StringStreamedCollection(coll.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, cpId.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpId.Value), null, true, false)) ;
+      using (new StringStreamedCollection(coll.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, cpId.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpId.Value), null, true, false)) ;
       return coll;
     }
 
@@ -2889,12 +2898,12 @@ namespace PowerLib.SqlServer.Collections
         return SqlBytes.Null;
 
       var coll = new SqlBytes(new MemoryStream());
-      using (new StringStreamedCollection(coll.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, cpName.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpName.Value), null, true, false)) ;
+      using (new StringStreamedCollection(coll.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, cpName.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpName.Value), null, true, false)) ;
       return coll;
     }
 
     [SqlFunction(Name = "strCollParse", IsDeterministic = true)]
-    public static SqlBytes StringCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -2903,13 +2912,13 @@ namespace PowerLib.SqlServer.Collections
 
       var coll = SqlFormatting.ParseCollection<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       var result = new SqlBytes(new MemoryStream());
-      using (var sc = new StringStreamedCollection(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, Encoding.Unicode, null, true, false))
+      using (var sc = new StringStreamedCollection(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, SqlRuntime.TextEncoding, null, true, false))
         sc.AddRange(coll);
       return result;
     }
 
     [SqlFunction(Name = "strCollParseByCpId", IsDeterministic = true)]
-    public static SqlBytes StringCollParseByCpId([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringCollParseByCpId([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing,
       [DefaultValue("NULL")]SqlInt32 cpId)
@@ -2917,7 +2926,7 @@ namespace PowerLib.SqlServer.Collections
       if (str.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpId.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpId.Value);
+      Encoding encoding = cpId.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpId.Value);
       var coll = SqlFormatting.ParseCollection<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       var result = new SqlBytes(new MemoryStream());
       using (var sc = new StringStreamedCollection(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, true, false))
@@ -2926,7 +2935,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollParseByCpName", IsDeterministic = true)]
-    public static SqlBytes StringCollParseByCpName([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringCollParseByCpName([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing,
       [SqlFacet(MaxSize = 128)][DefaultValue("NULL")]SqlString cpName)
@@ -2934,7 +2943,7 @@ namespace PowerLib.SqlServer.Collections
       if (str.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpName.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpName.Value);
+      Encoding encoding = cpName.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpName.Value);
       var coll = SqlFormatting.ParseCollection<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       var result = new SqlBytes(new MemoryStream());
       using (var sc = new StringStreamedCollection(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, true, false))
@@ -2943,6 +2952,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString StringCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -2969,7 +2979,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollIndexOf", IsDeterministic = true)]
-    public static SqlInt32 StringCollIndexOf(SqlBytes coll, SqlString value)
+    public static SqlInt32 StringCollIndexOf(SqlBytes coll, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -2985,6 +2995,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollGet", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString StringCollGet(SqlBytes coll, SqlInt32 index)
     {
       if (coll == null)
@@ -3001,7 +3012,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollSet", IsDeterministic = true)]
-    public static SqlBytes StringCollSet(SqlBytes coll, SqlInt32 index, SqlString value)
+    public static SqlBytes StringCollSet(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3015,7 +3026,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollInsert", IsDeterministic = true)]
-    public static SqlBytes StringCollInsert(SqlBytes coll, SqlInt32 index, SqlString value)
+    public static SqlBytes StringCollInsert(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3032,7 +3043,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollRemove", IsDeterministic = true)]
-    public static SqlBytes StringCollRemove(SqlBytes coll, SqlString value)
+    public static SqlBytes StringCollRemove(SqlBytes coll, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3114,7 +3125,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollInsertRepeat", IsDeterministic = true)]
-    public static SqlBytes StringCollInsertRepeat(SqlBytes coll, SqlInt32 index, SqlString value, SqlInt32 count)
+    public static SqlBytes StringCollInsertRepeat(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlString value, SqlInt32 count)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3169,7 +3180,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strCollSetRepeat", IsDeterministic = true)]
-    public static SqlBytes StringCollSetRepeat(SqlBytes coll, SqlInt32 index, SqlString value, SqlInt32 count)
+    public static SqlBytes StringCollSetRepeat(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlString value, SqlInt32 count)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3219,7 +3230,7 @@ namespace PowerLib.SqlServer.Collections
       }
     }
 
-    private static void StringCollFillRow(object obj, out SqlInt32 Index, out SqlString Value)
+    private static void StringCollFillRow(object obj, out SqlInt32 Index, [SqlFacet(MaxSize = -1)] out SqlString Value)
     {
       Tuple<int, String> tuple = (Tuple<int, String>)obj;
       Index = tuple.Item1;
@@ -3243,7 +3254,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollParse", IsDeterministic = true)]
-    public static SqlBytes BinaryCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BinaryCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -3258,6 +3269,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BinaryCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -3284,7 +3296,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollIndexOf", IsDeterministic = true)]
-    public static SqlInt32 BinaryCollIndexOf(SqlBytes coll, SqlBinary value)
+    public static SqlInt32 BinaryCollIndexOf(SqlBytes coll, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3300,6 +3312,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollGet", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlBinary BinaryCollGet(SqlBytes coll, SqlInt32 index)
     {
       if (coll == null)
@@ -3316,7 +3329,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollSet", IsDeterministic = true)]
-    public static SqlBytes BinaryCollSet(SqlBytes coll, SqlInt32 index, SqlBinary value)
+    public static SqlBytes BinaryCollSet(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3330,7 +3343,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollInsert", IsDeterministic = true)]
-    public static SqlBytes BinaryCollInsert(SqlBytes coll, SqlInt32 index, SqlBinary value)
+    public static SqlBytes BinaryCollInsert(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3347,7 +3360,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollRemove", IsDeterministic = true)]
-    public static SqlBytes BinaryCollRemove(SqlBytes coll, SqlBinary value)
+    public static SqlBytes BinaryCollRemove(SqlBytes coll, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3429,7 +3442,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollInsertRepeat", IsDeterministic = true)]
-    public static SqlBytes BinaryCollInsertRepeat(SqlBytes coll, SqlInt32 index, SqlBinary value, SqlInt32 count)
+    public static SqlBytes BinaryCollInsertRepeat(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlBinary value, SqlInt32 count)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3484,7 +3497,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binCollSetRepeat", IsDeterministic = true)]
-    public static SqlBytes BinaryCollSetRepeat(SqlBytes coll, SqlInt32 index, SqlBinary value, SqlInt32 count)
+    public static SqlBytes BinaryCollSetRepeat(SqlBytes coll, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlBinary value, SqlInt32 count)
     {
       if (coll == null)
         throw new ArgumentNullException("coll");
@@ -3534,7 +3547,7 @@ namespace PowerLib.SqlServer.Collections
       }
     }
 
-    private static void BinaryCollFillRow(object obj, out SqlInt32 Index, out SqlBinary Value)
+    private static void BinaryCollFillRow(object obj, out SqlInt32 Index, [SqlFacet(MaxSize = -1)] out SqlBinary Value)
     {
       Tuple<int, Byte[]> tuple = (Tuple<int, Byte[]>)obj;
       Index = tuple.Item1;
@@ -3558,7 +3571,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "rngCollParse", IsDeterministic = true)]
-    public static SqlBytes RangeCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes RangeCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -3573,6 +3586,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "rngCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString RangeCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -3857,6 +3871,322 @@ namespace PowerLib.SqlServer.Collections
     }
 
     #endregion
+    #region SqlLongRange collection methods
+
+    [SqlFunction(Name = "brngCollCreate", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollCreate(
+      [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
+      [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
+    {
+      if (countSizing.IsNull || compact.IsNull)
+        return SqlBytes.Null;
+
+      var coll = new SqlBytes(new MemoryStream());
+      using (new NulLongRangeStreamedCollection(coll.Stream, (SizeEncoding)countSizing.Value, compact.Value, true, false)) ;
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollParse", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
+      [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
+      [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
+    {
+      if (str.IsNull || countSizing.IsNull || compact.IsNull)
+        return SqlBytes.Null;
+
+      var coll = SqlFormatting.ParseCollection<LongRange?>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlLongRange.Parse(t).Value : default(LongRange?));
+      var result = new SqlBytes(new MemoryStream());
+      using (var sc = new NulLongRangeStreamedCollection(result.Stream, (SizeEncoding)countSizing.Value, compact.Value, true, false))
+        sc.AddRange(coll);
+      return result;
+    }
+
+    [SqlFunction(Name = "brngCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
+    public static SqlString LongRangeCollFormat(SqlBytes coll)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return SqlFormatting.NullText;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+        return SqlFormatting.Format(sc, t => (t.HasValue ? new SqlLongRange(t.Value) : SqlLongRange.Null).ToString());
+    }
+
+    [SqlFunction(Name = "brngCollCount", IsDeterministic = true)]
+    public static SqlInt32 LongRangeCollCount(SqlBytes coll)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return SqlInt32.Null;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+        return sc.Count;
+    }
+
+    [SqlFunction(Name = "brngCollIndexOf", IsDeterministic = true)]
+    public static SqlInt32 LongRangeCollIndexOf(SqlBytes coll, SqlLongRange value)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return SqlInt32.Null;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        var index = sc.IndexOf(value.IsNull ? default(LongRange?) : value.Value);
+        return index < 0 ? SqlInt32.Null : index;
+      }
+    }
+
+    [SqlFunction(Name = "brngCollGet", IsDeterministic = true)]
+    public static SqlLongRange LongRangeCollGet(SqlBytes coll, SqlInt32 index)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull || index.IsNull)
+        return SqlLongRange.Null;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        var v = sc[index.Value];
+        return v.HasValue ? v.Value : SqlLongRange.Null;
+      }
+    }
+
+    [SqlFunction(Name = "brngCollSet", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollSet(SqlBytes coll, SqlInt32 index, SqlLongRange value)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull || index.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+        sc[index.Value] = !value.IsNull ? value.Value : default(LongRange?);
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollInsert", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollInsert(SqlBytes coll, SqlInt32 index, SqlLongRange value)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count : index.Value;
+        sc.Insert(indexValue, !value.IsNull ? value.Value : default(LongRange?));
+      }
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollRemove", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollRemove(SqlBytes coll, SqlLongRange value)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+        sc.Remove(!value.IsNull ? value.Value : default(LongRange?));
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollRemoveAt", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollRemoveAt(SqlBytes coll, SqlInt32 index)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull || index.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+        sc.RemoveAt(index.Value);
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollClear", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollClear(SqlBytes coll)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+        sc.Clear();
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollGetRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollGetRange(SqlBytes coll, SqlInt32 index, SqlInt32 count)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return SqlBytes.Null;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count - (count.IsNull ? sc.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? sc.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        var result = new SqlBytes(new MemoryStream());
+        using (var rc = new NulLongRangeStreamedCollection(result.Stream, sc.CountSizing, sc.Compact, true, false))
+          rc.AddRange(sc.EnumerateRange(indexValue, countValue));
+        return result;
+      }
+    }
+
+    [SqlFunction(Name = "brngCollInsertRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollInsertRange(SqlBytes coll, SqlInt32 index, SqlBytes range)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+      if (range == null)
+        throw new ArgumentNullException("range");
+
+      if (coll.IsNull || range.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      using (var rc = new NulLongRangeStreamedCollection(range.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count : index.Value;
+        sc.InsertRange(indexValue, rc);
+      }
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollInsertRepeat", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollInsertRepeat(SqlBytes coll, SqlInt32 index, SqlLongRange value, SqlInt32 count)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull || count.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count : index.Value;
+        sc.InsertRepeat(indexValue, value.IsNull ? default(LongRange?) : value.Value, count.Value);
+      }
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollRemoveRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollRemoveRange(SqlBytes coll, SqlInt32 index, SqlInt32 count)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count - (count.IsNull ? sc.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? sc.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        sc.RemoveRange(indexValue, countValue);
+      }
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollSetRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollSetRange(SqlBytes coll, SqlInt32 index, SqlBytes range)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+      if (range == null)
+        throw new ArgumentNullException("range");
+
+      if (coll.IsNull || range.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      using (var rc = new NulLongRangeStreamedCollection(range.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count : index.Value;
+        sc.SetRange(indexValue, rc);
+      }
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollSetRepeat", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollSetRepeat(SqlBytes coll, SqlInt32 index, SqlLongRange value, SqlInt32 count)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return coll;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count - (count.IsNull ? sc.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? sc.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        sc.SetRepeat(indexValue, value.IsNull ? default(LongRange?) : value.Value, countValue);
+      }
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngCollToArray", IsDeterministic = true)]
+    public static SqlBytes LongRangeCollToArray(SqlBytes coll)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        return SqlBytes.Null;
+
+      var array = new SqlBytes(new MemoryStream());
+      using (var sc = new NulLongRangeStreamedCollection(array.Stream, true, false))
+      using (new NulLongRangeStreamedCollection(coll.Stream, sc.CountSizing, sc.Compact, sc, true, false)) ;
+      return array;
+    }
+
+    [SqlFunction(Name = "brngCollEnumerate", IsDeterministic = true, FillRowMethodName = "LongRangeCollFillRow")]
+    public static IEnumerable LongRangeCollEnumerate(SqlBytes coll, SqlInt32 index, SqlInt32 count)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (coll.IsNull)
+        yield break;
+
+      using (var sc = new NulLongRangeStreamedCollection(coll.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sc.Count - (count.IsNull ? sc.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? sc.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        foreach (var item in sc.EnumerateRange(indexValue, countValue))
+          yield return Tuple.Create(indexValue++, item);
+      }
+    }
+
+    private static void LongRangeCollFillRow(object obj, out SqlInt32 Index, out SqlLongRange Value)
+    {
+      Tuple<int, LongRange?> tuple = (Tuple<int, LongRange?>)obj;
+      Index = tuple.Item1;
+      Value = tuple.Item2.HasValue ? tuple.Item2.Value : SqlLongRange.Null;
+    }
+
+    #endregion
     #region SqlBigInteger collection methods
 
     [SqlFunction(Name = "hiCollCreate", IsDeterministic = true)]
@@ -3873,7 +4203,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "hiCollParse", IsDeterministic = true)]
-    public static SqlBytes BigIntegerCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BigIntegerCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -3888,6 +4218,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "hiCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BigIntegerCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -4188,7 +4519,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "cxCollParse", IsDeterministic = true)]
-    public static SqlBytes ComplexCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes ComplexCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -4203,6 +4534,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "cxCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString ComplexCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -4503,7 +4835,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "haCollParse", IsDeterministic = true)]
-    public static SqlBytes HourAngleCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes HourAngleCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -4518,6 +4850,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "haCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString HourAngleCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -4818,7 +5151,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "gaCollParse", IsDeterministic = true)]
-    public static SqlBytes GradAngleCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes GradAngleCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -4833,6 +5166,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "gaCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString GradAngleCollFormat(SqlBytes coll)
     {
       if (coll == null)
@@ -5133,7 +5467,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "saCollParse", IsDeterministic = true)]
-    public static SqlBytes SexagesimalAngleCollParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes SexagesimalAngleCollParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -5148,6 +5482,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "saCollFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString SexagesimalAngleCollFormat(SqlBytes coll)
     {
       if (coll == null)

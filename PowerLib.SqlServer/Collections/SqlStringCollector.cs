@@ -10,6 +10,7 @@ using PowerLib.System.IO.Streamed.Typed;
 
 namespace PowerLib.SqlServer.Collections
 {
+  [Serializable]
   [SqlUserDefinedAggregate(Format.UserDefined, Name = "strCollect", MaxByteSize = -1)]
   public sealed class SqlStringCollector : IBinarySerialize
   {
@@ -42,7 +43,7 @@ namespace PowerLib.SqlServer.Collections
       if (_list == null)
         return SqlBytes.Null;
       var result = new SqlBytes(new MemoryStream());
-      using (new StringStreamedArray(result.Stream, SizeEncoding.B4, SizeEncoding.B4, Encoding.Unicode, null, _list, true, false)) ;
+      using (new StringStreamedArray(result.Stream, SizeEncoding.B4, SizeEncoding.B4, SqlRuntime.TextEncoding, null, _list, true, false)) ;
       return result;
     }
 
@@ -59,7 +60,7 @@ namespace PowerLib.SqlServer.Collections
     {
       if (_list != null)
         using (var ms = new MemoryStream())
-        using (var sa = new StringStreamedArray(ms, SizeEncoding.B4, SizeEncoding.B4, Encoding.Unicode, null, _list, true, false))
+        using (var sa = new StringStreamedArray(ms, SizeEncoding.B4, SizeEncoding.B4, SqlRuntime.TextEncoding, null, _list, true, false))
           wr.Write(ms.GetBuffer(), 0, (int)ms.Length);
     }
 

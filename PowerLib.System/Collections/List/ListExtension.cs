@@ -369,7 +369,7 @@ namespace PowerLib.System.Collections
       return true;
     }
 
-    public static T Take<T>(this IList<T> list, int index)
+    public static T Get<T>(this IList<T> list, int index)
     {
       if (list == null)
         throw new ArgumentNullException("list");
@@ -387,7 +387,7 @@ namespace PowerLib.System.Collections
 
     public static T Pop<T>(this IList<T> list, bool direction)
     {
-      return list.Take<T>(list != null && list.Count > 0 && direction ? list.Count - 1 : 0);
+      return list.Get<T>(list != null && list.Count > 0 && direction ? list.Count - 1 : 0);
     }
 
     public static T PopFirst<T>(this IList<T> list)
@@ -646,12 +646,12 @@ namespace PowerLib.System.Collections
 
     public static bool Match<T>(this IList<T> list, Func<T, bool> match, bool all)
 		{
-      return Match(list, 0, list != null ? list.Count : 0, match, all);
+      return list.Match(0, list != null ? list.Count : 0, match, all);
     }
 
     public static bool Match<T>(this IList<T> list, int index, Func<T, bool> match, bool all)
 		{
-      return Match(list, index, list != null ? list.Count - index : 0, match, all);
+      return list.Match(index, list != null ? list.Count - index : 0, match, all);
     }
 
     public static bool Match<T>(this IList<T> list, int index, int count, Func<T, bool> match, bool all)
@@ -673,12 +673,12 @@ namespace PowerLib.System.Collections
 
     public static int FindIndex<T>(this IList<T> list, Func<T, bool> match)
 		{
-      return FindIndex(list, 0, list != null ? list.Count : 0, match);
+      return list.FindIndex(0, list != null ? list.Count : 0, match);
     }
 
 		public static int FindIndex<T>(this IList<T> list, int index, Func<T, bool> match)
 		{
-      return FindIndex(list, index, list != null ? list.Count - index : 0, match);
+      return list.FindIndex(index, list != null ? list.Count - index : 0, match);
     }
 
 		public static int FindIndex<T>(this IList<T> list, int index, int count, Func<T, bool> match)
@@ -698,14 +698,14 @@ namespace PowerLib.System.Collections
       return -1;
     }
 
-    public static int FindLastIndex<T>(this IList<T> list,Func<T, bool> match)
+    public static int FindLastIndex<T>(this IList<T> list, Func<T, bool> match)
 		{
-      return FindLastIndex(list, 0, list != null ? list.Count : 0, match);
+      return list.FindLastIndex(0, list != null ? list.Count : 0, match);
 		}
 
 		public static int FindLastIndex<T>(this IList<T> list, int index, Func<T, bool> match)
 		{
-      return FindLastIndex(list, index, list != null ? list.Count -  index : 0, match);
+      return list.FindLastIndex(index, list != null ? list.Count -  index : 0, match);
     }
 
 		public static int FindLastIndex<T>(this IList<T> list, int index, int count, Func<T, bool> match)
@@ -727,12 +727,12 @@ namespace PowerLib.System.Collections
 
     public static IEnumerable<T> FindAll<T>(this IList<T> list, Func<T, bool> match)
 		{
-      return FindAll(list, 0, list != null ? list.Count : 0, match);
+      return list.FindAll(0, list != null ? list.Count : 0, match);
     }
 
 		public static IEnumerable<T> FindAll<T>(this IList<T> list, int index, Func<T, bool> match)
 		{
-      return FindAll(list, index, list != null ? list.Count - index : 0, match);
+      return list.FindAll(index, list != null ? list.Count - index : 0, match);
     }
 
 		public static IEnumerable<T> FindAll<T>(this IList<T> list, int index, int count, Func<T, bool> match)
@@ -753,12 +753,12 @@ namespace PowerLib.System.Collections
 
     public static IEnumerable<int> FindAllIndices<T>(this IList<T> list, Func<T, bool> match)
 		{
-      return FindAllIndices(list, 0, list != null ? list.Count : 0, match);
+      return list.FindAllIndices(0, list != null ? list.Count : 0, match);
     }
 
 		public static IEnumerable<int> FindAllIndices<T>(this IList<T> list, int index, Func<T, bool> match)
 		{
-      return FindAllIndices(list, index, list != null ? list.Count - index : 0, match);
+      return list.FindAllIndices(index, list != null ? list.Count - index : 0, match);
     }
 
 		public static IEnumerable<int> FindAllIndices<T>(this IList<T> list, int index, int count, Func<T, bool> match)
@@ -779,12 +779,12 @@ namespace PowerLib.System.Collections
 
     public static int BinarySearch<T>(this IList<T> list, Func<T, int> comparison, SortingOption option = SortingOption.None)
     {
-      return BinarySearch(list, 0, list != null ? list.Count : 0, comparison, option);
+      return list.BinarySearch(0, list != null ? list.Count : 0, comparison, option);
     }
 
     public static int BinarySearch<T>(this IList<T> list, int index, Func<T, int> comparison, SortingOption option = SortingOption.None)
     {
-      return BinarySearch(list, index, list != null ? list.Count - index : 0, comparison, option);
+      return list.BinarySearch(index, list != null ? list.Count - index : 0, comparison, option);
     }
 
     public static int BinarySearch<T>(this IList<T> list, int index, int count, Func<T, int> comparison, SortingOption option = SortingOption.None)
@@ -826,17 +826,17 @@ namespace PowerLib.System.Collections
       return (found < 0) ? ~lower : found;
     }
 
-    public static int FindSequence<T>(this IList<T> list, IList<T> search, Equality<T> equality)
+    public static int SequenceFind<T>(this IList<T> list, IList<T> search, bool partial, Equality<T> equality)
     {
-      return FindSequence(list, 0, list != null ? list.Count : 0, search, equality);
+      return list.SequenceFind(0, list != null ? list.Count : 0, search, partial, equality);
     }
 
-    public static int FindSequence<T>(this IList<T> list, int index, IList<T> search, Equality<T> equality)
+    public static int SequenceFind<T>(this IList<T> list, int index, IList<T> search, bool partial, Equality<T> equality)
     {
-      return FindSequence(list, index, list != null ? list.Count - index : 0, search, equality);
+      return list.SequenceFind(index, list != null ? list.Count - index : 0, search, partial, equality);
     }
 
-    public static int FindSequence<T>(this IList<T> list, int index, int count, IList<T> search, Equality<T> equality)
+    public static int SequenceFind<T>(this IList<T> list, int index, int count, IList<T> search, bool partial, Equality<T> equality)
     {
       if (list == null)
         throw new ArgumentNullException("list");
@@ -850,7 +850,7 @@ namespace PowerLib.System.Collections
         throw new ArgumentNullException("equality");
 
       int matched = 0;
-      while (matched < search.Count && search.Count <= count)
+      while (count > 0 && matched < count && matched < search.Count && (partial || count >= search.Count))
       {
         if (equality(list[index + matched], search[matched]))
           matched++;
@@ -861,27 +861,20 @@ namespace PowerLib.System.Collections
           index++;
         }
       }
-      return matched == search.Count ? index : -1;
+      return matched == search.Count ? index : -matched - 1;
     }
 
-    public static int FindLastSequence<T>(this IList<T> list, IList<T> search, Equality<T> equality)
+    public static int SequenceFindLast<T>(this IList<T> list, IList<T> search, bool partial, Equality<T> equality)
     {
-      if (list == null)
-        throw new ArgumentNullException("list");
-      if (search == null)
-        throw new ArgumentNullException("search");
-      if (equality == null)
-        throw new ArgumentNullException("equality");
-
-      return FindLastSequence(list, 0, list != null ? list.Count : 0, search, equality);
+      return list.SequenceFindLast(0, list != null ? list.Count : 0, search, partial, equality);
     }
 
-    public static int FindLastSequence<T>(this IList<T> list, int index, IList<T> search, Equality<T> equality)
+    public static int SequenceFindLast<T>(this IList<T> list, int index, IList<T> search, bool partial, Equality<T> equality)
     {
-      return FindLastSequence(list, index, list != null ? list.Count - index : 0, search, equality);
+      return list.SequenceFindLast(index, list != null ? list.Count - index : 0, search, partial, equality);
     }
 
-    public static int FindLastSequence<T>(this IList<T> list, int index, int count, IList<T> search, Equality<T> equality)
+    public static int SequenceFindLast<T>(this IList<T> list, int index, int count, IList<T> search, bool partial, Equality<T> equality)
     {
       if (list == null)
         throw new ArgumentNullException("list");
@@ -895,7 +888,7 @@ namespace PowerLib.System.Collections
         throw new ArgumentNullException("equality");
 
       int matched = 0;
-      while (matched < search.Count && search.Count <= count)
+      while (count > 0 && matched < count && matched < search.Count && (partial || count >= search.Count))
       {
         if (equality(list[index + count - 1 - matched], search[search.Count - 1 - matched]))
           matched++;
@@ -905,20 +898,20 @@ namespace PowerLib.System.Collections
           count--;
         }
       }
-      return matched == search.Count ? index + count - search.Count : -1;
+      return matched == search.Count ? index + count - matched : -matched - 1;
     }
 
-    public static int FindSequence<T>(this IList<T> list, int search, Func<T, int, bool> match)
+    public static int SequenceFind<T>(this IList<T> list, int search, bool partial, Func<T, int, bool> match)
     {
-      return FindSequence(list, 0, list != null ? list.Count : 0, search, match);
+      return list.SequenceFind(0, list != null ? list.Count : 0, search, partial, match);
     }
 
-    public static int FindSequence<T>(this IList<T> list, int index, int search, Func<T, int, bool> match)
+    public static int SequenceFind<T>(this IList<T> list, int index, int search, bool partial, Func<T, int, bool> match)
     {
-      return FindSequence(list, index, list != null ? list.Count - index : 0, search, match);
+      return list.SequenceFind(index, list != null ? list.Count - index : 0, search, partial, match);
     }
 
-    public static int FindSequence<T>(this IList<T> list, int index, int count, int search, Func<T, int, bool> match)
+    public static int SequenceFind<T>(this IList<T> list, int index, int count, int search, bool partial, Func<T, int, bool> match)
     {
       if (list == null)
         throw new ArgumentNullException("list");
@@ -930,7 +923,7 @@ namespace PowerLib.System.Collections
         throw new ArgumentNullException("match");
 
       int matched = 0;
-      while (matched < search && search <= count)
+      while (count > 0 && matched < count && matched < search && (partial || count >= search))
       {
         if (match(list[index + matched], matched))
           matched++;
@@ -941,20 +934,20 @@ namespace PowerLib.System.Collections
           index++;
         }
       }
-      return matched == search ? index : -1;
+      return matched == search ? index : -matched - 1;
     }
 
-    public static int FindLastSequence<T>(this IList<T> list, int search, Func<T, int, bool> match)
+    public static int SequenceFindLast<T>(this IList<T> list, int search, bool partial, Func<T, int, bool> match)
     {
-      return FindLastSequence(list, 0, list != null ? list.Count : 0, search, match);
+      return list.SequenceFindLast(0, list != null ? list.Count : 0, search, partial, match);
     }
 
-    public static int FindLastSequence<T>(this IList<T> list, int index, int search, Func<T, int, bool> match)
+    public static int SequenceFindLast<T>(this IList<T> list, int index, int search, bool partial, Func<T, int, bool> match)
     {
-      return FindLastSequence(list, index, list != null ? list.Count - index : 0, search, match);
+      return list.SequenceFindLast(index, list != null ? list.Count - index : 0, search, partial, match);
     }
 
-    public static int FindLastSequence<T>(this IList<T> list, int index, int count, int search, Func<T, int, bool> match)
+    public static int SequenceFindLast<T>(this IList<T> list, int index, int count, int search, bool partial, Func<T, int, bool> match)
     {
       if (list == null)
         throw new ArgumentNullException("list");
@@ -968,9 +961,9 @@ namespace PowerLib.System.Collections
         throw new ArgumentNullException("match");
 
       int matched = 0;
-      while (matched < search && search <= count)
+      while (count > 0 && matched < count && matched < search && (partial || count >= search))
       {
-        if (match(list[index + count - 1 - matched], matched))
+        if (match(list[index + count - 1 - matched], search - 1 - matched))
           matched++;
         else
         {
@@ -978,7 +971,90 @@ namespace PowerLib.System.Collections
           count--;
         }
       }
-      return matched == search ? index + count - search : -1;
+      return matched == search ? index + count - matched : -matched - 1;
+    }
+
+    public static Range SequenceFind<T>(this IList<T> list, Func<IList<T>, int> match)
+    {
+      return list.SequenceFind<T>(0, list != null ? list.Count : 0, match);
+    }
+
+    public static Range SequenceFind<T>(this IList<T> list, int index, Func<IList<T>, int> match)
+    {
+      return list.SequenceFind<T>(index, list != null ? list.Count - index : 0, match);
+    }
+
+    public static Range SequenceFind<T>(this IList<T> list, int index, int count, Func<IList<T>, int> match)
+    {
+      if (list == null)
+        throw new ArgumentNullException("list");
+      if (index < 0 || index > list.Count)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > list.Count - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (match == null)
+        throw new ArgumentNullException("match");
+
+      PwrFrameListView<T> view = new PwrFrameListView<T>(list);
+      int matched = 0;
+      int accepted = 0;
+      while (count > 0 && matched < count)
+      {
+        view.Frame = new Range(index, matched + 1);
+        accepted = match(view);
+        if (accepted > 0)
+          break;
+        else if (accepted == 0)
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+          index++;
+        }
+      }
+      return new Range(index, accepted > 0 ? accepted : -matched - 1);
+    }
+
+    public static Range SequenceFindLast<T>(this IList<T> list, Func<IList<T>, int> match)
+    {
+      return SequenceFindLast(list, 0, list != null ? list.Count : 0, match);
+    }
+
+    public static Range SequenceFindLast<T>(this IList<T> list, int index, Func<IList<T>, int> match)
+    {
+      return SequenceFindLast(list, index, list != null ? list.Count - index : 0, match);
+    }
+
+    public static Range SequenceFindLast<T>(this IList<T> list, int index, int count, Func<IList<T>, int> match)
+    {
+      if (list == null)
+        throw new ArgumentNullException("list");
+      if (index < 0 || index > list.Count)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > list.Count - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (match == null)
+        throw new ArgumentNullException("match");
+
+      PwrFrameListView<T> view = new PwrFrameListView<T>(list);
+      int matched = 0;
+      int accepted = 0;
+      while (count > 0 && matched < count)
+      {
+        view.Frame = new Range(index + count - 1 - matched, matched + 1);
+        accepted = match(view);
+        if (accepted > 0)
+          break;
+        else if (accepted == 0)
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+        }
+      }
+      return new Range(index + count - accepted > 0 ? accepted : matched, accepted > 0 ? accepted : -matched - 1);
     }
 
     public static int SequenceCompare<T>(this IList<T> xList, IList<T> yList, Comparison<T> comparison)

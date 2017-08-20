@@ -7,7 +7,7 @@ using PowerLib.System.Linq;
 
 namespace PowerLib.System.IO
 {
-	public static class PwrBinaryWriterExtension
+	public static class BinaryWriterExtension
 	{
     public static bool ThrowDataInfo = false;
 

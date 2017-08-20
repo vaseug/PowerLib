@@ -3,11 +3,8 @@ using System.Linq;
 using System.IO;
 using System.Data.SqlTypes;
 using Microsoft.SqlServer.Server;
-using PowerLib.System;
-using PowerLib.System.Collections;
 using PowerLib.System.Linq;
 using PowerLib.System.IO.Streamed.Typed;
-using PowerLib.System.Data.SqlTypes;
 
 namespace PowerLib.System.Data.SqlTypes.Collections
 {

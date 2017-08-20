@@ -52,7 +52,7 @@ namespace PowerLib.System
       }
     }
 
-    public static Byte[] GetSizeBytes(int size, SizeEncoding sizeEncoding)
+    public static Byte[] GetSizeEncodingBytes(int size, SizeEncoding sizeEncoding)
     {
       if (size < 0)
         throw new ArgumentOutOfRangeException("size");
@@ -76,7 +76,7 @@ namespace PowerLib.System
       }
     }
 
-    public static Byte[] GetLongSizeBytes(long size, SizeEncoding sizeEncoding)
+    public static Byte[] GetSizeEncodingBytes(long size, SizeEncoding sizeEncoding)
     {
       if (size < 0)
         throw new ArgumentOutOfRangeException("size");
@@ -100,7 +100,26 @@ namespace PowerLib.System
       }
     }
 
-    public static int GetSizeEncodingSize(SizeEncoding sizeEncoding, int size)
+    public static int GetSizeEncodingSize(int size, SizeEncoding sizeEncoding)
+    {
+      switch (sizeEncoding)
+      {
+        case SizeEncoding.B1:
+          return sizeof(byte);
+        case SizeEncoding.B2:
+          return sizeof(ushort);
+        case SizeEncoding.B4:
+          return sizeof(uint);
+        case SizeEncoding.B8:
+          return sizeof(ulong);
+        case SizeEncoding.VB:
+          return GetVbSize(size);
+        default:
+          throw new InvalidOperationException();
+      }
+    }
+
+    public static int GetSizeEncodingSize(long size, SizeEncoding sizeEncoding)
     {
       switch (sizeEncoding)
       {

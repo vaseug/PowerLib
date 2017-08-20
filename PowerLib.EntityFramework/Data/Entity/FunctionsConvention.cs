@@ -275,7 +275,7 @@ namespace PowerLib.System.Data.Entity
           var propertyMappings = ((EntityType)edmType).Properties.Join(
             model.ConceptualToStoreMapping.EntitySetMappings
               .SelectMany(t => t.EntityTypeMappings)
-              .Where(t => edmType.Yield(b => b.BaseType).Contains(t.EntityType))
+              .Where(t => edmType.Yield(e => e.BaseType, (e, b) => b, e => e != null).Contains(t.EntityType))
               .SelectMany(tm => tm.Fragments.SelectMany(t => t.PropertyMappings))
               .OfType<ScalarPropertyMapping>(),
             p => p,
@@ -365,7 +365,7 @@ namespace PowerLib.System.Data.Entity
           EdmType edmType = GetStructuralEdmType(model, r.Type);
           if (edmType == null)
             edmType = GetTypeUsage(GetSimpleEdmType(model, r.Type), r).EdmType;
-          entitySets[i] = edmType.BuiltInTypeKind != BuiltInTypeKind.EntityType ? null : model.ConceptualModel.Container.EntitySets.FirstOrDefault(s => edmType.Yield(t => t.BaseType).Contains(s.ElementType));
+          entitySets[i] = edmType.BuiltInTypeKind != BuiltInTypeKind.EntityType ? null : model.ConceptualModel.Container.EntitySets.FirstOrDefault(s => edmType.Yield(t => t.BaseType, (t, b) => b, t => t != null).Contains(s.ElementType));
           return FunctionParameter.Create(string.Format("Result_{0}", i), edmType.GetCollectionType(), ParameterMode.ReturnValue);
         }).ToArray();
 

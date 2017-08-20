@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Linq;
 using System.Data;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using System.Text.RegularExpressions;
-using System.Numerics;
 using System.Reflection;
 using System.Globalization;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Xml.Linq;
+using PowerLib.System.IO;
 
 namespace PowerLib.System.Data.Linq
 {
@@ -4960,6 +4961,641 @@ namespace PowerLib.System.Data.Linq
     public IQueryable<RegularIndexedBinaryRow> binArrayEnumerateDim(byte[] array, byte[] ranges)
     {
       return CreateMethodCallQuery<RegularIndexedBinaryRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), array, ranges);
+    }
+
+    #endregion
+    #endregion
+    #region Uri functions
+
+    [Function(Name = Schema + "uriCheckHostName", IsComposable = true)]
+    public UriHostNameType uriCheckHostName(String hostName)
+    {
+      return (UriHostNameType)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), hostName).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriCheckSchemeName", IsComposable = true)]
+    public Boolean uriCheckSchemeName(String schemeName)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), schemeName).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriFromHex", IsComposable = true)]
+    public Int32 uriFromHex(String digit)
+    {
+      return (Int32)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), digit).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriHexEscape", IsComposable = true)]
+    public String uriHexEscape(String str)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), str).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriHexUnescape", IsComposable = true)]
+    public String uriHexUnescape(String pattern, Int32? index, Int32? count)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), pattern, index, count).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsHexDigit", IsComposable = true)]
+    public Boolean uriIsHexDigit(String character)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), character).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsHexEncoding", IsComposable = true)]
+    public Boolean uriIsHexEncoding(String pattern, Int32 index)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), pattern, index).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsWellFormedUriString", IsComposable = true)]
+    public Boolean uriIsWellFormedUriString(String uriString, UriKind uriKind)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString, uriKind).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriEscape", IsComposable = true)]
+    public String uriEscapeUri(String str)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), str).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriEscapeData", IsComposable = true)]
+    public String uriEscapeData(String str)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), str).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriUnescapeData", IsComposable = true)]
+    public String uriUnescapeData(String str)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), str).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetAbsolutePath", IsComposable = true)]
+    public String uriGetAbsolutePath(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetAbsoluteUri", IsComposable = true)]
+    public String uriGetAbsoluteUri(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetAuthority", IsComposable = true)]
+    public String uriGetAuthority(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetDnsSafeHost", IsComposable = true)]
+    public String uriGetDnsSafeHost(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetFragment", IsComposable = true)]
+    public String uriGetFragment(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetHost", IsComposable = true)]
+    public String uriGetHost(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetHostNameType", IsComposable = true)]
+    public UriHostNameType uriGetHostNameType(String uriString)
+    {
+      return (UriHostNameType)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsAbsoluteUri", IsComposable = true)]
+    public Boolean uriIsAbsoluteUri(String uriString)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsDefaultPort", IsComposable = true)]
+    public Boolean uriIsDefaultPort(String uriString)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsFile", IsComposable = true)]
+    public Boolean uriIsFile(String uriString)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsLoopback", IsComposable = true)]
+    public Boolean uriIsLoopback(String uriString)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriIsUnc", IsComposable = true)]
+    public Boolean uriIsUnc(String uriString)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetLocalPath", IsComposable = true)]
+    public String uriGetLocalPath(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetOriginalString", IsComposable = true)]
+    public String uriGetOriginalString(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetPathAndQuery", IsComposable = true)]
+    public String uriGetPathAndQuery(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetPort", IsComposable = true)]
+    public Int32 uriGetPort(String uriString)
+    {
+      return (Int32)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetQuery", IsComposable = true)]
+    public String uriGetQuery(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetScheme", IsComposable = true)]
+    public String uriGetScheme(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriUserEscaped", IsComposable = true)]
+    public Boolean uriUserEscaped(String uriString)
+    {
+      return (Boolean)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetUserInfo", IsComposable = true)]
+    public String uriGetUserInfo(String uriString)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriBuildString", IsComposable = true)]
+    public String uriBuild(String scheme, String userName, String password, String host, Int32? port, String path, String query, String fragment)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), scheme, userName, password, host, port, path, query, fragment).ReturnValue;
+    }
+
+    [Function(Name = Schema + "uriGetSegments", IsComposable = true)]
+    public IQueryable<StringRow> uriGetSegments(String uriString)
+    {
+      return CreateMethodCallQuery<StringRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), uriString);
+    }
+
+    #endregion
+    #region File functions
+    #region Xml file functions
+
+    [Function(Name = Schema + "fileReadAllXml", IsComposable = true)]
+    public String fileReadAllXml(String path)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteAllXml", IsComposable = true)]
+    public Int64? fileWriteAllXml(String path, String xml)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, xml).ReturnValue;
+    }
+
+    #endregion
+    #region Binary file functions
+
+    [Function(Name = Schema + "fileReadAllBinary", IsComposable = true)]
+    public byte[] fileReadAllBinary(String path)
+    {
+      return (byte[])ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadBinary", IsComposable = true)]
+    public byte[] fileReadBinary(String path, Int64? offset, Int64? count)
+    {
+      return (byte[])ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, count).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadSizedBlocks", IsComposable = true)]
+    public IQueryable<FileBlockRow> fileReadSizedBlocks(String path, Int64? offset, SizeEncoding sizing, Int32? maxCount)
+    {
+      return CreateMethodCallQuery<FileBlockRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, sizing, maxCount);
+    }
+
+    [Function(Name = Schema + "fileReadTerminatedBlocks", IsComposable = true)]
+    public IQueryable<FileBlockRow> fileReadTerminatedBlocks(String path, Int64? offset, byte[] searchTerminator, Boolean omitTerminator, Int32? maxCount)
+    {
+      return CreateMethodCallQuery<FileBlockRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, searchTerminator, omitTerminator, maxCount);
+    }
+
+    [Function(Name = Schema + "fileWriteAllBinary", IsComposable = true)]
+    public Int64? fileWriteAllBinary(String path, byte[] bytes)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, bytes).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteBinary", IsComposable = true)]
+    public Int64? fileWriteBinary(String path, byte[] bytes, Int64? offset, Boolean insert)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, bytes, offset, insert).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteSizedBlock", IsComposable = true)]
+    public Int64? fileWriteSizedBlock(String path, byte[] bytes, SizeEncoding sizing, Int64? offset, Boolean insert)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, bytes, sizing, offset, insert).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteTerminatedBlock", IsComposable = true)]
+    public Int64? fileWriteTerminatedBlock(String path, byte[] bytes, byte[] terminator, Int64? offset, Boolean insert)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, bytes, terminator, offset, insert).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileRemoveBlock", IsComposable = true)]
+    public Boolean? fileRemoveBlock(String path, Int64 offset, Int64? length)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, length).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSearchBinary", IsComposable = true)]
+    public Int64? fileSearchBinary(String path, Int64? offset, byte[] pattern)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, pattern).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSearchBinaryLast", IsComposable = true)]
+    public Int64? fileSearchBinaryLast(String path, Int64? offset, byte[] pattern)
+    {
+      return (Int64)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, pattern).ReturnValue;
+    }
+
+    #endregion
+    #region Text file functions
+
+    [Function(Name = Schema + "fileDetectCodePage", IsComposable = true)]
+    public Int32? fileDetectCodePage(String path)
+    {
+      return (Int32?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadAllText", IsComposable = true)]
+    public String fileReadAllText(String path, Boolean detectEncoding)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, detectEncoding).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadAllTextByCpId", IsComposable = true)]
+    public String fileReadAllTextByCpId(String path, Boolean detectEncoding, Int32? cpId)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, detectEncoding, cpId).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadAllTextByCpName", IsComposable = true)]
+    public String fileReadAllTextByCpName(String path, Boolean detectEncoding, String cpName)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, detectEncoding, cpName).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadText", IsComposable = true)]
+    public String fileReadText(String path, Int64? offset, Int64? count, Boolean detectEncoding)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, count, detectEncoding).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadTextByCpId", IsComposable = true)]
+    public String fileReadTextByCpId(String path, Int64? offset, Int64? count, Boolean detectEncoding, Int32? cpId)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, count, detectEncoding, cpId).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadTextByCpName", IsComposable = true)]
+    public String fileReadTextByCpName(String path, Int64? offset, Int64? count, Boolean detectEncoding, String cpName)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, count, detectEncoding, cpName).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReadLines", IsComposable = true)]
+    public IQueryable<FileLineRow> fileReadLines(String path, Int64? offset, String searchTerminator, String delimiter, String newTerminator, Int32? maxCount, Boolean detectEncoding)
+    {
+      return CreateMethodCallQuery<FileLineRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, searchTerminator, delimiter, newTerminator, maxCount, detectEncoding);
+    }
+
+    [Function(Name = Schema + "fileReadLinesByCpId", IsComposable = true)]
+    public IQueryable<FileLineRow> fileReadLinesByCpId(String path, Int64? offset, String searchTerminator, String delimiter, String newTerminator, Int32? maxCount, Boolean detectEncoding, Int32? cpId)
+    {
+      return CreateMethodCallQuery<FileLineRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, searchTerminator, delimiter, newTerminator, maxCount, detectEncoding, cpId);
+    }
+
+    [Function(Name = Schema + "fileReadLinesByCpName", IsComposable = true)]
+    public IQueryable<FileLineRow> fileReadLinesByCpName(String path, Int64? offset, String searchTerminator, String delimiter, String newTerminator, Int32? maxCount, Boolean detectEncoding, String cpName)
+    {
+      return CreateMethodCallQuery<FileLineRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, searchTerminator, delimiter, newTerminator, maxCount, detectEncoding, cpName);
+    }
+
+    [Function(Name = Schema + "fileWriteAllText", IsComposable = true)]
+    public Int64? fileWriteAllText(String path, String chars, Boolean writeEncoding)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, chars, writeEncoding).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteAllTextByCpId", IsComposable = true)]
+    public Int64? fileWriteAllTextByCpId(String path, String chars, Boolean writeEncoding, Int32? cpId)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, chars, writeEncoding, cpId).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteAllTextByCpName", IsComposable = true)]
+    public Int64? fileWriteAllTextByCpName(String path, String chars, Boolean writeEncoding, String cpName)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, chars, writeEncoding, cpName).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteText", IsComposable = true)]
+    public Int64? fileWriteText(String path, String chars, String terminator, Int64? offset, Boolean insert, Byte useEncoding)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, chars, terminator, offset, insert, useEncoding).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteTextByCpId", IsComposable = true)]
+    public Int64? fileWriteTextByCpId(String path, String chars, String terminator, Int64? offset, Boolean insert, Byte useEncoding, Int32? cpId)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, chars, terminator, offset, insert, useEncoding, cpId).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileWriteTextByCpName", IsComposable = true)]
+    public Int64? fileWriteTextByCpName(String path, String chars, String terminator, Int64? offset, Boolean insert, Byte useEncoding, String cpName)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, chars, terminator, offset, insert, useEncoding, cpName).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSearchText", IsComposable = true)]
+    public Int64? fileSearchText(String path, Int64? offset, Int32? skip, String pattern, Boolean detectEncoding)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, skip, pattern, detectEncoding).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSearchTextByCpId", IsComposable = true)]
+    public Int64? fileSearchTextByCpId(String path, Int64? offset, Int32? skip, String pattern, Boolean detectEncoding, Int32? cpId)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, skip, pattern, detectEncoding, cpId).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSearchTextByCpName", IsComposable = true)]
+    public Int64? fileSearchTextByCpName(String path, Int64? offset, Int32? skip, String pattern, Boolean detectEncoding, String cpName)
+    {
+      return (Int64?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, offset, skip, pattern, detectEncoding, cpName).ReturnValue;
+    }
+
+    #endregion
+    #region Directory manipulation functions
+
+    [Function(Name = Schema + "dirCreate", IsComposable = true)]
+    public Boolean? dirCreate(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "dirDelete", IsComposable = true)]
+    public Boolean? dirDelete(String path, Boolean? recursive)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, recursive).ReturnValue;
+    }
+
+    [Function(Name = Schema + "dirMove", IsComposable = true)]
+    public Boolean? dirMove(String sourcePath, String targetPath)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), sourcePath, targetPath).ReturnValue;
+    }
+
+    [Function(Name = Schema + "dirExists", IsComposable = true)]
+    public Boolean? dirExists(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "dirEnumerate", IsComposable = true)]
+    public IQueryable<FileSystemRow> dirEnumerate(String path, String searchPattern, Int32? maxDepth, FileSystemTraversalOptions? traversalOptions)
+    {
+      return CreateMethodCallQuery<FileSystemRow>(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, searchPattern, maxDepth, traversalOptions);
+    }
+
+    #endregion
+    #region File manipulation functions
+
+    [Function(Name = Schema + "fileDelete", IsComposable = true)]
+    public Boolean? fileDelete(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileCopy", IsComposable = true)]
+    public Boolean? fileCopy(String sourcePath, String targetPath, Boolean overwrite)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), sourcePath, targetPath, overwrite).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileMove", IsComposable = true)]
+    public Boolean? fileMove(String sourcePath, String targetPath)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), sourcePath, targetPath).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileReplace", IsComposable = true)]
+    public Boolean? fileReplace(String sourcePath, String targetPath, String targetBackupFilename)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), sourcePath, targetPath, targetBackupFilename).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileEncrypt", IsComposable = true)]
+    public Boolean? fileEncrypt(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileDecrypt", IsComposable = true)]
+    public Boolean? fileDecrypt(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileExists", IsComposable = true)]
+    public Boolean? fileExists(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileTruncate", IsComposable = true)]
+    public Boolean? fileTruncate(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileGetAttributes", IsComposable = true)]
+    public FileAttributes? fileGetAttributes(String path)
+    {
+      return (FileAttributes?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileGetCreationTime", IsComposable = true)]
+    public DateTime? fileGetCreationTime(String path)
+    {
+      return (DateTime?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileGetCreationTimeUtc", IsComposable = true)]
+    public DateTime? fileGetCreationTimeUtc(String path)
+    {
+      return (DateTime?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileGetLastAccessTime", IsComposable = true)]
+    public DateTime? fileGetLastAccessTime(String path)
+    {
+      return (DateTime?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileGetLastAccessTimeUtc", IsComposable = true)]
+    public DateTime? fileGetLastAccessTimeUtc(String path)
+    {
+      return (DateTime?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileGetLastWriteTime", IsComposable = true)]
+    public DateTime? fileGetLastWriteTime(String path)
+    {
+      return (DateTime?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileGetLastWriteTimeUtc", IsComposable = true)]
+    public DateTime? fileGetLastWriteTimeUtc(String path)
+    {
+      return (DateTime?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSetAttributes", IsComposable = true)]
+    public Boolean? fileSetAttributes(String path, FileAttributes attributes)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, attributes).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSetCreationTime", IsComposable = true)]
+    public Boolean? fileSetCreationTime(String path, DateTime creationTime)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, creationTime).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSetCreationTimeUtc", IsComposable = true)]
+    public Boolean? fileSetCreationTimeUtc(String path, DateTime creationTimeUtc)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, creationTimeUtc).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSetLastAccessTime", IsComposable = true)]
+    public Boolean? fileSetLastAccessTime(String path, DateTime lastAccessTime)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, lastAccessTime).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSetLastAccessTimeUtc", IsComposable = true)]
+    public Boolean? fileSetLastAccessTimeUtc(String path, DateTime lastAccessTimeUtc)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, lastAccessTimeUtc).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSetLastWriteTime", IsComposable = true)]
+    public Boolean? fileSetLastWriteTime(String path, DateTime lastWriteTime)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, lastWriteTime).ReturnValue;
+    }
+
+    [Function(Name = Schema + "fileSetLastWriteTimeUtc", IsComposable = true)]
+    public Boolean? fileSetLastWriteTimeUtc(String path, DateTime lastWriteTimeUtc)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, lastWriteTimeUtc).ReturnValue;
+    }
+
+    #endregion
+    #region Path manipulation functions
+
+    [Function(Name = Schema + "pathChangeExtension", IsComposable = true)]
+    public String pathChangeExtension(String path, String extension)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path, extension).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathGetDirectoryName", IsComposable = true)]
+    public String pathGetDirectoryName(String path)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathGetExtension", IsComposable = true)]
+    public String pathGetExtension(String path)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathGetFileName", IsComposable = true)]
+    public String pathGetFileName(String path)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathGetFileNameWithoutExtension", IsComposable = true)]
+    public String pathGetFileNameWithoutExtension(String path)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathGetRoot", IsComposable = true)]
+    public String pathGetPathRoot(String path)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathGetRandomFileName", IsComposable = true)]
+    public String pathGetRandomFileName()
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod()).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathHasExtension", IsComposable = true)]
+    public Boolean? pathHasExtension(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathIsRooted", IsComposable = true)]
+    public Boolean? pathIsPathRooted(String path)
+    {
+      return (Boolean?)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
+    }
+
+    [Function(Name = Schema + "pathCombine", IsComposable = true)]
+    public String pathCombine(String path)
+    {
+      return (String)ExecuteMethodCall(this, (MethodInfo)MethodInfo.GetCurrentMethod(), path).ReturnValue;
     }
 
     #endregion

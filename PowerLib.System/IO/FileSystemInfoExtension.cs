@@ -87,7 +87,7 @@ namespace PowerLib.System.IO
       if (hasChildren == null)
         throw new ArgumentNullException("hasChildren");
 
-      if (!hasChildren(diParent))
+      if (maxDepth == 0 || !hasChildren(diParent))
         yield break;
       foreach (FileSystemInfo fsi in comparison != null ?
         predicate != null ?
@@ -103,7 +103,7 @@ namespace PowerLib.System.IO
         {
           DI di = fsi as DI;
           if (di != null)
-            using (var e = di.EnumerateFileSystemInfos(maxDepth > 0 ? maxDepth - 1 : 0, excludeEmpty, predicate, comparison, getChildren, hasChildren).GetEnumerator())
+            using (var e = di.EnumerateFileSystemInfos(maxDepth - 1, excludeEmpty, predicate, comparison, getChildren, hasChildren).GetEnumerator())
             {
               if (e.MoveNext())
               {
@@ -129,47 +129,57 @@ namespace PowerLib.System.IO
 		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart,
 			Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
 		{
-			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false, predicate, comparison);
+			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison);
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
 			Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
 		{
-			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty, predicate, comparison);
+			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, comparison);
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
 			Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
 		{
       if (diStart == null)
         throw new ArgumentNullException("diStart");
-      if (searchPattern == null)
-        throw new ArgumentNullException("searchPattern");
       if (maxDepth < 0)
         throw new ArgumentOutOfRangeException("maxDepth");
 
-      return diStart.EnumerateFileSystemInfos(maxDepth, excludeEmpty, predicate, comparison,
-        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth == 1 ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories), fsi => fsi is DirectoryInfo);
+      using (var e = diStart.EnumerateFileSystemInfos(maxDepth, (traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) != 0, predicate, comparison,
+        di => di.EnumerateFileSystemInfos(searchPattern ?? DefaultSearchPattern, SearchOption.TopDirectoryOnly), fsi => fsi is DirectoryInfo).GetEnumerator())
+      {
+        if (e.MoveNext())
+        {
+          if ((traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+            yield return diStart;
+          do
+            yield return e.Current;
+          while (e.MoveNext());
+        }
+        else if ((traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) == 0 && (traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+          yield return diStart;
+      }
 		}
 
 		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart,
 			IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
 		{
-			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false,
+			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0,
 				predicate != null ? predicate.Match : default(Func<FileSystemInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
 			IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
 		{
-			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty,
+			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
         predicate != null ? predicate.Match : default(Func<FileSystemInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
 			IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
 		{
-			return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty,
+			return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions,
         predicate != null ? predicate.Match : default(Func<FileSystemInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
 		}
 
@@ -179,37 +189,37 @@ namespace PowerLib.System.IO
     public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart,
       Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false, predicate, comparison).ToArray();
+      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
     }
 
     public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart,
       IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false, predicate, comparer).ToArray();
+      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparer).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, traversalOptions, predicate, comparer).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
     }
 
     #endregion
@@ -225,7 +235,7 @@ namespace PowerLib.System.IO
       if (hasChildren == null)
         throw new ArgumentNullException("hasChildren");
 
-      if (!hasChildren(diParent))
+      if (maxDepth == 0 || !hasChildren(diParent))
         yield break;
       context.PushAncestor(diParent);
       try
@@ -244,7 +254,7 @@ namespace PowerLib.System.IO
           {
             DI di = fsi as DI;
             if (di != null)
-              using (var e = di.EnumerateFileSystemInfos(maxDepth > 0 ? maxDepth - 1 : 0, excludeEmpty, context, predicate, comparison, getChildren, hasChildren).GetEnumerator())
+              using (var e = di.EnumerateFileSystemInfos(maxDepth - 1, excludeEmpty, context, predicate, comparison, getChildren, hasChildren).GetEnumerator())
               {
                 if (e.MoveNext())
                 {
@@ -275,47 +285,57 @@ namespace PowerLib.System.IO
 		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
 		{
-			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false, predicate, comparison);
+			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison);
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
 		{
-			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty, predicate, comparison);
+			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, comparison);
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
 		{
       if (diStart == null)
         throw new ArgumentNullException("diStart");
-      if (searchPattern == null)
-        throw new ArgumentNullException("searchPattern");
       if (maxDepth < 0)
         throw new ArgumentOutOfRangeException("maxDepth");
 
-      return diStart.EnumerateFileSystemInfos(maxDepth, excludeEmpty, new FileSystemHierarchicalContext(), predicate, comparison,
-        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth == 1 ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories), fsi => fsi is DirectoryInfo);
+      using (var e = diStart.EnumerateFileSystemInfos(maxDepth, (traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) != 0, new FileSystemHierarchicalContext(), predicate, comparison,
+        di => di.EnumerateFileSystemInfos(searchPattern ?? DefaultSearchPattern, SearchOption.TopDirectoryOnly), fsi => fsi is DirectoryInfo).GetEnumerator())
+      {
+        if (e.MoveNext())
+        {
+          if ((traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+            yield return diStart;
+          do
+            yield return e.Current;
+          while (e.MoveNext());
+        }
+        else if ((traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) == 0 && (traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+          yield return diStart;
+      }
 		}
 
 		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart,
 			IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
 		{
-			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false,
+			return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0,
         predicate != null ? predicate.Match : default(Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
 			IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
 		{
-			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, false,
+			return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
         predicate != null ? predicate.Match : default(Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
 		}
 
-		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+		public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
 			IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
 		{
-			return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty,
+			return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions,
         predicate != null ? predicate.Match : default(Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
 		}
 
@@ -325,37 +345,37 @@ namespace PowerLib.System.IO
     public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart,
       Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false, predicate, comparison).ToArray();
+      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
     }
 
     public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart,
       IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, false, predicate, comparer).ToArray();
+      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparer).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, comparer).ToArray();
     }
 
-    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static FileSystemInfo[] GetFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
     }
 
     #endregion
@@ -370,19 +390,19 @@ namespace PowerLib.System.IO
         .Select(fsi => fsi as DirectoryInfo);
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, false,
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
         fsi => fsi is DirectoryInfo && (predicate == null || predicate(fsi as DirectoryInfo)),
         comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : default(Comparison<FileSystemInfo>))
         .Select(fsi => fsi as DirectoryInfo);
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty,
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions,
         fsi => fsi is DirectoryInfo && (predicate == null || predicate(fsi as DirectoryInfo)),
         comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : default(Comparison<FileSystemInfo>))
         .Select(fsi => fsi as DirectoryInfo);
@@ -391,21 +411,21 @@ namespace PowerLib.System.IO
     public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart,
       IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(DefaultSearchPattern, 0, false,
+      return diStart.EnumerateDirectories(DefaultSearchPattern, int.MaxValue, 0,
         predicate != null ? predicate.Match : default(Func<DirectoryInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, false,
+      return diStart.EnumerateDirectories(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
         predicate != null ? predicate.Match : default(Func<DirectoryInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, maxDepth, excludeEmpty,
+      return diStart.EnumerateDirectories(searchPattern, maxDepth, traversalOptions,
         predicate != null ? predicate.Match : default(Func<DirectoryInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
     }
 
@@ -418,16 +438,16 @@ namespace PowerLib.System.IO
       return diStart.EnumerateDirectories(predicate, comparison).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateDirectories(searchPattern, searchOption, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateDirectories(searchPattern, maxDepth, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
     }
 
     public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart,
@@ -436,16 +456,16 @@ namespace PowerLib.System.IO
       return diStart.EnumerateDirectories(predicate, comparer).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, searchOption, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, searchOption, traversalOptions, predicate, comparer).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, maxDepth, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
     }
 
     #endregion
@@ -461,20 +481,20 @@ namespace PowerLib.System.IO
         .Select(v => v as DirectoryInfo);
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, false,
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
         (ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>> ec) =>
           ec.Element is DirectoryInfo && (predicate == null || predicate(new ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))),
         comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : (Comparison<FileSystemInfo>)null)
         .Select(v => v as DirectoryInfo);
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty,
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions,
         (ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>> ec) =>
           ec.Element is DirectoryInfo && (predicate == null || predicate(new ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))),
         comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : (Comparison<FileSystemInfo>)null)
@@ -484,21 +504,21 @@ namespace PowerLib.System.IO
     public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart,
       IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(DefaultSearchPattern, 0, false,
+      return diStart.EnumerateDirectories(DefaultSearchPattern, int.MaxValue, 0,
         predicate != null ? predicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, false,
+      return diStart.EnumerateDirectories(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
         predicate != null ? predicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
     }
 
-    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, maxDepth, excludeEmpty,
+      return diStart.EnumerateDirectories(searchPattern, maxDepth, traversalOptions,
         predicate != null ? predicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
     }
 
@@ -511,16 +531,16 @@ namespace PowerLib.System.IO
       return diStart.EnumerateDirectories(predicate, comparison).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateDirectories(searchPattern, searchOption, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
     {
-      return diStart.EnumerateDirectories(searchPattern, maxDepth, excludeEmpty, predicate, comparison).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
     }
 
     public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart,
@@ -529,247 +549,965 @@ namespace PowerLib.System.IO
       return diStart.EnumerateDirectories(predicate, comparer).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, searchOption, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, searchOption, traversalOptions, predicate, comparer).ToArray();
     }
 
-    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static DirectoryInfo[] GetDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
     {
-      return diStart.EnumerateDirectories(searchPattern, maxDepth, excludeEmpty, predicate, comparer).ToArray();
+      return diStart.EnumerateDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
     }
 
     #endregion
     #region Enumerate Files
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, bool direction,
-      Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, true,
-        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)),
-        (x, y) => x is DirectoryInfo ?
-          y is DirectoryInfo ? dirComparison != null ? dirComparison(x as DirectoryInfo, y as DirectoryInfo) : 0 : direction ? 1 : -1 :
-          y is DirectoryInfo ? direction ? -1 : 1 : fileComparison != null ? fileComparison(x as FileInfo, y as FileInfo) : 0)
-        .Where(fsi => fsi is FileInfo).Select(fsi => fsi as FileInfo);
+      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)), comparison)
+        .Where(fsi => fsi is FileInfo)
+        .Select(fsi => fsi as FileInfo);
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, true,
-        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)),
-        (x, y) => x is DirectoryInfo ?
-          y is DirectoryInfo ? dirComparison != null ? dirComparison(x as DirectoryInfo, y as DirectoryInfo) : 0 : direction ? 1 : -1 :
-          y is DirectoryInfo ? direction ? -1 : 1 : fileComparison != null ? fileComparison(x as FileInfo, y as FileInfo) : 0)
-        .Where(fsi => fsi is FileInfo).Select(fsi => fsi as FileInfo);
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)), comparison)
+        .Where(fsi => fsi is FileInfo)
+        .Select(fsi => fsi as FileInfo);
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, true,
-        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)),
-        (x, y) => x is DirectoryInfo ?
-          y is DirectoryInfo ? dirComparison != null ? dirComparison(x as DirectoryInfo, y as DirectoryInfo) : 0 : direction ? 1 : -1 :
-          y is DirectoryInfo ? direction ? -1 : 1 : fileComparison != null ? fileComparison(x as FileInfo, y as FileInfo) : 0)
-        .Where(fsi => fsi is FileInfo).Select(fsi => fsi as FileInfo);
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)), comparison)
+        .Where(fsi => fsi is FileInfo)
+        .Select(fsi => fsi as FileInfo);
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, bool direction,
-      IPredicate<FileInfo> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<DirectoryInfo> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(direction,
-        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), fileComparer != null ? fileComparer.Compare : default(Comparison<FileInfo>),
-        dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>), dirComparer != null ? dirComparer.Compare : default(Comparison<DirectoryInfo>));
+      return diStart.EnumerateFiles(
+        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      IPredicate<FileInfo> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<DirectoryInfo> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, searchOption, direction,
-        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), fileComparer != null ? fileComparer.Compare : default(Comparison<FileInfo>),
-        dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>), dirComparer != null ? dirComparer.Compare : default(Comparison<DirectoryInfo>));
+      return diStart.EnumerateFiles(searchPattern, searchOption,
+        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      IPredicate<FileInfo> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<DirectoryInfo> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, maxDepth, direction,
-        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), fileComparer != null ? fileComparer.Compare : default(Comparison<FileInfo>),
-        dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>), dirComparer != null ? dirComparer.Compare : default(Comparison<DirectoryInfo>));
+      return diStart.EnumerateFiles(searchPattern, maxDepth,
+        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
     }
 
     #endregion
     #region Get Files
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, bool direction,
-      Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFiles(direction, filePredicate, fileComparison, dirPredicate, dirComparison).ToArray();
+      return diStart.EnumerateFiles(filePredicate, dirPredicate, comparison).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFiles(searchPattern, searchOption, direction, filePredicate, fileComparison, dirPredicate, dirComparison).ToArray();
+      return diStart.EnumerateFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparison).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFiles(searchPattern, maxDepth, direction, filePredicate, fileComparison, dirPredicate, dirComparison).ToArray();
+      return diStart.EnumerateFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparison).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, bool direction,
-      IPredicate<FileInfo> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<DirectoryInfo> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(direction, filePredicate, fileComparer, dirPredicate, dirComparer).ToArray();
+      return diStart.EnumerateFiles(filePredicate, dirPredicate, comparer).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      IPredicate<FileInfo> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<DirectoryInfo> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, searchOption, direction, filePredicate, fileComparer, dirPredicate, dirComparer).ToArray();
+      return diStart.EnumerateFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparer).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      IPredicate<FileInfo> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<DirectoryInfo> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, maxDepth, direction, filePredicate, fileComparer, dirPredicate, dirComparer).ToArray();
+      return diStart.EnumerateFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparer).ToArray();
     }
 
     #endregion
     #region Enumerate Files with IHierarchicalContext<T>
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, bool direction,
-      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart,
+      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, 0, true,
+      return diStart.EnumerateFileSystemInfos(DefaultSearchPattern, int.MaxValue, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
         ec =>
           ec.Element is DirectoryInfo && (dirPredicate == null || dirPredicate(new ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))) ||
-          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as FileInfo, ec.Context))),
-        (x, y) => x is DirectoryInfo ?
-          y is DirectoryInfo ? dirComparison != null ? dirComparison(x as DirectoryInfo, y as DirectoryInfo) : 0 : direction ? 1 : -1 :
-          y is DirectoryInfo ? direction ? -1 : 1 : fileComparison != null ? fileComparison(x as FileInfo, y as FileInfo) : 0)
+          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as FileInfo, ec.Context))), comparison)
         .Where(fsi => fsi is FileInfo)
         .Select(fsi => fsi as FileInfo);
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, true,
+      return diStart.EnumerateFileSystemInfos(searchPattern, searchOption, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
         ec =>
           ec.Element is DirectoryInfo && (dirPredicate == null || dirPredicate(new ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))) ||
-          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as FileInfo, ec.Context))),
-        (x, y) => x is DirectoryInfo ?
-          y is DirectoryInfo ? dirComparison != null ? dirComparison(x as DirectoryInfo, y as DirectoryInfo) : 0 : direction ? 1 : -1 :
-          y is DirectoryInfo ? direction ? -1 : 1 : fileComparison != null ? fileComparison(x as FileInfo, y as FileInfo) : 0)
+          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as FileInfo, ec.Context))), comparison)
         .Where(fsi => fsi is FileInfo)
         .Select(fsi => fsi as FileInfo);
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, true,
+      return diStart.EnumerateFileSystemInfos(searchPattern, maxDepth, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
         ec =>
           ec.Element is DirectoryInfo && (dirPredicate == null || dirPredicate(new ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))) ||
-          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as FileInfo, ec.Context))),
-        (x, y) => x is DirectoryInfo ?
-          y is DirectoryInfo ? dirComparison != null ? dirComparison(x as DirectoryInfo, y as DirectoryInfo) : 0 : direction ? 1 : -1 :
-          y is DirectoryInfo ? direction ? -1 : 1 : fileComparison != null ? fileComparison(x as FileInfo, y as FileInfo) : 0)
+          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>(ec.Element as FileInfo, ec.Context))), comparison)
         .Where(fsi => fsi is FileInfo)
         .Select(fsi => fsi as FileInfo);
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, bool direction,
-      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(direction,
-        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool>), fileComparer != null ? fileComparer.Compare : default(Comparison<FileInfo>),
-        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>), dirComparer != null ? dirComparer.Compare : default(Comparison<DirectoryInfo>));
+      return diStart.EnumerateFiles(
+        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool>),
+        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, direction,
-        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool>), fileComparer != null ? fileComparer.Compare : default(Comparison<FileInfo>),
-        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>), dirComparer != null ? dirComparer.Compare : default(Comparison<DirectoryInfo>));
+      return diStart.EnumerateFiles(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue,
+        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool>),
+        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
     }
 
-    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, maxDepth, direction,
-        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool>), fileComparer != null ? fileComparer.Compare : default(Comparison<FileInfo>),
-        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>), dirComparer != null ? dirComparer.Compare : default(Comparison<DirectoryInfo>));
+      return diStart.EnumerateFiles(searchPattern, maxDepth,
+        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool>),
+        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
     }
 
     #endregion
     #region Get Files with IHierarchicalContext<T>
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, bool direction,
-      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart,
+      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFiles(direction, filePredicate, fileComparison, dirPredicate, dirComparison).ToArray();
+      return diStart.EnumerateFiles(filePredicate, dirPredicate, comparison).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFiles(searchPattern, searchOption, direction, filePredicate, fileComparison, dirPredicate, dirComparison).ToArray();
+      return diStart.EnumerateFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparison).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, Comparison<FileInfo> fileComparison,
-      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
     {
-      return diStart.EnumerateFiles(searchPattern, maxDepth, direction, filePredicate, fileComparison, dirPredicate, dirComparison).ToArray();
+      return diStart.EnumerateFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparison).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, bool direction,
-      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(direction, filePredicate, fileComparer, dirPredicate, dirComparer).ToArray();
+      return diStart.EnumerateFiles(filePredicate, dirPredicate, comparer).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool direction,
-      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, searchOption, direction, filePredicate, fileComparer, dirPredicate, dirComparer).ToArray();
+      return diStart.EnumerateFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparer).ToArray();
     }
 
-    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction,
-      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate, IComparer<FileInfo> fileComparer,
-      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate, IComparer<DirectoryInfo> dirComparer)
+    public static FileInfo[] GetFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
     {
-      return diStart.EnumerateFiles(searchPattern, maxDepth, direction, filePredicate, fileComparer, dirPredicate, dirComparer).ToArray();
+      return diStart.EnumerateFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparer).ToArray();
+    }
+
+    #endregion
+    #region Hierarchical methods
+
+    public static string GetRelativePath(this FileSystemInfo fsi, HierarchicalDirectoryInfo hdiParent)
+    {
+      return hdiParent == null ? null : fsi.FullName
+        .Remove(0, (hdiParent.RelativeName == null ? hdiParent.Info.FullName : hdiParent.Info.FullName.Remove(hdiParent.Info.FullName.Length - hdiParent.RelativeName.Length, hdiParent.RelativeName.Length)).Length)
+        .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    }
+
+    public static HierarchicalDirectoryInfo CreateHierarchicalDirectoryInfo(this DirectoryInfo di, HierarchicalDirectoryInfo hdiParent)
+    {
+      return new HierarchicalDirectoryInfo(di, hdiParent, hdiParent == null ? 0 : hdiParent.Depth + 1, di.GetRelativePath(hdiParent));
+    }
+
+    public static HierarchicalFileInfo CreateHierarchicalFileInfo(this FileInfo fi, HierarchicalDirectoryInfo hdiParent)
+    {
+      return new HierarchicalFileInfo(fi, hdiParent, hdiParent == null ? 0 : hdiParent.Depth + 1, fi.GetRelativePath(hdiParent));
+    }
+
+    public static HierarchicalFileSystemInfo CreateHierarchicalFileSystemInfo(this FileSystemInfo fsi, HierarchicalDirectoryInfo hdiParent)
+    {
+      if (fsi is DirectoryInfo)
+        return new HierarchicalDirectoryInfo((DirectoryInfo)fsi, hdiParent, hdiParent == null ? 0 : hdiParent.Depth + 1, fsi.GetRelativePath(hdiParent));
+      else if (fsi is FileInfo)
+        return new HierarchicalFileInfo((FileInfo)fsi, hdiParent, hdiParent == null ? 0 : hdiParent.Depth + 1, fsi.GetRelativePath(hdiParent));
+      else
+        return new HierarchicalFileSystemInfo(fsi, hdiParent, hdiParent == null ? 0 : hdiParent.Depth + 1, fsi.GetRelativePath(hdiParent));
+    }
+
+    #endregion
+    #region Enumerate Hierarchical FileSystem items
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos<HDI>(this HDI hdiParent, int maxDepth, bool excludeEmpty,
+      Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison,
+      Func<HDI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren, Func<FileSystemInfo, HDI, HierarchicalFileSystemInfo> factory)
+      where HDI : HierarchicalFileSystemInfo
+    {
+      if (getChildren == null)
+        throw new ArgumentNullException("getChildren");
+      if (hasChildren == null)
+        throw new ArgumentNullException("hasChildren");
+
+      if (maxDepth == 0 || !hasChildren(hdiParent.Info))
+        yield break;
+      foreach (FileSystemInfo fsi in comparison != null ?
+        predicate != null ?
+          getChildren(hdiParent).Where(predicate).Sort(comparison) :
+          getChildren(hdiParent).Sort(comparison) :
+        predicate != null ?
+          getChildren(hdiParent).Where(predicate) :
+          getChildren(hdiParent))
+      {
+        if (!hasChildren(fsi))
+          yield return factory(fsi, hdiParent);
+        else if (fsi.Exists)
+        {
+          var hfsi = factory(fsi, hdiParent);
+          HDI hdi = hfsi as HDI;
+          if (hdi != null)
+            using (var e = hdi.EnumerateHierarchicalFileSystemInfos(maxDepth - 1, excludeEmpty, predicate, comparison, getChildren, hasChildren, factory).GetEnumerator())
+            {
+              if (e.MoveNext())
+              {
+                yield return hfsi;
+                if (maxDepth == 1)
+                  continue;
+                else
+                  yield return e.Current;
+                while (e.MoveNext())
+                  yield return e.Current;
+              }
+              else if (!excludeEmpty)
+                yield return hfsi;
+            }
+          else
+            yield return hfsi;
+        }
+        else if (!excludeEmpty)
+          yield return factory(fsi, hdiParent);
+      }
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart,
+      Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison);
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, comparison);
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      if (hdiStart == null)
+        throw new ArgumentNullException("hdiStart");
+      if (maxDepth < 0)
+        throw new ArgumentOutOfRangeException("maxDepth");
+
+      using (var e = hdiStart.EnumerateHierarchicalFileSystemInfos(maxDepth, (traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) != 0, predicate, comparison,
+        di => di.Info.EnumerateFileSystemInfos(searchPattern ?? DefaultSearchPattern, SearchOption.TopDirectoryOnly), fsi => fsi is DirectoryInfo, CreateHierarchicalFileSystemInfo).GetEnumerator())
+      {
+        if (e.MoveNext())
+        {
+          if ((traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+            yield return hdiStart;
+          do
+            yield return e.Current;
+          while (e.MoveNext());
+        }
+        else if ((traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) == 0 && (traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+          yield return hdiStart;
+      }
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart,
+      IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0,
+        predicate != null ? predicate.Match : default(Func<FileSystemInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<FileSystemInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<FileSystemInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    #endregion
+    #region Get Hierarchical FileSystem items
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart,
+      Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart,
+      IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<FileSystemInfo> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    #endregion
+    #region Enumerate Hierarchical FileSystem items with IHierarchicalContext<T>
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos<HDI>(this HDI hdiParent, int maxDepth, bool excludeEmpty, HierarchicalContext<HDI> context,
+      Func<ElementContext<FileSystemInfo, IHierarchicalContext<HDI>>, bool> predicate, Comparison<FileSystemInfo> comparison,
+      Func<HDI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren, Func<FileSystemInfo, HDI, HierarchicalFileSystemInfo> factory)
+      where HDI : HierarchicalFileSystemInfo
+    {
+      if (getChildren == null)
+        throw new ArgumentNullException("getChildren");
+      if (hasChildren == null)
+        throw new ArgumentNullException("hasChildren");
+
+      if (maxDepth == 0 || !hasChildren(hdiParent.Info))
+        yield break;
+      foreach (FileSystemInfo fsi in comparison != null ?
+          predicate != null ?
+            getChildren(hdiParent).Where(t => predicate(ElementContext.Create(t, (IHierarchicalContext<HDI>)context))).Sort(comparison) :
+            getChildren(hdiParent).Sort(comparison) :
+          predicate != null ?
+            getChildren(hdiParent).Where(t => predicate(ElementContext.Create(t, (IHierarchicalContext<HDI>)context))) :
+            getChildren(hdiParent))
+      {
+        if (!hasChildren(fsi))
+          yield return factory(fsi, hdiParent);
+        else if (fsi.Exists)
+        {
+          var hfsi = factory(fsi, hdiParent);
+          HDI hdi = hfsi as HDI;
+          if (hdi != null)
+            using (var e = hdi.EnumerateHierarchicalFileSystemInfos(maxDepth - 1, excludeEmpty, context, predicate, comparison, getChildren, hasChildren, factory).GetEnumerator())
+            {
+              if (e.MoveNext())
+              {
+                yield return hfsi;
+                if (maxDepth == 1)
+                  continue;
+                else
+                  yield return e.Current;
+                while (e.MoveNext())
+                  yield return e.Current;
+              }
+              else if (!excludeEmpty)
+                yield return hfsi;
+            }
+          else
+            yield return hfsi;
+        }
+        else if (!excludeEmpty)
+          yield return factory(fsi, hdiParent);
+      }
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart,
+      Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison);
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, comparison);
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      if (hdiStart == null)
+        throw new ArgumentNullException("hdiStart");
+      if (maxDepth < 0)
+        throw new ArgumentOutOfRangeException("maxDepth");
+
+      using (var e = hdiStart.EnumerateHierarchicalFileSystemInfos(maxDepth, (traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) != 0, new HierarchicalFileSystemHierarchicalContext(), predicate, comparison,
+        di => di.Info.EnumerateFileSystemInfos(searchPattern ?? DefaultSearchPattern, SearchOption.TopDirectoryOnly), fsi => fsi is DirectoryInfo, CreateHierarchicalFileSystemInfo).GetEnumerator())
+      {
+        if (e.MoveNext())
+        {
+          if ((traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+            yield return hdiStart;
+          do
+            yield return e.Current;
+          while (e.MoveNext());
+        }
+        else if ((traversalOptions & FileSystemTraversalOptions.ExcludeEmpty) == 0 && (traversalOptions & FileSystemTraversalOptions.ExcludeStart) == 0)
+          yield return hdiStart;
+      }
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart,
+      IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0,
+        predicate != null ? predicate.Match : default(Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileSystemInfo> EnumerateHierarchicalFileSystemInfos(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    #endregion
+    #region Get Hierarchical FileSystem items with IHierarchicalContext<T>
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart,
+      Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<FileSystemInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart,
+      IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, 0, predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileSystemInfo[] GetHierarchicalFileSystemInfo(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<FileSystemInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    #endregion
+    #region Enumerate Hierarchical Directories
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo hdiStart,
+      Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(
+        fsi => fsi is DirectoryInfo && (predicate == null || predicate(fsi as DirectoryInfo)),
+        comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : default(Comparison<FileSystemInfo>))
+        .Select(hfsi => hfsi as HierarchicalDirectoryInfo);
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
+        fsi => fsi is DirectoryInfo && (predicate == null || predicate(fsi as DirectoryInfo)),
+        comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : default(Comparison<FileSystemInfo>))
+        .Select(hfsi => hfsi as HierarchicalDirectoryInfo);
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return hdiStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions,
+        fsi => fsi is DirectoryInfo && (predicate == null || predicate(fsi as DirectoryInfo)),
+        comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : default(Comparison<FileSystemInfo>))
+        .Select(hfsi => hfsi as HierarchicalDirectoryInfo);
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo hdiStart,
+      IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalDirectories(DefaultSearchPattern, int.MaxValue, 0,
+        predicate != null ? predicate.Match : default(Func<DirectoryInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo hdiStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalDirectories(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<DirectoryInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo hdiStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return hdiStart.EnumerateHierarchicalDirectories(searchPattern, maxDepth, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<DirectoryInfo, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
+    }
+
+    #endregion
+    #region Get Hierarchical Directories
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart,
+      Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalDirectories(predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart,
+      IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, searchOption, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<DirectoryInfo> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    #endregion
+    #region Enumerate Hierarchical Directories with IHierarchicalContext<T>
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo diStart,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(
+        (ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>> ec) =>
+          ec.Element is DirectoryInfo && (predicate == null || predicate(new ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))),
+        comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : (Comparison<FileSystemInfo>)null)
+        .Select(v => v as HierarchicalDirectoryInfo);
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
+        (ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>> ec) =>
+          ec.Element is DirectoryInfo && (predicate == null || predicate(new ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))),
+        comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : (Comparison<FileSystemInfo>)null)
+        .Select(v => v as HierarchicalDirectoryInfo);
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, traversalOptions,
+        (ElementContext<FileSystemInfo, IHierarchicalContext<HierarchicalDirectoryInfo>> ec) =>
+          ec.Element is DirectoryInfo && (predicate == null || predicate(new ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))),
+        comparison != null ? (x, y) => comparison(x as DirectoryInfo, y as DirectoryInfo) : (Comparison<FileSystemInfo>)null)
+        .Select(v => v as HierarchicalDirectoryInfo);
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo diStart,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(DefaultSearchPattern, int.MaxValue, 0,
+        predicate != null ? predicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
+    }
+
+    public static IEnumerable<HierarchicalDirectoryInfo> EnumerateHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, maxDepth, traversalOptions,
+        predicate != null ? predicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>), comparer != null ? comparer.Compare : default(Comparison<DirectoryInfo>));
+    }
+
+    #endregion
+    #region Get Hierarchical Directories with IHierarchicalContext<T>
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalDirectories(predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, searchOption, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparison).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, searchOption, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    public static HierarchicalDirectoryInfo[] GetHierarchicalDirectories(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> predicate, IComparer<DirectoryInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalDirectories(searchPattern, maxDepth, traversalOptions, predicate, comparer).ToArray();
+    }
+
+    #endregion
+    #region Enumerate Hierarchical Files
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)), comparison)
+        .Where(fsi => fsi is HierarchicalFileInfo)
+        .Select(fsi => fsi as HierarchicalFileInfo);
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)), comparison)
+        .Where(fsi => fsi is HierarchicalFileInfo)
+        .Select(fsi => fsi as HierarchicalFileInfo);
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        fsi => fsi is DirectoryInfo && (dirPredicate == null || dirPredicate(fsi as DirectoryInfo)) || fsi is FileInfo && (filePredicate == null || filePredicate(fsi as FileInfo)), comparison)
+        .Where(fsi => fsi is HierarchicalFileInfo)
+        .Select(fsi => fsi as HierarchicalFileInfo);
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(
+        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, searchOption,
+        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, maxDepth,
+        filePredicate != null ? filePredicate.Match : default(Func<FileInfo, bool>), dirPredicate != null ? dirPredicate.Match : default(Func<DirectoryInfo, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    #endregion
+    #region Get Hierarchical Files
+
+    public static HierarchicalFileInfo[] GetHierarchicalFiles(this HierarchicalDirectoryInfo diStart,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFiles(filePredicate, dirPredicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<FileInfo, bool> filePredicate, Func<DirectoryInfo, bool> dirPredicate, Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetHierarchicalFiles(this HierarchicalDirectoryInfo diStart,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(filePredicate, dirPredicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<FileInfo> filePredicate, IPredicate<DirectoryInfo> dirPredicate, IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparer).ToArray();
+    }
+
+    #endregion
+    #region Enumerate Hierarchical Files with IHierarchicalContext<T>
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart,
+      Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(DefaultSearchPattern, int.MaxValue, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        ec =>
+          ec.Element is DirectoryInfo && (dirPredicate == null || dirPredicate(new ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))) ||
+          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as FileInfo, ec.Context))), comparison)
+        .Where(fsi => fsi is HierarchicalFileInfo)
+        .Select(fsi => fsi as HierarchicalFileInfo);
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(searchPattern, searchOption, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        ec =>
+          ec.Element is DirectoryInfo && (dirPredicate == null || dirPredicate(new ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))) ||
+          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as FileInfo, ec.Context))), comparison)
+        .Where(fsi => fsi is HierarchicalFileInfo)
+        .Select(fsi => fsi as HierarchicalFileInfo);
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFileSystemInfos(searchPattern, maxDepth, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty,
+        ec =>
+          ec.Element is DirectoryInfo && (dirPredicate == null || dirPredicate(new ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as DirectoryInfo, ec.Context))) ||
+          ec.Element is FileInfo && (filePredicate == null || filePredicate(new ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>(ec.Element as FileInfo, ec.Context))), comparison)
+        .Where(fsi => fsi is HierarchicalFileInfo)
+        .Select(fsi => fsi as HierarchicalFileInfo);
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(
+        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>),
+        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue,
+        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>),
+        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    public static IEnumerable<HierarchicalFileInfo> EnumerateHierarchicalFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, maxDepth,
+        filePredicate != null ? filePredicate.Match : default(Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>),
+        dirPredicate != null ? dirPredicate.Match : default(Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool>),
+        comparer != null ? comparer.Compare : default(Comparison<FileSystemInfo>));
+    }
+
+    #endregion
+    #region Get Hierarchical Files with IHierarchicalContext<T>
+
+    public static HierarchicalFileInfo[] GetFiles(this HierarchicalDirectoryInfo diStart,
+      Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFiles(filePredicate, dirPredicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      Func<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> filePredicate,
+      Func<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>, bool> dirPredicate,
+      Comparison<FileSystemInfo> comparison)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparison).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetFiles(this HierarchicalDirectoryInfo diStart,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(filePredicate, dirPredicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, SearchOption searchOption,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, searchOption, filePredicate, dirPredicate, comparer).ToArray();
+    }
+
+    public static HierarchicalFileInfo[] GetFiles(this HierarchicalDirectoryInfo diStart, string searchPattern, int maxDepth,
+      IPredicate<ElementContext<FileInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> filePredicate,
+      IPredicate<ElementContext<DirectoryInfo, IHierarchicalContext<HierarchicalDirectoryInfo>>> dirPredicate,
+      IComparer<FileSystemInfo> comparer)
+    {
+      return diStart.EnumerateHierarchicalFiles(searchPattern, maxDepth, filePredicate, dirPredicate, comparer).ToArray();
     }
 
     #endregion
@@ -802,16 +1540,16 @@ namespace PowerLib.System.IO
     public static int MoveTo(this DirectoryInfo diStart, Func<FileSystemInfo, bool> predicate,
       Func<FileSystemInfo, string> replacing, bool renameOnly)
     {
-      return diStart.MoveTo(DefaultSearchPattern, 0, false, predicate, replacing);
+      return diStart.MoveTo(DefaultSearchPattern, int.MaxValue, 0, predicate, replacing);
     }
 
-    public static int MoveTo(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+    public static int MoveTo(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
       Func<FileSystemInfo, bool> predicate, Func<FileSystemInfo, string> replacing)
     {
-      return diStart.MoveTo(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty, predicate, replacing);
+      return diStart.MoveTo(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, replacing);
     }
 
-    public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+    public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
       Func<FileSystemInfo, bool> predicate, Func<FileSystemInfo, string> replacing)
     {
       if (replacing == null)
@@ -824,7 +1562,7 @@ namespace PowerLib.System.IO
         throw new ArgumentOutOfRangeException("maxDepth");
 
       return diStart.MoveTo(
-        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
+        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
         (fsi, path) =>
         {
           if (string.IsNullOrEmpty(path))
@@ -856,16 +1594,16 @@ namespace PowerLib.System.IO
 		public static int MoveTo(this DirectoryInfo diStart,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Func<FileSystemInfo, string> replacing)
 		{
-			return diStart.MoveTo(DefaultSearchPattern, 0, false, predicate, replacing);
+			return diStart.MoveTo(DefaultSearchPattern, int.MaxValue, 0, predicate, replacing);
 		}
 
-		public static int MoveTo(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+		public static int MoveTo(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Func<FileSystemInfo, string> replacing)
 		{
-			return diStart.MoveTo(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty, predicate, replacing);
+			return diStart.MoveTo(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, replacing);
 		}
 
-		public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+		public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Func<FileSystemInfo, string> replacing)
 		{
       if (replacing == null)
@@ -878,7 +1616,7 @@ namespace PowerLib.System.IO
         throw new ArgumentOutOfRangeException("maxDepth");
 
       return diStart.MoveTo(
-        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
+        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
         (fsi, path) =>
         {
           if (string.IsNullOrEmpty(path))
@@ -920,16 +1658,16 @@ namespace PowerLib.System.IO
     public static int Delete(this DirectoryInfo diStart,
 			Func<FileSystemInfo, bool> predicate, bool recursive)
 		{
-			return diStart.Delete(DefaultSearchPattern, 0, false, predicate, recursive);
+			return diStart.Delete(DefaultSearchPattern, int.MaxValue, 0, predicate, recursive);
 		}
 
-		public static int Delete(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+		public static int Delete(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
 			Func<FileSystemInfo, bool> predicate, bool recursive)
 		{
-			return diStart.Delete(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty, predicate, recursive);
+			return diStart.Delete(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, recursive);
 		}
 
-		public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+		public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
 			Func<FileSystemInfo, bool> predicate, bool recursive)
 		{
       if (diStart == null)
@@ -940,7 +1678,7 @@ namespace PowerLib.System.IO
         throw new ArgumentOutOfRangeException("maxDepth");
 
       return diStart.Delete(recursive,
-        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
+        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
         (fsi, r) =>
         {
           FileInfo fi = fsi as FileInfo;
@@ -969,16 +1707,16 @@ namespace PowerLib.System.IO
 		public static int Delete(this DirectoryInfo diStart,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, bool recursive)
 		{
-			return diStart.Delete(DefaultSearchPattern, 0, false, predicate, recursive);
+			return diStart.Delete(DefaultSearchPattern, int.MaxValue, 0, predicate, recursive);
 		}
 
-		public static int Delete(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, bool excludeEmpty,
+		public static int Delete(this DirectoryInfo diStart, string searchPattern, SearchOption searchOption, FileSystemTraversalOptions traversalOptions,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, bool recursive)
 		{
-			return diStart.Delete(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : 0, excludeEmpty, predicate, recursive);
+			return diStart.Delete(searchPattern, searchOption == SearchOption.TopDirectoryOnly ? 1 : int.MaxValue, traversalOptions, predicate, recursive);
 		}
 
-		public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,
+		public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,
 			Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, bool recursive)
 		{
       if (diStart == null)
@@ -989,7 +1727,7 @@ namespace PowerLib.System.IO
         throw new ArgumentOutOfRangeException("maxDepth");
 
       return diStart.Delete(recursive,
-        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, excludeEmpty, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
+        di => di.EnumerateFileSystemInfos(searchPattern, maxDepth, traversalOptions, predicate, new SelectComparer<FileSystemInfo, bool>(t => t is FileInfo, ComparableComparer<bool>.Default).Compare),
         (fsi, r) =>
         {
           FileInfo fi = fsi as FileInfo;
@@ -1013,5 +1751,12 @@ namespace PowerLib.System.IO
     }
 
     #endregion
+  }
+
+  [Flags]
+  public enum FileSystemTraversalOptions
+  {
+    ExcludeStart = 1,
+    ExcludeEmpty = 2
   }
 }

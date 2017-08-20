@@ -87,8 +87,8 @@ namespace PowerLib.System.IO.Streamed.Typed
     {
       if (value.HasValue)
       {
-        stream.WriteDouble(value.Value.Index);
-        stream.WriteDouble(value.Value.Count);
+        stream.WriteInt32(value.Value.Index);
+        stream.WriteInt32(value.Value.Count);
       }
     }
 

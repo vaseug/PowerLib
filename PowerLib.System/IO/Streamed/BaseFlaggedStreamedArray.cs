@@ -21,7 +21,7 @@ namespace PowerLib.System.IO.Streamed
 
     protected override int AllocItemSize
     {
-      get { return FlagSize + (FixedDataSize.HasValue ? 0 : PwrBitConverter.GetSizeEncodingSize(ItemSizing, int.MaxValue)); }
+      get { return FlagSize + (FixedDataSize.HasValue ? 0 : PwrBitConverter.GetSizeEncodingSize(int.MaxValue, ItemSizing)); }
     }
 
     protected override int? FixedItemSize
@@ -34,7 +34,7 @@ namespace PowerLib.System.IO.Streamed
 
     protected virtual long GetAllocOffset(int index)
     {
-      return HeaderOffset + AllocItemSize * index + PwrBitConverter.GetSizeEncodingSize(CountSizing, int.MaxValue);
+      return HeaderOffset + AllocItemSize * index + PwrBitConverter.GetSizeEncodingSize(int.MaxValue, CountSizing);
     }
 
     protected abstract bool HasItemData(F flags);

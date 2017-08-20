@@ -91,8 +91,8 @@ namespace PowerLib.SqlServer.Text
       switch (_state = rd.ReadEnum<State>())
       {
         case State.Valued:
-          _separator = rd.ReadString(Encoding.Unicode, SizeEncoding.VB);
-          _sb.Append(rd.ReadString(Encoding.Unicode, SizeEncoding.VB));
+          _separator = rd.ReadString(SqlRuntime.TextEncoding, SizeEncoding.VB);
+          _sb.Append(rd.ReadString(SqlRuntime.TextEncoding, SizeEncoding.VB));
           break;
         case State.Empty:
           _separator = string.Empty;
@@ -105,8 +105,8 @@ namespace PowerLib.SqlServer.Text
       writer.WriteEnum(_state);
       if (_state == State.Valued)
       {
-        writer.Write(_separator, Encoding.Unicode, SizeEncoding.VB);
-        writer.Write(_sb.ToString(), Encoding.Unicode, SizeEncoding.VB);
+        writer.Write(_separator, SqlRuntime.TextEncoding, SizeEncoding.VB);
+        writer.Write(_sb.ToString(), SqlRuntime.TextEncoding, SizeEncoding.VB);
       }
     }
 

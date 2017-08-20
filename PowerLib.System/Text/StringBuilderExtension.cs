@@ -100,5 +100,15 @@ namespace PowerLib.System.Text
         sb.Append(value);
       return sb;
     }
+
+    public static StringBuilder AppendChars(this StringBuilder sb, IEnumerable<char> chars)
+    {
+      if (sb == null)
+        throw new ArgumentNullException("sb");
+
+      foreach (var ch in chars)
+        sb.Append(ch);
+      return sb;
+    }
   }
 }

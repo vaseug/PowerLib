@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.IO;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using PowerLib.System.Collections;
@@ -846,6 +847,135 @@ namespace PowerLib.System.Data.Entity
 
     [Column]
     public Guid? Value
+    {
+      get;
+      set;
+    }
+  }
+
+  #endregion
+  #region File rows
+
+  [ComplexType]
+  public sealed class FileBlockRow
+  {
+    public long Offset
+    {
+      get;
+      set;
+    }
+
+    public Byte[] Value
+    {
+      get;
+      set;
+    }
+  }
+
+  [ComplexType]
+  public sealed class FileLineRow
+  {
+    public long Offset
+    {
+      get;
+      set;
+    }
+
+    public String Value
+    {
+      get;
+      set;
+    }
+  }
+
+  [ComplexType]
+  public sealed class FileSystemRow
+  {
+    public bool IsDirectory
+    {
+      get;
+      set;
+    }
+
+    public int Depth
+    {
+      get;
+      set;
+    }
+
+    public string FullName
+    {
+      get;
+      set;
+    }
+
+    public string RelativeName
+    {
+      get;
+      set;
+    }
+
+    public string ParentName
+    {
+      get;
+      set;
+    }
+
+    public string Name
+    {
+      get;
+      set;
+    }
+
+    public string Extension
+    {
+      get;
+      set;
+    }
+
+    public FileAttributes Attributes
+    {
+      get;
+      set;
+    }
+
+    public long Length
+    {
+      get;
+      set;
+    }
+
+    public DateTime CreationTime
+    {
+      get;
+      set;
+    }
+
+    public DateTime CreationTimeUtc
+    {
+      get;
+      set;
+    }
+
+    public DateTime LastWriteTime
+    {
+      get;
+      set;
+    }
+
+    public DateTime LastWriteTimeUtc
+    {
+      get;
+      set;
+    }
+
+    public DateTime LastAccessTime
+    {
+      get;
+      set;
+    }
+
+    public DateTime LastAccessTimeUtc
     {
       get;
       set;

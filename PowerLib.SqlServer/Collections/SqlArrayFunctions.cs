@@ -34,7 +34,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "bArrayParse", IsDeterministic = true)]
-    public static SqlBytes BooleanArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BooleanArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing)
     {
       if (str.IsNull || countSizing.IsNull)
@@ -47,6 +47,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "bArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BooleanArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -232,7 +233,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "tiArrayParse", IsDeterministic = true)]
-    public static SqlBytes ByteArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes ByteArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -246,6 +247,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "tiArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString ByteArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -431,7 +433,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "siArrayParse", IsDeterministic = true)]
-    public static SqlBytes Int16ArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int16ArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -445,6 +447,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "siArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int16ArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -630,7 +633,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "iArrayParse", IsDeterministic = true)]
-    public static SqlBytes Int32ArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int32ArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -644,6 +647,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "iArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int32ArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -829,7 +833,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "biArrayParse", IsDeterministic = true)]
-    public static SqlBytes Int64ArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int64ArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -843,6 +847,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "biArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int64ArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -1028,7 +1033,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "sfArrayParse", IsDeterministic = true)]
-    public static SqlBytes SingleArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes SingleArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -1042,6 +1047,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "sfArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString SingleArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -1227,7 +1233,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dfArrayParse", IsDeterministic = true)]
-    public static SqlBytes DoubleArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes DoubleArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -1241,6 +1247,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dfArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString DoubleArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -1426,7 +1433,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dtArrayParse", IsDeterministic = true)]
-    public static SqlBytes DateTimeArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes DateTimeArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -1440,6 +1447,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dtArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString DateTimeArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -1625,7 +1633,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "uidArrayParse", IsDeterministic = true)]
-    public static SqlBytes GuidArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes GuidArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -1639,6 +1647,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "uidArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString GuidArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -1819,7 +1828,7 @@ namespace PowerLib.SqlServer.Collections
         return SqlBytes.Null;
 
       var array = new SqlBytes(new MemoryStream());
-      using (new StringStreamedArray(array.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, Encoding.Unicode, null, default(String).Repeat(length.Value), true, false)) ;
+      using (new StringStreamedArray(array.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, SqlRuntime.TextEncoding, null, default(String).Repeat(length.Value), true, false)) ;
       return array;
     }
 
@@ -1832,7 +1841,7 @@ namespace PowerLib.SqlServer.Collections
       if (length.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpId.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpId.Value);
+      Encoding encoding = cpId.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpId.Value);
       var array = new SqlBytes(new MemoryStream());
       using (new StringStreamedArray(array.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, default(String).Repeat(length.Value), true, false)) ;
       return array;
@@ -1846,14 +1855,14 @@ namespace PowerLib.SqlServer.Collections
       if (length.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpName.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpName.Value);
+      Encoding encoding = cpName.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpName.Value);
       var array = new SqlBytes(new MemoryStream());
       using (new StringStreamedArray(array.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, default(String).Repeat(length.Value), true, false)) ;
       return array;
     }
 
     [SqlFunction(Name = "strArrayParse", IsDeterministic = true)]
-    public static SqlBytes StringArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -1862,12 +1871,12 @@ namespace PowerLib.SqlServer.Collections
 
       var array = SqlFormatting.ParseArray<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       var result = new SqlBytes(new MemoryStream());
-      using (new StringStreamedArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, Encoding.Unicode, null, array, true, false)) ;
+      using (new StringStreamedArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, SqlRuntime.TextEncoding, null, array, true, false)) ;
       return result;
     }
 
     [SqlFunction(Name = "strArrayParseByCpId", IsDeterministic = true)]
-    public static SqlBytes StringArrayParseByCpId([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringArrayParseByCpId([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing,
       [DefaultValue("NULL")]SqlInt32 cpId)
@@ -1875,7 +1884,7 @@ namespace PowerLib.SqlServer.Collections
       if (str.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpId.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpId.Value);
+      Encoding encoding = cpId.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpId.Value);
       var array = SqlFormatting.ParseArray<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       var result = new SqlBytes(new MemoryStream());
       using (new StringStreamedArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, array, true, false)) ;
@@ -1883,7 +1892,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayParseByCpName", IsDeterministic = true)]
-    public static SqlBytes StringArrayParseByCpName([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringArrayParseByCpName([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing,
       [SqlFacet(MaxSize = 128)][DefaultValue("NULL")]SqlString cpName)
@@ -1891,7 +1900,7 @@ namespace PowerLib.SqlServer.Collections
       if (str.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpName.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpName.Value);
+      Encoding encoding = cpName.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpName.Value);
       var array = SqlFormatting.ParseArray<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       var result = new SqlBytes(new MemoryStream());
       using (new StringStreamedArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, array, true, false)) ;
@@ -1899,6 +1908,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString StringArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -1925,7 +1935,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayIndexOf", IsDeterministic = true)]
-    public static SqlInt32 StringArrayIndexOf(SqlBytes array, SqlString value)
+    public static SqlInt32 StringArrayIndexOf(SqlBytes array, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -1941,6 +1951,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayGet", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString StringArrayGet(SqlBytes array, SqlInt32 index)
     {
       if (array == null)
@@ -1957,7 +1968,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArraySet", IsDeterministic = true)]
-    public static SqlBytes StringArraySet(SqlBytes array, SqlInt32 index, SqlString value)
+    public static SqlBytes StringArraySet(SqlBytes array, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -2010,7 +2021,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayFillRange", IsDeterministic = true)]
-    public static SqlBytes StringArrayFillRange(SqlBytes array, SqlInt32 index, SqlInt32 count, SqlString value)
+    public static SqlBytes StringArrayFillRange(SqlBytes array, SqlInt32 index, SqlInt32 count, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -2060,7 +2071,7 @@ namespace PowerLib.SqlServer.Collections
       }
     }
 
-    private static void StringArrayFillRow(object obj, out SqlInt32 Index, out SqlString Value)
+    private static void StringArrayFillRow(object obj, out SqlInt32 Index, [SqlFacet(MaxSize = -1)] out SqlString Value)
     {
       Tuple<int, String> tuple = (Tuple<int, String>)obj;
       Index = tuple.Item1;
@@ -2084,7 +2095,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayParse", IsDeterministic = true)]
-    public static SqlBytes BinaryArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BinaryArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -2098,6 +2109,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BinaryArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -2124,7 +2136,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayIndexOf", IsDeterministic = true)]
-    public static SqlInt32 BinaryArrayIndexOf(SqlBytes array, SqlBinary value)
+    public static SqlInt32 BinaryArrayIndexOf(SqlBytes array, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -2140,6 +2152,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayGet", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlBinary BinaryArrayGet(SqlBytes array, SqlInt32 index)
     {
       if (array == null)
@@ -2156,7 +2169,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArraySet", IsDeterministic = true)]
-    public static SqlBytes BinaryArraySet(SqlBytes array, SqlInt32 index, SqlBinary value)
+    public static SqlBytes BinaryArraySet(SqlBytes array, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -2209,7 +2222,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayFillRange", IsDeterministic = true)]
-    public static SqlBytes BinaryArrayFillRange(SqlBytes array, SqlInt32 index, SqlInt32 count, SqlBinary value)
+    public static SqlBytes BinaryArrayFillRange(SqlBytes array, SqlInt32 index, SqlInt32 count, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -2259,7 +2272,7 @@ namespace PowerLib.SqlServer.Collections
       }
     }
 
-    private static void BinaryArrayFillRow(object obj, out SqlInt32 Index, out SqlBinary Value)
+    private static void BinaryArrayFillRow(object obj, out SqlInt32 Index, [SqlFacet(MaxSize = -1)] out SqlBinary Value)
     {
       Tuple<int, Byte[]> tuple = (Tuple<int, Byte[]>)obj;
       Index = tuple.Item1;
@@ -2283,7 +2296,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "rngArrayParse", IsDeterministic = true)]
-    public static SqlBytes RangeArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes RangeArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -2297,6 +2310,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "rngArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString RangeArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -2466,6 +2480,206 @@ namespace PowerLib.SqlServer.Collections
     }
 
     #endregion
+    #region SqlLongRange array methods
+
+    [SqlFunction(Name = "brngArrayCreate", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayCreate([SqlFacet(IsNullable = false)]SqlInt32 length,
+      [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
+      [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
+    {
+      if (countSizing.IsNull || compact.IsNull)
+        return SqlBytes.Null;
+
+      var array = new SqlBytes(new MemoryStream());
+      using (new NulLongRangeStreamedArray(array.Stream, (SizeEncoding)countSizing.Value, compact.Value, default(LongRange?).Repeat(length.Value), true, false)) ;
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayParse", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
+      [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
+      [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
+    {
+      if (str.IsNull || countSizing.IsNull || compact.IsNull)
+        return SqlBytes.Null;
+
+      var result = new SqlBytes(new MemoryStream());
+      var array = SqlFormatting.ParseArray<LongRange?>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlLongRange.Parse(t).Value : default(LongRange?));
+      using (new NulLongRangeStreamedArray(result.Stream, (SizeEncoding)countSizing.Value, compact.Value, array, true, false)) ;
+      return result;
+    }
+
+    [SqlFunction(Name = "brngArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
+    public static SqlString LongRangeArrayFormat(SqlBytes array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlFormatting.NullText;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+        return SqlFormatting.Format(sa.ToArray(), t => (t.HasValue ? new SqlLongRange(t.Value) : SqlLongRange.Null).ToString());
+    }
+
+    [SqlFunction(Name = "brngArrayLength", IsDeterministic = true)]
+    public static SqlInt32 LongRangeArrayLength(SqlBytes array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlInt32.Null;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+        return sa.Count;
+    }
+
+    [SqlFunction(Name = "brngArrayIndexOf", IsDeterministic = true)]
+    public static SqlInt32 LongRangeArrayIndexOf(SqlBytes array, SqlLongRange value)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlInt32.Null;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+      {
+        var index = sa.IndexOf(value.IsNull ? default(LongRange?) : value.Value);
+        return index < 0 ? SqlInt32.Null : index;
+      }
+    }
+
+    [SqlFunction(Name = "brngArrayGet", IsDeterministic = true)]
+    public static SqlLongRange LongRangeArrayGet(SqlBytes array, SqlInt32 index)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull || index.IsNull)
+        return SqlLongRange.Null;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+      {
+        var v = sa[index.Value];
+        return !v.HasValue ? SqlLongRange.Null : v.Value;
+      }
+    }
+
+    [SqlFunction(Name = "brngArraySet", IsDeterministic = true)]
+    public static SqlBytes LongRangeArraySet(SqlBytes array, SqlInt32 index, SqlLongRange value)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull || index.IsNull)
+        return array;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+        sa[index.Value] = value.IsNull ? default(LongRange?) : value.Value;
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayGetRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayGetRange(SqlBytes array, SqlInt32 index, SqlInt32 count)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlBytes.Null;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sa.Count - (count.IsNull ? sa.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? sa.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        var result = new SqlBytes(new MemoryStream());
+        using (new NulLongRangeStreamedArray(result.Stream, sa.CountSizing, sa.Compact, sa.EnumerateRange(indexValue, countValue).Counted(countValue), true, false)) ;
+        return result;
+      }
+    }
+
+    [SqlFunction(Name = "brngArraySetRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArraySetRange(SqlBytes array, SqlInt32 index, SqlBytes range)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (range == null)
+        throw new ArgumentNullException("range");
+
+      if (array.IsNull || range.IsNull)
+        return array;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+      using (var ra = new NulLongRangeStreamedArray(range.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sa.Count : index.Value;
+        sa.SetRange(indexValue, ra);
+      }
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayFillRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayFillRange(SqlBytes array, SqlInt32 index, SqlInt32 count, SqlLongRange value)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return array;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sa.Count - (count.IsNull ? sa.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? sa.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        sa.SetRepeat(indexValue, value.IsNull ? default(LongRange?) : value.Value, countValue);
+      }
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayToCollection", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayToCollection(SqlBytes array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlBytes.Null;
+
+      var coll = new SqlBytes(new MemoryStream());
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+      using (new NulLongRangeStreamedCollection(coll.Stream, sa.CountSizing, sa.Compact, sa, true, false)) ;
+      return coll;
+    }
+
+    [SqlFunction(Name = "brngArrayEnumerate", IsDeterministic = true, FillRowMethodName = "LongRangeArrayFillRow")]
+    public static IEnumerable LongRangeArrayEnumerate(SqlBytes array, SqlInt32 index, SqlInt32 count)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        yield break;
+
+      using (var sa = new NulLongRangeStreamedArray(array.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? sa.Count - (count.IsNull ? sa.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? sa.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        foreach (var item in sa.EnumerateRange(indexValue, countValue))
+          yield return Tuple.Create(indexValue++, item);
+      }
+    }
+
+    private static void LongRangeArrayFillRow(object obj, out SqlInt32 Index, out SqlLongRange Value)
+    {
+      Tuple<int, LongRange?> tuple = (Tuple<int, LongRange?>)obj;
+      Index = tuple.Item1;
+      Value = tuple.Item2.HasValue ? tuple.Item2.Value : SqlLongRange.Null;
+    }
+
+    #endregion
     #region SqlBigInteger array methods
 
     [SqlFunction(Name = "hiArrayCreate", IsDeterministic = true)]
@@ -2482,7 +2696,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "hiArrayParse", IsDeterministic = true)]
-    public static SqlBytes BigIntegerArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BigIntegerArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -2496,6 +2710,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "hiArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BigIntegerArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -2681,7 +2896,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "cxArrayParse", IsDeterministic = true)]
-    public static SqlBytes ComplexArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes ComplexArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -2695,6 +2910,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "cxArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString ComplexArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -2880,7 +3096,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "haArrayParse", IsDeterministic = true)]
-    public static SqlBytes HourAngleArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes HourAngleArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -2894,6 +3110,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "haArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString HourAngleArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -3079,7 +3296,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "gaArrayParse", IsDeterministic = true)]
-    public static SqlBytes GradAngleArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes GradAngleArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -3093,6 +3310,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "gaArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString GradAngleArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -3278,7 +3496,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "saArrayParse", IsDeterministic = true)]
-    public static SqlBytes SexagesimalAngleArrayParse([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes SexagesimalAngleArrayParse([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -3292,6 +3510,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "saArrayFormat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString SexagesimalAngleArrayFormat(SqlBytes array)
     {
       if (array == null)
@@ -3477,7 +3696,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "bArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes BooleanArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BooleanArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing)
     {
       if (str.IsNull || countSizing.IsNull)
@@ -3491,6 +3710,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "bArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BooleanArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -3810,7 +4030,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "tiArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes ByteArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes ByteArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -3825,6 +4045,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "tiArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString ByteArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -4144,7 +4365,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "siArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes Int16ArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int16ArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -4159,6 +4380,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "siArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int16ArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -4478,7 +4700,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "iArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes Int32ArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int32ArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -4493,6 +4715,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "iArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int32ArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -4812,7 +5035,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "biArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes Int64ArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes Int64ArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -4827,6 +5050,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "biArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString Int64ArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -5146,7 +5370,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "sfArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes SingleArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes SingleArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -5161,6 +5385,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "sfArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString SingleArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -5480,7 +5705,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dfArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes DoubleArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes DoubleArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -5495,6 +5720,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dfArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString DoubleArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -5814,7 +6040,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dtArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes DateTimeArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes DateTimeArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -5829,6 +6055,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "dtArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString DateTimeArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -6148,7 +6375,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "uidArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes GuidArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes GuidArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -6163,6 +6390,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "uidArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString GuidArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -6477,12 +6705,12 @@ namespace PowerLib.SqlServer.Collections
 
       var array = new SqlBytes(new MemoryStream());
       using (var l = new NulInt32StreamedArray(lengths.Stream, true, false))
-      using (var a = new StringStreamedRegularArray(array.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, Encoding.Unicode, null, l.Select(t => t.Value).ToArray(), true, false))
+      using (var a = new StringStreamedRegularArray(array.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, SqlRuntime.TextEncoding, null, l.Select(t => t.Value).ToArray(), true, false))
         return array;
     }
 
     [SqlFunction(Name = "strArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes StringArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -6491,13 +6719,13 @@ namespace PowerLib.SqlServer.Collections
 
       var result = new SqlBytes(new MemoryStream());
       var array = SqlFormatting.ParseRegular<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
-      using (var a = new StringStreamedRegularArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, Encoding.Unicode, null, array.GetRegularArrayLengths(), true, false))
+      using (var a = new StringStreamedRegularArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, SqlRuntime.TextEncoding, null, array.GetRegularArrayLengths(), true, false))
         a.SetRange(0, array.EnumerateAsRegular<String>().Counted(array.Length));
       return result;
     }
 
     [SqlFunction(Name = "strArrayParseRegularByCpId", IsDeterministic = true)]
-    public static SqlBytes StringArrayParseRegularByCpId([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringArrayParseRegularByCpId([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing,
       [DefaultValue("NULL")]SqlInt32 cpId)
@@ -6505,7 +6733,7 @@ namespace PowerLib.SqlServer.Collections
       if (str.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpId.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpId.Value);
+      Encoding encoding = cpId.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpId.Value);
       var result = new SqlBytes(new MemoryStream());
       var array = SqlFormatting.ParseRegular<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       using (var a = new StringStreamedRegularArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, array.GetRegularArrayLengths(), true, false))
@@ -6514,7 +6742,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayParseRegularByCpName", IsDeterministic = true)]
-    public static SqlBytes StringArrayParseRegularByCpName([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes StringArrayParseRegularByCpName([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing,
       [SqlFacet(MaxSize = 128)][DefaultValue("NULL")]SqlString cpName)
@@ -6522,7 +6750,7 @@ namespace PowerLib.SqlServer.Collections
       if (str.IsNull || countSizing.IsNull || itemSizing.IsNull)
         return SqlBytes.Null;
 
-      Encoding encoding = cpName.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpName.Value);
+      Encoding encoding = cpName.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpName.Value);
       var result = new SqlBytes(new MemoryStream());
       var array = SqlFormatting.ParseRegular<String>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlFormatting.Unquote(t) : default(String));
       using (var a = new StringStreamedRegularArray(result.Stream, (SizeEncoding)countSizing.Value, (SizeEncoding)itemSizing.Value, encoding, null, array.GetRegularArrayLengths(), true, false))
@@ -6531,6 +6759,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString StringArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -6598,6 +6827,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayGetFlat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString StringArrayGetFlat(SqlBytes array, SqlInt32 index)
     {
       if (array == null)
@@ -6614,7 +6844,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArraySetFlat", IsDeterministic = true)]
-    public static SqlBytes StringArraySetFlat(SqlBytes array, SqlInt32 index, SqlString value)
+    public static SqlBytes StringArraySetFlat(SqlBytes array, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -6667,7 +6897,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayFillFlatRange", IsDeterministic = true)]
-    public static SqlBytes StringArrayFillFlatRange(SqlBytes array, SqlInt32 index, SqlInt32 count, SqlString value)
+    public static SqlBytes StringArrayFillFlatRange(SqlBytes array, SqlInt32 index, SqlInt32 count, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -6703,6 +6933,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayGetDim", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString StringArrayGetDim(SqlBytes array, SqlBytes indices)
     {
       if (array == null)
@@ -6722,7 +6953,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArraySetDim", IsDeterministic = true)]
-    public static SqlBytes StringArraySetDim(SqlBytes array, SqlBytes indices, SqlString value)
+    public static SqlBytes StringArraySetDim(SqlBytes array, SqlBytes indices, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -6783,7 +7014,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "strArrayFillDimRange", IsDeterministic = true)]
-    public static SqlBytes StringArrayFillDimRange(SqlBytes array, SqlBytes ranges, SqlString value)
+    public static SqlBytes StringArrayFillDimRange(SqlBytes array, SqlBytes ranges, [SqlFacet(MaxSize = -1)] SqlString value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -6823,7 +7054,7 @@ namespace PowerLib.SqlServer.Collections
       }
     }
 
-    private static void StringArrayFillRowRegular(object obj, out SqlInt32 FlatIndex, out SqlBytes DimIndices, out SqlString Value)
+    private static void StringArrayFillRowRegular(object obj, out SqlInt32 FlatIndex, out SqlBytes DimIndices, [SqlFacet(MaxSize = -1)] out SqlString Value)
     {
       Tuple<int, int[], String> tuple = (Tuple<int, int[], String>)obj;
       FlatIndex = tuple.Item1;
@@ -6851,7 +7082,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes BinaryArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BinaryArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -6866,6 +7097,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BinaryArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -6933,6 +7165,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayGetFlat", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlBinary BinaryArrayGetFlat(SqlBytes array, SqlInt32 index)
     {
       if (array == null)
@@ -6949,7 +7182,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArraySetFlat", IsDeterministic = true)]
-    public static SqlBytes BinaryArraySetFlat(SqlBytes array, SqlInt32 index, SqlBinary value)
+    public static SqlBytes BinaryArraySetFlat(SqlBytes array, SqlInt32 index, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -7002,7 +7235,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayFillFlatRange", IsDeterministic = true)]
-    public static SqlBytes BinaryArrayFillFlatRange(SqlBytes array, SqlInt32 index, SqlInt32 count, SqlBinary value)
+    public static SqlBytes BinaryArrayFillFlatRange(SqlBytes array, SqlInt32 index, SqlInt32 count, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -7038,6 +7271,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayGetDim", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlBinary BinaryArrayGetDim(SqlBytes array, SqlBytes indices)
     {
       if (array == null)
@@ -7057,7 +7291,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArraySetDim", IsDeterministic = true)]
-    public static SqlBytes BinaryArraySetDim(SqlBytes array, SqlBytes indices, SqlBinary value)
+    public static SqlBytes BinaryArraySetDim(SqlBytes array, SqlBytes indices, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -7118,7 +7352,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "binArrayFillDimRange", IsDeterministic = true)]
-    public static SqlBytes BinaryArrayFillDimRange(SqlBytes array, SqlBytes ranges, SqlBinary value)
+    public static SqlBytes BinaryArrayFillDimRange(SqlBytes array, SqlBytes ranges, [SqlFacet(MaxSize = -1)] SqlBinary value)
     {
       if (array == null)
         throw new ArgumentNullException("array");
@@ -7158,7 +7392,7 @@ namespace PowerLib.SqlServer.Collections
       }
     }
 
-    private static void BinaryArrayFillRowRegular(object obj, out SqlInt32 FlatIndex, out SqlBytes DimIndices, out SqlBinary Value)
+    private static void BinaryArrayFillRowRegular(object obj, out SqlInt32 FlatIndex, out SqlBytes DimIndices, [SqlFacet(MaxSize = -1)] out SqlBinary Value)
     {
       Tuple<int, int[], byte[]> tuple = (Tuple<int, int[], byte[]>)obj;
       FlatIndex = tuple.Item1;
@@ -7185,7 +7419,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "rngArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes RangeArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes RangeArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -7200,6 +7434,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "rngArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString RangeArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -7502,6 +7737,341 @@ namespace PowerLib.SqlServer.Collections
     }
 
     #endregion
+    #region SqlLongRange regular array methods
+
+    [SqlFunction(Name = "brngArrayCreateRegular", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayCreateRegular([SqlFacet(IsNullable = false)]SqlBytes lengths,
+      [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
+      [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
+    {
+      if (lengths.IsNull || countSizing.IsNull || compact.IsNull)
+        return SqlBytes.Null;
+
+      var array = new SqlBytes(new MemoryStream());
+      using (var l = new NulInt32StreamedArray(lengths.Stream, true, false))
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, (SizeEncoding)countSizing.Value, compact.IsNull, l.Select(t => t.Value).ToArray(), true, false))
+        return array;
+    }
+
+    [SqlFunction(Name = "brngArrayParseRegular", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
+      [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
+      [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
+    {
+      if (str.IsNull || countSizing.IsNull || compact.IsNull)
+        return SqlBytes.Null;
+
+      var result = new SqlBytes(new MemoryStream());
+      var array = SqlFormatting.ParseRegular<LongRange?>(str.Value, t => !t.Equals(SqlFormatting.NullText, StringComparison.InvariantCultureIgnoreCase) ? SqlLongRange.Parse(t).Value : default(LongRange?));
+      using (var a = new NulLongRangeStreamedRegularArray(result.Stream, (SizeEncoding)countSizing.Value, compact.IsNull, array.GetRegularArrayLengths(), true, false))
+        a.SetRange(0, array.EnumerateAsRegular<LongRange?>().Counted(array.Length));
+      return result;
+    }
+
+    [SqlFunction(Name = "brngArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
+    public static SqlString LongRangeArrayFormatRegular(SqlBytes array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlFormatting.NullText;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+        return SqlFormatting.FormatRegular<LongRange?>(a.ToRegularArray(), t => (t.HasValue ? new SqlLongRange(t.Value) : SqlLongRange.Null).ToString());
+    }
+
+    [SqlFunction(Name = "brngArrayRank", IsDeterministic = true)]
+    public static SqlInt32 LongRangeArrayRank(SqlBytes array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlInt32.Null;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+        return a.Lengths.Count;
+    }
+
+    [SqlFunction(Name = "brngArrayFlatLength", IsDeterministic = true)]
+    public static SqlInt32 LongRangeArrayFlatLength(SqlBytes array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlInt32.Null;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+        return a.Count;
+    }
+
+    [SqlFunction(Name = "brngArrayDimLengths", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayDimLengths(SqlBytes array)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlBytes.Null;
+
+      var lengths = new SqlBytes(new MemoryStream());
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      using (new NulInt32StreamedArray(lengths.Stream, SizeEncoding.B1, true, a.Lengths.Select(t => (int?)t).Counted(a.Lengths.Count), true, false)) ;
+      return lengths;
+    }
+
+    [SqlFunction(Name = "brngArrayDimLength", IsDeterministic = true)]
+    public static SqlInt32 LongRangeArrayDimLength(SqlBytes array, SqlInt32 index)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull || index.IsNull)
+        return SqlInt32.Null;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+        return a.Lengths[index.Value];
+    }
+
+    [SqlFunction(Name = "brngArrayGetFlat", IsDeterministic = true)]
+    public static SqlLongRange LongRangeArrayGetFlat(SqlBytes array, SqlInt32 index)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull || index.IsNull)
+        return SqlLongRange.Null;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      {
+        var v = a[index.Value];
+        return !v.HasValue ? SqlLongRange.Null : v.Value;
+      }
+    }
+
+    [SqlFunction(Name = "brngArraySetFlat", IsDeterministic = true)]
+    public static SqlBytes LongRangeArraySetFlat(SqlBytes array, SqlInt32 index, SqlLongRange value)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull || index.IsNull)
+        return array;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+        a[index.Value] = value.IsNull ? default(LongRange?) : value.Value;
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayGetFlatRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayGetFlatRange(SqlBytes array, SqlInt32 index, SqlInt32 count)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return SqlBytes.Null;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? a.Count - (count.IsNull ? a.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? a.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        var result = new SqlBytes(new MemoryStream());
+        using (new NulLongRangeStreamedArray(result.Stream, a.CountSizing, true, a.EnumerateRange(indexValue, countValue).Counted(countValue), true, false)) ;
+        return result;
+      }
+    }
+
+    [SqlFunction(Name = "brngArraySetFlatRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArraySetFlatRange(SqlBytes array, SqlInt32 index, SqlBytes range)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (range == null)
+        throw new ArgumentNullException("range");
+
+      if (array.IsNull || range.IsNull)
+        return array;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      using (var r = new NulLongRangeStreamedArray(range.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? a.Count : index.Value;
+        a.SetRange(indexValue, r);
+      }
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayFillFlatRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayFillFlatRange(SqlBytes array, SqlInt32 index, SqlInt32 count, SqlLongRange value)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        return array;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? a.Count - (count.IsNull ? a.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? a.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        a.SetRepeat(indexValue, value.IsNull ? default(LongRange?) : value.Value, countValue);
+      }
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayEnumerateFlat", IsDeterministic = true, FillRowMethodName = "LongRangeArrayFillRowRegular")]
+    public static IEnumerable LongRangeArrayEnumerateFlat(SqlBytes array, SqlInt32 index, SqlInt32 count)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+
+      if (array.IsNull)
+        yield break;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      {
+        int indexValue = index.IsNull ? a.Count - (count.IsNull ? a.Count : count.Value) : index.Value;
+        int countValue = count.IsNull ? a.Count - (index.IsNull ? 0 : index.Value) : count.Value;
+        foreach (var item in a.EnumerateRange(indexValue, countValue))
+          yield return Tuple.Create(indexValue, a.GetDimIndices(indexValue++), item);
+      }
+    }
+
+    [SqlFunction(Name = "brngArrayGetDim", IsDeterministic = true)]
+    public static SqlLongRange LongRangeArrayGetDim(SqlBytes array, SqlBytes indices)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (indices == null)
+        throw new ArgumentNullException("indices");
+
+      if (array.IsNull || indices.IsNull)
+        return SqlLongRange.Null;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      using (var d = new NulInt32StreamedArray(indices.Stream, true, false))
+      {
+        var v = a.GetValue(d.Select(t => t.Value).ToArray());
+        return !v.HasValue ? SqlLongRange.Null : v.Value;
+      }
+    }
+
+    [SqlFunction(Name = "brngArraySetDim", IsDeterministic = true)]
+    public static SqlBytes LongRangeArraySetDim(SqlBytes array, SqlBytes indices, SqlLongRange value)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (indices == null)
+        throw new ArgumentNullException("indices");
+
+      if (array.IsNull || indices.IsNull)
+        return array;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, false))
+      using (var d = new NulInt32StreamedArray(indices.Stream, true, false))
+        a.SetValue(value.IsNull ? default(LongRange?) : value.Value, d.Select(t => t.Value).ToArray());
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayGetDimRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayGetDimRange(SqlBytes array, SqlBytes ranges)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (ranges == null)
+        throw new ArgumentNullException("ranges");
+
+      if (array.IsNull || ranges.IsNull)
+        return SqlBytes.Null;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, true))
+      using (var r = new NulRangeStreamedArray(ranges.Stream, true, true))
+      {
+        Range[] ra = r.Select(t => t.Value).ToArray();
+        var result = new SqlBytes(new MemoryStream());
+        using (var d = new NulLongRangeStreamedRegularArray(result.Stream, a.CountSizing, true, ra.Select(t => t.Count).ToArray(), true, true))
+          a.EnumerateRangeIndex(ra)
+            .ForEach((t, i) => { d[i] = a[t]; });
+        return result;
+      }
+    }
+
+    [SqlFunction(Name = "brngArraySetDimRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArraySetDimRange(SqlBytes array, SqlBytes indices, SqlBytes range)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (indices == null)
+        throw new ArgumentNullException("indices");
+      if (range == null)
+        throw new ArgumentNullException("range");
+
+      if (array.IsNull || indices.IsNull || range.IsNull)
+        return array;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, true))
+      using (var r = new NulLongRangeStreamedRegularArray(range.Stream, true, true))
+      using (var n = new NulInt32StreamedArray(indices.Stream, true, true))
+        a.EnumerateRangeIndex(r.Lengths.Select((l, i) => new Range(n[i].Value, l)).ToArray())
+          .ForEach((t, i) => { a[t] = r[i]; });
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayFillDimRange", IsDeterministic = true)]
+    public static SqlBytes LongRangeArrayFillDimRange(SqlBytes array, SqlBytes ranges, SqlLongRange value)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (ranges == null)
+        throw new ArgumentNullException("ranges");
+
+      if (array.IsNull || ranges.IsNull)
+        return array;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, true))
+      using (var r = new NulRangeStreamedArray(ranges.Stream, true, true))
+      {
+        Range[] ra = r.Select(t => t.Value).ToArray();
+        a.EnumerateRangeIndex(ra)
+          .ForEach(t => { a[t] = value.IsNull ? default(LongRange?) : value.Value; });
+      }
+      return array;
+    }
+
+    [SqlFunction(Name = "brngArrayEnumerateDim", IsDeterministic = true, FillRowMethodName = "LongRangeArrayFillRowRegular")]
+    public static IEnumerable LongRangeArrayEnumerateDim(SqlBytes array, SqlBytes ranges)
+    {
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (ranges == null)
+        throw new ArgumentNullException("ranges");
+
+      if (array.IsNull || ranges.IsNull)
+        yield break;
+
+      using (var a = new NulLongRangeStreamedRegularArray(array.Stream, true, true))
+      using (var r = new NulRangeStreamedArray(ranges.Stream, true, true))
+      {
+        Range[] ra = r.Select(t => t.Value).ToArray();
+        foreach (var fi in a.EnumerateRangeIndex(ra))
+          yield return Tuple.Create(fi, a.GetDimIndices(fi), a[fi]);
+      }
+    }
+
+    private static void LongRangeArrayFillRowRegular(object obj, out SqlInt32 FlatIndex, out SqlBytes DimIndices, out SqlLongRange Value)
+    {
+      Tuple<int, int[], LongRange?> tuple = (Tuple<int, int[], LongRange?>)obj;
+      FlatIndex = tuple.Item1;
+      DimIndices = new SqlBytes(new MemoryStream());
+      using (new NulInt32StreamedArray(DimIndices.Stream, SizeEncoding.B1, true, tuple.Item2.Select(t => (int?)t).Counted(tuple.Item2.Length), true, false)) ;
+      Value = tuple.Item3.HasValue ? tuple.Item3.Value : SqlLongRange.Null;
+    }
+
+    #endregion
     #region SqlBigInteger regular array methods
 
     [SqlFunction(Name = "hiArrayCreateRegular", IsDeterministic = true)]
@@ -7519,7 +8089,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "hiArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes BigIntegerArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes BigIntegerArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte itemSizing)
     {
@@ -7534,6 +8104,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "hiArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString BigIntegerArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -7853,7 +8424,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "cxArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes ComplexArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes ComplexArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -7868,6 +8439,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "cxArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString ComplexArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -8187,7 +8759,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "haArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes HourAngleArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes HourAngleArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -8202,6 +8774,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "haArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString HourAngleArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -8521,7 +9094,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "gaArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes GradAngleArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes GradAngleArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -8536,6 +9109,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "gaArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString GradAngleArrayFormatRegular(SqlBytes array)
     {
       if (array == null)
@@ -8855,7 +9429,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "saArrayParseRegular", IsDeterministic = true)]
-    public static SqlBytes SexagesimalAngleArrayParseRegular([SqlFacet(IsNullable = false)]SqlString str,
+    public static SqlBytes SexagesimalAngleArrayParseRegular([SqlFacet(MaxSize = -1, IsNullable = false)]SqlString str,
       [SqlFacet(IsNullable = false)][DefaultValue(SizeEncoding.B4)]SqlByte countSizing,
       [SqlFacet(IsNullable = false)][DefaultValue(true)]SqlBoolean compact)
     {
@@ -8870,6 +9444,7 @@ namespace PowerLib.SqlServer.Collections
     }
 
     [SqlFunction(Name = "saArrayFormatRegular", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString SexagesimalAngleArrayFormatRegular(SqlBytes array)
     {
       if (array == null)

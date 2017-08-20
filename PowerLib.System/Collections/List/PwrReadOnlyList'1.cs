@@ -11,16 +11,16 @@ namespace PowerLib.System.Collections
 	public class PwrReadOnlyList<T> : PwrReadOnlyListBase<T>
 	{
 		private Func<int, int> _indexer;
-		private Func<IList<T>, int> _counter;
+		private Func<int> _counter;
 
 		#region Constructors
 
 		public PwrReadOnlyList(IList<T> list)
-			: this(list, i => i, l => l.Count)
+			: this(list, i => i, () => list.Count)
 		{
 		}
 
-		public PwrReadOnlyList(IList<T> list, Func<int, int> indexer, Func<IList<T>, int> counter)
+		public PwrReadOnlyList(IList<T> list, Func<int, int> indexer, Func<int> counter)
 			: base(list)
 		{
 			_indexer = indexer;
@@ -35,7 +35,7 @@ namespace PowerLib.System.Collections
 		{
 			get
 			{
-				return _counter(InnerStore);
+				return _counter();
 			}
 		}
 

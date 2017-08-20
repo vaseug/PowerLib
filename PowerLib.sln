@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.System.Data.SqlTyp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.System.ComponentModel.DataAnnotations", "PowerLib.System.ComponentModel.DataAnnotations\PowerLib.System.ComponentModel.DataAnnotations.csproj", "{615C5CDA-2907-4355-A728-2B7CD1B63C92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.SqlRuntime", "PowerLib.SqlRuntime\PowerLib.SqlRuntime.csproj", "{8271BD07-09BA-49A9-BF97-2C594E6D582C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{615C5CDA-2907-4355-A728-2B7CD1B63C92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{615C5CDA-2907-4355-A728-2B7CD1B63C92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{615C5CDA-2907-4355-A728-2B7CD1B63C92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8271BD07-09BA-49A9-BF97-2C594E6D582C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8271BD07-09BA-49A9-BF97-2C594E6D582C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8271BD07-09BA-49A9-BF97-2C594E6D582C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8271BD07-09BA-49A9-BF97-2C594E6D582C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

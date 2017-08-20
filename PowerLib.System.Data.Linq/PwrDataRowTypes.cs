@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Data.Linq.Mapping;
+using System.IO;
 using System.Xml.Linq;
 using PowerLib.System.Collections;
 using PowerLib.System.IO.Streamed.Typed;
@@ -947,6 +948,154 @@ namespace PowerLib.System.Data.Linq
 
     [Column]
     public XElement Value
+    {
+      get;
+      private set;
+    }
+  }
+
+  #endregion
+  #region File rows
+
+  [Table]
+  public sealed class FileBlockRow
+  {
+    [Column]
+    public long Offset
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public Byte[] Value
+    {
+      get;
+      private set;
+    }
+  }
+
+  [Table]
+  public sealed class FileLineRow
+  {
+    [Column]
+    public long Offset
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public String Value
+    {
+      get;
+      private set;
+    }
+  }
+
+  [Table]
+  public sealed class FileSystemRow
+  {
+    [Column]
+    public bool IsDirectory
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public int Depth
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public string FullName
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public string RelativeName
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public string ParentName
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public string Name
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public string Extension
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public FileAttributes Attributes
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public long Length
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public DateTime CreationTime
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public DateTime CreationTimeUtc
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public DateTime LastWriteTime
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public DateTime LastWriteTimeUtc
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public DateTime LastAccessTime
+    {
+      get;
+      private set;
+    }
+
+    [Column]
+    public DateTime LastAccessTimeUtc
     {
       get;
       private set;

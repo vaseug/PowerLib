@@ -4,7 +4,6 @@ using Microsoft.SqlServer.Server;
 using System.Data.SqlTypes;
 using System.Data.SqlClient;
 using System.Threading;
-using PowerLib.System.Data.SqlTypes.IO;
 
 namespace PowerLib.SqlServer
 {

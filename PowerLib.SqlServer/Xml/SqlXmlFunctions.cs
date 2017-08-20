@@ -39,7 +39,6 @@ namespace PowerLib.SqlServer.Xml
     #region Scalar functions
 
     [SqlFunction(Name = "xmlEvaluate", IsDeterministic = true)]
-    [return: SqlFacet(MaxSize = -1)]
     public static SqlXml Evaluate([SqlFacet(MaxSize = -1)] SqlXml input, [SqlFacet(MaxSize = -1)] SqlString path, SqlString nsMap)
     {
       if (input.IsNull || path.IsNull)
@@ -247,6 +246,81 @@ namespace PowerLib.SqlServer.Xml
       }
     }
 
+    [SqlFunction(Name = "xmlInsertAfter", IsDeterministic = true)]
+    public static SqlXml InsertAfter(SqlXml input, [SqlFacet(MaxSize = -1)] SqlString path, SqlString nsMap, SqlXml value)
+    {
+      if (input.IsNull || path.IsNull || value.IsNull)
+        return input;
+
+      using (var reader = input.CreateReader())
+      {
+        var navigator = new XPathDocument(reader).CreateNavigator();
+        var resolver = GetNamespaceResolver(navigator.NameTable, !nsMap.IsNull ? nsMap.Value : null);
+        var iterator = navigator.Select(path.Value, resolver);
+        if (iterator != null)
+          while (iterator.MoveNext())
+            using (var xrd = value.CreateReader())
+              iterator.Current.InsertAfter(xrd);
+        return input;
+      }
+    }
+
+    [SqlFunction(Name = "xmlInsertBefore", IsDeterministic = true)]
+    public static SqlXml InsertBefore(SqlXml input, [SqlFacet(MaxSize = -1)] SqlString path, SqlString nsMap, SqlXml value)
+    {
+      if (input.IsNull || path.IsNull || value.IsNull)
+        return input;
+
+      using (var reader = input.CreateReader())
+      {
+        var navigator = new XPathDocument(reader).CreateNavigator();
+        var resolver = GetNamespaceResolver(navigator.NameTable, !nsMap.IsNull ? nsMap.Value : null);
+        var iterator = navigator.Select(path.Value, resolver);
+        if (iterator != null)
+          while (iterator.MoveNext())
+            using (var xrd = value.CreateReader())
+              iterator.Current.InsertBefore(xrd);
+        return input;
+      }
+    }
+
+    [SqlFunction(Name = "xmlDelete", IsDeterministic = true)]
+    public static SqlXml Delete(SqlXml input, [SqlFacet(MaxSize = -1)] SqlString path, SqlString nsMap)
+    {
+      if (input.IsNull || path.IsNull)
+        return input;
+
+      using (var reader = input.CreateReader())
+      {
+        var navigator = new XPathDocument(reader).CreateNavigator();
+        var resolver = GetNamespaceResolver(navigator.NameTable, !nsMap.IsNull ? nsMap.Value : null);
+        var iterator = navigator.Select(path.Value, resolver);
+        if (iterator != null)
+          while (iterator.MoveNext())
+            iterator.Current.DeleteSelf();
+        return input;
+      }
+    }
+
+    [SqlFunction(Name = "xmlReplace", IsDeterministic = true)]
+    public static SqlXml Replace(SqlXml input, [SqlFacet(MaxSize = -1)] SqlString path, SqlString nsMap, SqlXml replace)
+    {
+      if (input.IsNull || path.IsNull || replace.IsNull)
+        return input;
+
+      using (var reader = input.CreateReader())
+      {
+        var navigator = new XPathDocument(reader).CreateNavigator();
+        var resolver = GetNamespaceResolver(navigator.NameTable, !nsMap.IsNull ? nsMap.Value : null);
+        var iterator = navigator.Select(path.Value, resolver);
+        if (iterator != null)
+          while (iterator.MoveNext())
+            using (var xrd = replace.CreateReader())
+              iterator.Current.ReplaceSelf(xrd);
+        return input;
+      }
+    }
+
     [SqlFunction(Name = "xmlTransform", IsDeterministic = true)]
     public static SqlXml Transform([SqlFacet(MaxSize = -1)] SqlXml input, [SqlFacet(MaxSize = -1)] SqlXml stylesheet)
     {
@@ -267,6 +341,7 @@ namespace PowerLib.SqlServer.Xml
     }
 
     [SqlFunction(Name = "xmlToJson", IsDeterministic = true)]
+    [return: SqlFacet(MaxSize = -1)]
     public static SqlString ToJson([SqlFacet(MaxSize = -1)] SqlXml input)
     {
       if (input.IsNull)

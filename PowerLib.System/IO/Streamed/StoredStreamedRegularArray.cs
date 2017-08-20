@@ -84,8 +84,8 @@ namespace PowerLib.System.IO.Streamed
     {
       get
       {
-        return sizeof(byte) + (FixedDataSize.HasValue ? PwrBitConverter.GetSizeEncodingSize(ItemSizing, int.MaxValue) : 0) +
-          sizeof(byte) + PwrBitConverter.GetSizeEncodingSize(CountSizing, int.MaxValue) * ArrayInfo.Rank;
+        return sizeof(byte) + (FixedDataSize.HasValue ? PwrBitConverter.GetSizeEncodingSize(int.MaxValue, ItemSizing) : 0) +
+          sizeof(byte) + PwrBitConverter.GetSizeEncodingSize(int.MaxValue, CountSizing) * ArrayInfo.Rank;
       }
     }
 

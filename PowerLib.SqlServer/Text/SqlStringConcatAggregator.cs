@@ -76,14 +76,14 @@ namespace PowerLib.SqlServer.Text
       else
         _sb.Clear();
       if ((_state = rd.ReadEnum<State>()) == State.Valued)
-        _sb.Append(rd.ReadString(Encoding.Unicode, SizeEncoding.VB));
+        _sb.Append(rd.ReadString(SqlRuntime.TextEncoding, SizeEncoding.VB));
     }
 
     void IBinarySerialize.Write(BinaryWriter writer)
     {
       writer.WriteEnum(_state);
       if (_state == State.Valued)
-        writer.Write(_sb.ToString(), Encoding.Unicode, SizeEncoding.VB);
+        writer.Write(_sb.ToString(), SqlRuntime.TextEncoding, SizeEncoding.VB);
     }
 
     #endregion

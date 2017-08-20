@@ -30,8 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>bin\Debug\PowerLib.System.XML</DocumentationFile>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <NoWarn>1591, 1574, 1720</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
@@ -46,8 +45,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>bin\Release\PowerLib.System.XML</DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -143,8 +141,16 @@
       <DependentUpon>ConditionCriteria.resx</DependentUpon>
     </Compile>
     <Compile Include="DateTimeInterval.cs" />
+    <Compile Include="IO\Streamed\Typed\NulLongRangeStreamedArray.cs" />
+    <Compile Include="IO\Streamed\Typed\NulLongRangeStreamedCollection.cs" />
+    <Compile Include="IO\Streamed\Typed\NulLongRangeStreamedRegularArray.cs" />
+    <Compile Include="IO\TextReaderExtension.cs" />
+    <Compile Include="IO\HierarchicalFileSystemHierarchicalContext.cs" />
     <Compile Include="IO\FileSystemHierarchicalContext.cs" />
     <Compile Include="IO\FileSystemInfoExtension.cs" />
+    <Compile Include="IO\HierarchicalDirectoryInfo.cs" />
+    <Compile Include="IO\HierarchicalFileInfo.cs" />
+    <Compile Include="IO\HierarchicalFileSystemInfo.cs" />
     <Compile Include="IO\RangeStream.cs" />
     <Compile Include="IO\Streamed\BaseFlaggedStreamedArray.cs" />
     <Compile Include="IO\Streamed\BaseFlaggedStreamedCollection.cs" />
@@ -224,6 +230,11 @@
     <Compile Include="Linq\Builders\ParametersBuilder.cs" />
     <Compile Include="Linq\Builders\PredicateBuilder.cs" />
     <Compile Include="Linq\Builders\ReflectionBuilder.cs" />
+    <Compile Include="PwrStringProxy.cs" />
+    <Compile Include="PwrFrameStringView.cs" />
+    <Compile Include="RangeExtension.cs" />
+    <Compile Include="StringHelper.cs" />
+    <Compile Include="Text\EncodingPreamble.cs" />
     <Compile Include="TypeExtension.cs" />
     <Compile Include="Arrays\JaggedArrayEnumerator.cs" />
     <Compile Include="Arrays\JaggedArrayInfo.cs" />
@@ -280,7 +291,6 @@
     <Compile Include="Collections\List\PwrReadOnlyList%272.cs" />
     <Compile Include="Collections\List\PwrReadOnlyListBase%271.cs" />
     <Compile Include="Collections\List\PwrReadOnlyListBase%272.cs" />
-    <Compile Include="IO\PeekStream.cs" />
     <Compile Include="IO\RestrictiveStream.cs" />
     <Compile Include="IO\Streamed\BaseStreamedArray.cs" />
     <Compile Include="IO\Streamed\BaseStreamedCollection.cs" />
@@ -310,14 +320,14 @@
     <Compile Include="IO\LookbackStream.cs" />
     <Compile Include="IO\PwrBinaryReader.cs" />
     <Compile Include="IO\PwrBinaryWriter.cs" />
-    <Compile Include="IO\PwrBinaryReaderExtension.cs" />
-    <Compile Include="IO\PwrBinaryWriterExtension.cs" />
-    <Compile Include="IO\PwrStream.cs" />
+    <Compile Include="IO\BinaryReaderExtension.cs" />
+    <Compile Include="IO\BinaryWriterExtension.cs" />
+    <Compile Include="IO\StreamDataExtension.cs" />
     <Compile Include="SizeEncoding.cs" />
     <Compile Include="IO\WriteRestrictiveStream.cs" />
     <Compile Include="IO\ReadRestrictiveStream.cs" />
     <Compile Include="IO\ReverseSearchStream.cs" />
-    <Compile Include="IO\PwrStreamExtension.cs" />
+    <Compile Include="IO\StreamExtension.cs" />
     <Compile Include="LongRange.cs" />
     <Compile Include="Collections\Matching\BetweenPredicate.cs" />
     <Compile Include="Collections\Matching\ComparableComparer.cs" />

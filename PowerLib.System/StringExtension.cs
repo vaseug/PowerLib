@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using PowerLib.System.Collections;
 
-
 namespace PowerLib.System
 {
 	/// <summary>
@@ -15,7 +14,8 @@ namespace PowerLib.System
     public static string Quote(this string str, char quote)
     {
       if (str == null)
-        return null;
+        throw new ArgumentNullException("str");
+
       StringBuilder sb = new StringBuilder();
       sb.Append(quote);
       for (int i = 0; i < str.Length; i++)
@@ -31,7 +31,8 @@ namespace PowerLib.System
     public static string Quote(this string str, char quote, char escape)
     {
       if (str == null)
-        return null;
+        throw new ArgumentNullException("str");
+
       StringBuilder sb = new StringBuilder();
       sb.Append(quote);
       for (int i = 0; i < str.Length; i++)
@@ -46,9 +47,10 @@ namespace PowerLib.System
 
     public static string Unquote(this string str, char quote)
     {
-      if (string.IsNullOrEmpty(str))
-        return str;
-      if (str[0] != quote || str[str.Length - 1] != quote)
+      if (str == null)
+        throw new ArgumentNullException("str");
+
+      if (str.Length == 0 || str[0] != quote || str[str.Length - 1] != quote)
         return str;
       bool quoted = false;
       StringBuilder sb = new StringBuilder();
@@ -70,9 +72,10 @@ namespace PowerLib.System
 
     public static string Unquote(this string str, char quote, char escape)
     {
-      if (string.IsNullOrEmpty(str))
-        return str;
-      if (str[0] != quote || str[str.Length - 1] != quote)
+      if (str == null)
+        throw new ArgumentNullException("str");
+
+      if (str.Length == 0 || str[0] != quote || str[str.Length - 1] != quote)
         return str;
       bool escaped = false;
       StringBuilder sb = new StringBuilder();
@@ -102,7 +105,7 @@ namespace PowerLib.System
     public static string Escape(this string str, char escape, bool oneself, params char[] symbols)
     {
       if (str == null)
-        return null;
+        throw new ArgumentNullException("str");
       var escaping = new HashSet<char>(symbols);
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < str.Length; i++)
@@ -117,7 +120,7 @@ namespace PowerLib.System
     public static string Unescape(this string str, char escape, params char[] symbols)
     {
       if (str == null)
-        return null;
+        throw new ArgumentNullException("str");
       var escaping = new HashSet<char>(symbols);
       StringBuilder sb = new StringBuilder();
       bool escaped = false;
@@ -139,9 +142,9 @@ namespace PowerLib.System
 
 		public static string CutLeft(this string str, int totalWidth)
 		{
-			if (str == null)
-				throw new NullReferenceException();
-			if (totalWidth < 0)
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (totalWidth < 0)
 				throw new ArgumentOutOfRangeException("totalWidth");
 
 			return str.Length <= totalWidth ? str : str.Remove(0, str.Length - totalWidth);
@@ -149,9 +152,9 @@ namespace PowerLib.System
 
 		public static string CutRight(this string str, int totalWidth)
 		{
-			if (str == null)
-				throw new NullReferenceException();
-			if (totalWidth < 0)
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (totalWidth < 0)
 				throw new ArgumentOutOfRangeException("totalWidth");
 
 			return str.Length <= totalWidth ? str : str.Remove(totalWidth, str.Length - totalWidth);
@@ -159,17 +162,17 @@ namespace PowerLib.System
 
 		public static string[] Split(this string str, char[] separators, char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
 		{
-			return Split(str, separators, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
+			return str.Split(separators, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
 		}
 
 		public static string[] Split(this string str, char[] separators, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count)
 		{
-			return Split(str, separators, trims, escapes, quotations, count, StringSplitOptionsEx.None);
+			return str.Split(separators, trims, escapes, quotations, count, StringSplitOptionsEx.None);
 		}
 
 		public static string[] Split(this string str, char[] separators, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
 		{
-			return Split(str, separators, trims, escapes, quotations, int.MaxValue , options);
+			return str.Split(separators, trims, escapes, quotations, int.MaxValue , options);
 		}
 
 		public static string[] Split(this string str, char[] separators, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count, StringSplitOptionsEx options)
@@ -443,17 +446,17 @@ namespace PowerLib.System
 
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters)
 		{
-			return SplitToKeyValue(str, itemDelimiters, keyDelimiters, int.MaxValue , StringSplitOptions.None);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, int.MaxValue , StringSplitOptions.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, int count)
 		{
-			return SplitToKeyValue(str, itemDelimiters, keyDelimiters, count, StringSplitOptions.None);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, count, StringSplitOptions.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, StringSplitOptions options)
 		{
-			return SplitToKeyValue(str, itemDelimiters, keyDelimiters, int.MaxValue , options);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, int.MaxValue , options);
 		}
 
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, int count, StringSplitOptions options)
@@ -468,19 +471,19 @@ namespace PowerLib.System
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
 			char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
 		{
-			return SplitToKeyValue(str, itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
 			char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count)
 		{
-			return SplitToKeyValue(str, itemDelimiters, keyDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
 			char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
 		{
-			return SplitToKeyValue(str, itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , options);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , options);
 		}
 
 		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
@@ -495,19 +498,19 @@ namespace PowerLib.System
 
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters)
 		{
-			return SplitToKeyGroup(str, itemDelimiters, keyDelimiters, elementDelimiters, int.MaxValue , int.MaxValue , StringSplitOptions.None);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, int.MaxValue , int.MaxValue , StringSplitOptions.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
 			int itemCount, int elementCount)
 		{
-			return SplitToKeyGroup(str, itemDelimiters, keyDelimiters, elementDelimiters, itemCount, elementCount, StringSplitOptions.None);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, itemCount, elementCount, StringSplitOptions.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
 			StringSplitOptions options)
 		{
-			return SplitToKeyGroup(str, itemDelimiters, keyDelimiters, elementDelimiters, int.MaxValue , int.MaxValue , options);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, int.MaxValue , int.MaxValue , options);
 		}
 
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
@@ -524,19 +527,19 @@ namespace PowerLib.System
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
 			char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
 		{
-			return SplitToKeyGroup(str, itemDelimiters, keyDelimiters, elementDelimiters, trims, escapes, quotations, int.MaxValue , int.MaxValue , StringSplitOptionsEx.None);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, trims, escapes, quotations, int.MaxValue , int.MaxValue , StringSplitOptionsEx.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
 			char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int itemCount, int elementCount)
 		{
-			return SplitToKeyGroup(str, itemDelimiters, keyDelimiters, elementDelimiters, trims, escapes, quotations, itemCount, elementCount, StringSplitOptionsEx.None);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, trims, escapes, quotations, itemCount, elementCount, StringSplitOptionsEx.None);
 		}
 
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
 			char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
 		{
-			return SplitToKeyGroup(str, itemDelimiters, keyDelimiters, elementDelimiters, trims, escapes, quotations, int.MaxValue , int.MaxValue , options);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, trims, escapes, quotations, int.MaxValue , int.MaxValue , options);
 		}
 
 		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
@@ -552,17 +555,17 @@ namespace PowerLib.System
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters)
 		{
-			return SplitToLookup(str, itemDelimiters, keyDelimiters, int.MaxValue , StringSplitOptions.None);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, int.MaxValue , StringSplitOptions.None);
 		}
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, int count)
 		{
-			return SplitToLookup(str, itemDelimiters, keyDelimiters, count, StringSplitOptions.None);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, count, StringSplitOptions.None);
 		}
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, StringSplitOptions options)
 		{
-			return SplitToLookup(str, itemDelimiters, keyDelimiters, int.MaxValue , options);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, int.MaxValue , options);
 		}
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, int count, StringSplitOptions options)
@@ -580,17 +583,17 @@ namespace PowerLib.System
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
 		{
-			return SplitToLookup(str, itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
 		}
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count)
 		{
-			return SplitToLookup(str, itemDelimiters, keyDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
 		}
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
 		{
-			return SplitToLookup(str, itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , options);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , options);
 		}
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count, StringSplitOptionsEx options)
@@ -608,17 +611,17 @@ namespace PowerLib.System
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters)
 		{
-			return SplitToDictionary(str, itemDelimiters, keyValueDelimiters, int.MaxValue , StringSplitOptions.None);
+			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, int.MaxValue , StringSplitOptions.None);
 		}
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, int count)
 		{
-			return SplitToDictionary(str, itemDelimiters, keyValueDelimiters, count, StringSplitOptions.None);
+			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, count, StringSplitOptions.None);
 		}
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, StringSplitOptions options)
 		{
-			return SplitToDictionary(str, itemDelimiters, keyValueDelimiters, int.MaxValue , options);
+			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, int.MaxValue , options);
 		}
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, int count, StringSplitOptions options)
@@ -636,17 +639,17 @@ namespace PowerLib.System
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
 		{
-			return SplitToDictionary(str, itemDelimiters, keyValueDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
+			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
 		}
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count)
 		{
-			return SplitToDictionary(str, itemDelimiters, keyValueDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
+			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
 		}
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
 		{
-			return SplitToDictionary(str, itemDelimiters, keyValueDelimiters, trims, escapes, quotations, int.MaxValue , options);
+			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, trims, escapes, quotations, int.MaxValue , options);
 		}
 
 		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count, StringSplitOptionsEx options)
@@ -670,7 +673,7 @@ namespace PowerLib.System
 		/// <returns></returns>
 		public static int IndexOfExcept(this string str, char[] exceptOf)
 		{
-			return IndexOfExcept(str, exceptOf, 0, str != null ? str.Length : 0);
+			return str.IndexOfExcept(exceptOf, 0, str != null ? str.Length : 0);
 		}
 
 		/// <summary>
@@ -682,7 +685,7 @@ namespace PowerLib.System
 		/// <returns></returns>
 		public static int IndexOfExcept(this string str, char[] exceptOf, int startIndex)
 		{
-			return IndexOfExcept(str, exceptOf, startIndex, str != null ? str.Length - startIndex : 0);
+			return str.IndexOfExcept(exceptOf, startIndex, str != null ? str.Length - startIndex : 0);
 		}
 
 		/// <summary>
@@ -695,9 +698,9 @@ namespace PowerLib.System
 		/// <returns></returns>
 		public static int IndexOfExcept(this string str, char[] exceptOf, int startIndex, int count)
 		{
-			if (str == null)
-				throw new NullReferenceException();
-			if (exceptOf == null)
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (exceptOf == null)
 				throw new ArgumentNullException("exceptOf");
 			if (startIndex < 0 || startIndex > str.Length)
 				throw new ArgumentOutOfRangeException("startIndex");
@@ -720,7 +723,7 @@ namespace PowerLib.System
 		/// <returns></returns>
 		public static int LastIndexOfExcept(this string str, char[] exceptOf)
 		{
-			return LastIndexOfExcept(str, exceptOf, 0, str != null ? str.Length : 0);
+			return str.LastIndexOfExcept(exceptOf, 0, str != null ? str.Length : 0);
 		}
 
 		/// <summary>
@@ -732,7 +735,7 @@ namespace PowerLib.System
 		/// <returns></returns>
 		public static int LastIndexOfExcept(this string str, char[] exceptOf, int startIndex)
 		{
-			return LastIndexOfExcept(str, exceptOf, startIndex, str != null ? str.Length - startIndex : 0);
+			return str.LastIndexOfExcept(exceptOf, startIndex, str != null ? str.Length - startIndex : 0);
 		}
 
 		/// <summary>
@@ -745,9 +748,9 @@ namespace PowerLib.System
 		/// <returns></returns>
 		public static int LastIndexOfExcept(this string str, char[] exceptOf, int startIndex, int count)
 		{
-			if (str == null)
-				throw new NullReferenceException();
-			if (exceptOf == null)
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (exceptOf == null)
 				throw new ArgumentNullException("exceptOf");
 			if (startIndex < -1 || startIndex >= str.Length + (str.Length == 0 ? 1 : 0))
 				throw new ArgumentOutOfRangeException("startIndex");
@@ -761,12 +764,273 @@ namespace PowerLib.System
 					startIndex--;
 			return -1;
 		}
-	}
 
-	/// <summary>
-	/// 
-	/// </summary>
-	[Flags]
+    public static int Find(this string str, string search, bool partial, Equality<char> equality)
+    {
+      return str.Find(new PwrStringProxy(search), partial, equality);
+    }
+
+    public static int Find(this string str, int index, string search, bool partial, Equality<char> equality)
+    {
+      return str.Find(index, new PwrStringProxy(search), partial, equality);
+    }
+
+    public static int Find(this string str, int index, int count, string search, bool partial, Equality<char> equality)
+    {
+      return str.Find(index, count, new PwrStringProxy(search), partial, equality);
+    }
+
+    public static int FindLast(this string str, string search, bool partial, Equality<char> equality)
+    {
+      return str.FindLast(new PwrStringProxy(search), partial, equality);
+    }
+
+    public static int FindLast(this string str, int index, string search, bool partial, Equality<char> equality)
+    {
+      return str.FindLast(index, new PwrStringProxy(search), partial, equality);
+    }
+
+    public static int FindLast(this string str, int index, int count, string search, bool partial, Equality<char> equality)
+    {
+      return str.FindLast(index, count, new PwrStringProxy(search), partial, equality);
+    }
+
+    public static int Find(this string str, IList<char> search, bool partial, Equality<char> equality)
+    {
+      return str.Find(0, str != null ? str.Length : 0, search, partial, equality);
+    }
+
+    public static int Find(this string str, int index, IList<char> search, bool partial, Equality<char> equality)
+    {
+      return str.Find(index, str != null ? str.Length - index : 0, search, partial, equality);
+    }
+
+    public static int Find(this string str, int index, int count, IList<char> search, bool partial, Equality<char> equality)
+    {
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (index < 0 || index > str.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > str.Length - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (search == null)
+        throw new ArgumentNullException("search");
+      if (equality == null)
+        throw new ArgumentNullException("equality");
+
+      int matched = 0;
+      while (count > 0 && matched < count && matched < search.Count && (partial || count >= search.Count))
+      {
+        if (equality(str[index + matched], search[matched]))
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+          index++;
+        }
+      }
+      return matched == search.Count ? index : -matched - 1;
+    }
+
+    public static int FindLast(this string str, IList<char> search, bool partial, Equality<char> equality)
+    {
+      return str.FindLast(0, str != null ? str.Length : 0, search, partial, equality);
+    }
+
+    public static int FindLast(this string str, int index, IList<char> search, bool partial, Equality<char> equality)
+    {
+      return str.FindLast(index, str != null ? str.Length - index : 0, search, partial, equality);
+    }
+
+    public static int FindLast(this string str, int index, int count, IList<char> search, bool partial, Equality<char> equality)
+    {
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (index < 0 || index > str.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > str.Length - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (search == null)
+        throw new ArgumentNullException("search");
+      if (equality == null)
+        throw new ArgumentNullException("equality");
+
+      int matched = 0;
+      while (count > 0 && matched < count && matched < search.Count && (partial || count >= search.Count))
+      {
+        if (equality(str[index + count - 1 - matched], search[search.Count - 1 - matched]))
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+        }
+      }
+      return matched == search.Count ? index + count - matched : -matched - 1;
+    }
+
+    public static int Find(this string str, int search, bool partial, Func<char, int, bool> match)
+    {
+      return Find(str, 0, str != null ? str.Length : 0, search, partial, match);
+    }
+
+    public static int Find(this string str, int index, int search, bool partial, Func<char, int, bool> match)
+    {
+      return Find(str, index, str != null ? str.Length - index : 0, search, partial, match);
+    }
+
+    public static int Find(this string str, int index, int count, int search, bool partial, Func<char, int, bool> match)
+    {
+      if (str == null)
+        throw new ArgumentNullException("list");
+      if (index < 0 || index > str.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > str.Length - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (match == null)
+        throw new ArgumentNullException("match");
+
+      int matched = 0;
+      while (count > 0 && matched < count && matched < search && (partial || count >= search))
+      {
+        if (match(str[index + matched], matched))
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+          index++;
+        }
+      }
+      return matched == search ? index : -matched - 1;
+    }
+
+    public static int FindLast(this string str, int search, bool partial, Func<char, int, bool> match)
+    {
+      return str.FindLast(0, str != null ? str.Length : 0, search, partial, match);
+    }
+
+    public static int FindLast(this string str, int index, int search, bool partial, Func<char, int, bool> match)
+    {
+      return str.FindLast(index, str != null ? str.Length - index : 0, search, partial, match);
+    }
+
+    public static int FindLast(this string str, int index, int count, int search, bool partial, Func<char, int, bool> match)
+    {
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (index < 0 || index > str.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > str.Length - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (search < 0)
+        throw new ArgumentOutOfRangeException("search");
+      if (match == null)
+        throw new ArgumentNullException("match");
+
+      int matched = 0;
+      while (count > 0 && matched < count && matched < search && (partial || count >= search))
+      {
+        if (match(str[index + count - 1 - matched], search - 1 - matched))
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+        }
+      }
+      return matched == search ? index + count - matched : -matched - 1;
+    }
+
+    public static Range Find(this string str, Func<IList<char>, int> match)
+    {
+      return str.Find(0, str != null ? str.Length : 0, match);
+    }
+
+    public static Range Find(this string str, int index, Func<IList<char>, int> match)
+    {
+      return str.Find(index, str != null ? str.Length - index : 0, match);
+    }
+
+    public static Range Find(this string str, int index, int count, Func<IList<char>, int> match)
+    {
+      if (str == null)
+        throw new ArgumentNullException("str");
+      if (index < 0 || index > str.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > str.Length - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (match == null)
+        throw new ArgumentNullException("match");
+
+      PwrFrameStringView view = new PwrFrameStringView(str);
+      int matched = 0;
+      int accepted = 0;
+      while (count > 0 && matched < count)
+      {
+        view.Frame = new Range(index, matched + 1);
+        accepted = match(view);
+        if (accepted > 0)
+          break;
+        else if (accepted == 0)
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+          index++;
+        }
+      }
+      return new Range(index, accepted > 0 ? accepted : -matched - 1);
+    }
+
+    public static Range FindLast(this string str, Func<IList<char>, int> match)
+    {
+      return FindLast(str, 0, str != null ? str.Length : 0, match);
+    }
+
+    public static Range FindLast(this string str, int index, Func<IList<char>, int> match)
+    {
+      return FindLast(str, index, str != null ? str.Length - index : 0, match);
+    }
+
+    public static Range FindLast(this string str, int index, int count, Func<IList<char>, int> match)
+    {
+      if (str == null)
+        throw new ArgumentNullException("list");
+      if (index < 0 || index > str.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > str.Length - index)
+        throw new ArgumentOutOfRangeException("count");
+      if (match == null)
+        throw new ArgumentNullException("match");
+
+      PwrFrameStringView view = new PwrFrameStringView(str);
+      int matched = 0;
+      int accepted = 0;
+      while (count > 0 && matched < count)
+      {
+        view.Frame = new Range(index + count - 1 - matched, matched + 1);
+        accepted = match(view);
+        if (accepted > 0)
+          break;
+        else if (accepted == 0)
+          matched++;
+        else
+        {
+          matched = 0;
+          count--;
+        }
+      }
+      return new Range(index + count - accepted > 0 ? accepted : matched, accepted > 0 ? accepted : -matched - 1);
+    }
+  }
+
+  /// <summary>
+  /// 
+  /// </summary>
+  [Flags]
 	public enum StringSplitOptionsEx
 	{
 		None = 0,

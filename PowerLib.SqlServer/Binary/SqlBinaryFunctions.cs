@@ -138,8 +138,8 @@ namespace PowerLib.SqlServer.Binary
       while (position < indexValue + countValue)
       {
         found =
-          input.Storage == StorageState.Buffer ? input.Buffer.FindSequence((int)position, (int)(indexValue + countValue - position), (int)value.Length, (byte v, int i) => v == value[i]) :
-          input.Storage == StorageState.Stream ? input.Stream.Find(indexValue + countValue - position, value.Length, (long i, long j, byte v) => value.Buffer[i] == (j >= 0 ? value.Buffer[j] : v)) :
+          input.Storage == StorageState.Buffer ? input.Buffer.SequenceFind((int)position, (int)(indexValue + countValue - position), (int)value.Length, false, (byte v, int i) => v == value[i]) :
+          input.Storage == StorageState.Stream ? input.Stream.Find(indexValue + countValue - position, value.Length, (byte v, long i, long j) => value.Buffer[i] == (j >= 0 ? value.Buffer[j] : v)) :
           -1L;
         if (found < 0)
           break;
@@ -172,7 +172,7 @@ namespace PowerLib.SqlServer.Binary
 
       long indexValue = !index.IsNull ? index.Value : count.IsNull ? 0 : input.Length - count.Value;
       long countValue = !count.IsNull ? count.Value : index.IsNull ? input.Length : input.Length - index.Value;
-      return new SqlChars(Encoding.Unicode.GetChars(input.Buffer, (int)indexValue, (int)countValue));
+      return new SqlChars(SqlRuntime.TextEncoding.GetChars(input.Buffer, (int)indexValue, (int)countValue));
     }
 
     [SqlFunction(Name = "binToStringByCpId", IsDeterministic = true)]
@@ -187,7 +187,7 @@ namespace PowerLib.SqlServer.Binary
 
       long indexValue = !index.IsNull ? index.Value : count.IsNull ? 0 : input.Length - count.Value;
       long countValue = !count.IsNull ? count.Value : index.IsNull ? input.Length : input.Length - index.Value;
-      Encoding encoding = cpId.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpId.Value);
+      Encoding encoding = cpId.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpId.Value);
       return new SqlChars(encoding.GetChars(input.Buffer, (int)indexValue, (int)countValue));
     }
 
@@ -203,7 +203,7 @@ namespace PowerLib.SqlServer.Binary
 
       long indexValue = !index.IsNull ? index.Value : count.IsNull ? 0 : input.Length - count.Value;
       long countValue = !count.IsNull ? count.Value : index.IsNull ? input.Length : input.Length - index.Value;
-      Encoding encoding = cpName.IsNull ? Encoding.Unicode : Encoding.GetEncoding(cpName.Value);
+      Encoding encoding = cpName.IsNull ? SqlRuntime.TextEncoding : Encoding.GetEncoding(cpName.Value);
       return new SqlChars(encoding.GetChars(input.Buffer, (int)indexValue, (int)countValue));
     }
 
@@ -345,19 +345,19 @@ namespace PowerLib.SqlServer.Binary
     [SqlFunction(Name = "binFromString", IsDeterministic = true)]
     public static SqlBytes FromString([SqlFacet(MaxSize = -1)] SqlChars input)
     {
-      return !input.IsNull ? new SqlBytes(Encoding.Unicode.GetBytes(input.Buffer, 0, (int)input.Length)) : SqlBytes.Null;
+      return !input.IsNull ? new SqlBytes(SqlRuntime.TextEncoding.GetBytes(input.Buffer, 0, (int)input.Length)) : SqlBytes.Null;
     }
 
     [SqlFunction(Name = "binFromStringByCpId", IsDeterministic = true)]
     public static SqlBytes FromStringByCpId([SqlFacet(MaxSize = -1)] SqlChars input, SqlInt32 cpId)
     {
-      return !input.IsNull ? new SqlBytes((!cpId.IsNull ? Encoding.GetEncoding(cpId.Value) : Encoding.Unicode).GetBytes(input.Buffer, 0, (int)input.Length)) : SqlBytes.Null;
+      return !input.IsNull ? new SqlBytes((!cpId.IsNull ? Encoding.GetEncoding(cpId.Value) : SqlRuntime.TextEncoding).GetBytes(input.Buffer, 0, (int)input.Length)) : SqlBytes.Null;
     }
 
     [SqlFunction(Name = "binFromStringByCpName", IsDeterministic = true)]
     public static SqlBytes FromStringByCpName([SqlFacet(MaxSize = -1)] SqlChars input, [SqlFacet(MaxSize = 128)] SqlString cpName)
     {
-      return !input.IsNull ? new SqlBytes((!cpName.IsNull ? Encoding.GetEncoding(cpName.Value) : Encoding.Unicode).GetBytes(input.Buffer, 0, (int)input.Length)) : SqlBytes.Null;
+      return !input.IsNull ? new SqlBytes((!cpName.IsNull ? Encoding.GetEncoding(cpName.Value) : SqlRuntime.TextEncoding).GetBytes(input.Buffer, 0, (int)input.Length)) : SqlBytes.Null;
     }
 
     [SqlFunction(Name = "binFromBase64String", IsDeterministic = true)]
@@ -446,11 +446,11 @@ namespace PowerLib.SqlServer.Binary
       switch (input.Storage)
       {
         case StorageState.Buffer:
-          return new SqlInt64(input.Buffer.FindSequence((int)indexValue, (int)countValue, (int)value.Length, (byte v, int i) => v == value.Buffer[i]));
+          return new SqlInt64(input.Buffer.SequenceFind((int)indexValue, (int)countValue, (int)value.Length, false, (byte v, int i) => v == value.Buffer[i]));
         case StorageState.Stream:
           Stream stream = input.Stream;
           stream.Position = indexValue;
-          long position = input.Stream.Find(countValue, (int)value.Length, (int i, int j, byte v) => value.Buffer[i] == (j >= 0 ? value.Buffer[j] : v));
+          long position = input.Stream.Find(countValue, (int)value.Length, (byte v, int i, int j) => value.Buffer[i] == (j >= 0 ? value.Buffer[j] : v));
           if (position >= 0)
             position += indexValue;
           return new SqlInt64(position);
@@ -482,11 +482,11 @@ namespace PowerLib.SqlServer.Binary
       switch (input.Storage)
       {
         case StorageState.Buffer:
-          return new SqlInt64(input.Buffer.FindLastSequence((int)indexValue, (int)countValue, (int)value.Length, (byte v, int i) => v == value.Buffer[i]));
+          return new SqlInt64(input.Buffer.SequenceFindLast((int)indexValue, (int)countValue, (int)value.Length, false, (byte v, int i) => v == value.Buffer[i]));
         case StorageState.Stream:
           Stream stream = input.Stream;
           stream.Position = indexValue;
-          long position = PwrStreamExtension.FindLast(input.Stream, countValue, (int)value.Length, (int i, int j, byte v) => value.Buffer[(int)value.Length - 1 - i] == (j >= 0 ? value.Buffer[(int)value.Length - 1 - j] : v));
+          long position = StreamExtension.FindLast(input.Stream, countValue, (int)value.Length, (byte v, int i, int j) => value.Buffer[(int)value.Length - 1 - i] == (j >= 0 ? value.Buffer[(int)value.Length - 1 - j] : v));
           if (position >= 0L)
             position = indexValue - position;
           return new SqlInt64(position);
@@ -558,7 +558,7 @@ namespace PowerLib.SqlServer.Binary
           case 0:
             yield break;
           case 1:
-            encoding = Encoding.Unicode;
+            encoding = SqlRuntime.TextEncoding;
             break;
           case 2:
             encoding = Encoding.GetEncoding(rd.ReadUInt16());
@@ -803,7 +803,7 @@ namespace PowerLib.SqlServer.Binary
       if (size > SqlRuntime.MaxBufferSize)
         throw new InvalidOperationException("Exceeded maximum allowable size.");
 
-      return new SqlBytes(new byte[(int)size]);
+      return new SqlBytes(new byte[size]);
     }
 
     private static IEnumerable<byte> Enumerate(SqlBytes input, long offset, long count)
@@ -813,7 +813,7 @@ namespace PowerLib.SqlServer.Binary
         case StorageState.Buffer:
           return input.Buffer.Enumerate((int)offset, (int)count);
         case StorageState.Stream:
-          return input.Stream.Enumerate(offset, count, SqlTypesIOExtension.IoBufferSize);
+          return input.Stream.Locate(offset).ReadBytes().Take(count);
         default:
           throw new NotSupportedException("Unsupported input storage type.");
       }
@@ -823,7 +823,7 @@ namespace PowerLib.SqlServer.Binary
     {
       if (length == 0)
         return;
-      byte[] buffer = new byte[Comparable.Min(SqlTypesIOExtension.IoBufferSize, length)];
+      byte[] buffer = new byte[Comparable.Min(SqlRuntime.IoBufferSize, length)];
       long read = 0;
       while (length > 0 && (read = source.Read(srcOffset, buffer, 0, (int)Comparable.Min(length, buffer.Length))) > 0L)
       {

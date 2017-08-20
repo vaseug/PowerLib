@@ -416,8 +416,8 @@ namespace PowerLib.System
         throw new InvalidOperationException("Invalid internal array index");
       if (!node.ArrayInfo.IncDimIndices(zeroBased, indices[_ranks.Length - 1]))
         return false;
-      long tota = node.Total + node.ArrayInfo.Length;
-      if (tota == _length)
+      long total = node.Total + node.ArrayInfo.Length;
+      if (total == _length)
         return true;
       //
       descent:
@@ -435,7 +435,7 @@ namespace PowerLib.System
           arrayIndex = new ArrayLongIndex(node.ArrayInfo);
           arrayIndex.SetMin();
         }
-        else if (node.Total == tota && node.ArrayInfo.Length > 0)
+        else if (node.Total == total && node.ArrayInfo.Length > 0)
         {
           node.ArrayInfo.GetMinDimIndices(zeroBased, indices[_ranks.Length - 1]);
           while (arrayContexts.Count > 0)
@@ -487,7 +487,7 @@ namespace PowerLib.System
         return false;
       if (node.Total == 0)
         return true;
-      long tota = node.Total;
+      long total = node.Total;
       //
       descent:
       while (depth < _ranks.Length - 1)
@@ -504,7 +504,7 @@ namespace PowerLib.System
           arrayIndex = new ArrayLongIndex(node.ArrayInfo);
           arrayIndex.SetMax();
         }
-        else if (node.Total == (tota - node.ArrayInfo.Length) && node.ArrayInfo.Length > 0)
+        else if (node.Total == (total - node.ArrayInfo.Length) && node.ArrayInfo.Length > 0)
         {
           node.ArrayInfo.GetMaxDimIndices(zeroBased, indices[_ranks.Length - 1]);
           while (arrayContexts.Count > 0)

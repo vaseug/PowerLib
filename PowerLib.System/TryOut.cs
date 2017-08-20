@@ -13,8 +13,8 @@ namespace PowerLib.System
 
 		#region Constructor
 
-		public TryOut(T value, bool success)
-		{
+		public TryOut(bool success, T value)
+    {
 			_value = value ;
 			_success = success;
 		}
@@ -43,24 +43,24 @@ namespace PowerLib.System
 
 	public static class TryOut
 	{
-		public static TryOut<T> Create<T>(T value, bool success)
-		{
-			return new TryOut<T>(value, success);
+		public static TryOut<T> Create<T>(bool success, T value)
+    {
+			return new TryOut<T>(success, value);
 		}
 
     public static TryOut<T> Fail<T>()
     {
-      return new TryOut<T>(default(T), false);
+      return new TryOut<T>(false, default(T));
     }
 
 		public static TryOut<T> Fail<T>(T value)
 		{
-			return new TryOut<T>(value, false);
+			return new TryOut<T>(false, value);
 		}
 
 		public static TryOut<T> Success<T>(T value)
 		{
-			return new TryOut<T>(value, true);
+			return new TryOut<T>(true, value);
 		}
 	}
 }

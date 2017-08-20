@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using PowerLib.System.Collections.Matching;
+using System.Text;
 using PowerLib.System.Linq;
 
 namespace PowerLib.System.IO
 {
-  public static class PwrStreamExtension
+  public static class StreamExtension
   {
     private readonly static byte[] filler = new byte[1024];
 
@@ -145,7 +145,7 @@ namespace PowerLib.System.IO
         if (matched >= search_count)
         {
           int read = stream.ReadByte();
-          if (read == -1)
+          if (read < 0)
             break;
           else
             value = (byte)read;
@@ -182,29 +182,84 @@ namespace PowerLib.System.IO
       return offset < 0 || search.Count == 0 ? offset : offset + search.Count - 1;
     }
 
-    public static long Find(this Stream stream, long length, int count, Func<int, int, byte, bool> match)
+    public static long Find(this Stream stream, Encoding encoding, long length, IList<char> search, int index, int count)
+    {
+      if (stream == null)
+        throw new ArgumentNullException("stream");
+      if (encoding == null)
+        throw new ArgumentNullException("encoding");
+      if (search == null)
+        throw new ArgumentNullException("search");
+      if (index < 0 && index > search.Count)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 && count > search.Count - index)
+        throw new ArgumentOutOfRangeException("count");
+
+      Decoder decoder = encoding.GetDecoder();
+      long offset = 0L;
+      int search_index = index, search_count = 0, matched = 0, char_size = 0;
+      char[] chars = new char[1];
+      byte[] bytes = new byte[1];
+      while (matched < count && count <= length)
+      {
+        if (matched >= search_count)
+        {
+          if (matched == 0)
+            char_size = 0;
+          int read;
+          while ((read = stream.Read(bytes, 0, bytes.Length)) > 0 && decoder.GetChars(bytes, 0, bytes.Length, chars, 0) == 0)
+            if (matched == 0)
+              char_size++;
+          if (read == 0)
+            break;
+        }
+        if (search[index + matched] == (matched < search_count && search_count > 1 ? search[search_index + matched] : chars[0]))
+        {
+          matched++;
+          if (matched == search_count)
+            search_index = index;
+        }
+        else
+        {
+          if (matched >= search_count)
+            search_count = matched;
+          else if (search_count > 0)
+            search_count--;
+          if (search_count == 0)
+            search_index = index;
+          else
+            search_index++;
+          matched = 0;
+          offset += char_size;
+          length -= char_size;
+        }
+      }
+      return matched == count ? offset : -1L;
+    }
+
+    public static long Find(this Stream stream, long length, int searching, Func<byte, int, int, bool> match)
     {
       if (stream == null)
         throw new ArgumentNullException("stream");
       if (match == null)
         throw new ArgumentNullException("match");
-      if (count < 0)
-        throw new ArgumentOutOfRangeException("count");
+      if (searching < 0)
+        throw new ArgumentOutOfRangeException("searching");
 
       long offset = 0L;
       int search_index = 0, search_count = 0, matched = 0;
       byte value = 0;
-      while (matched < count && count <= length)
+      while (matched < searching && searching <= length)
       {
         if (matched >= search_count)
         {
           int read = stream.ReadByte();
-          if (read == -1)
+          if (read < 0)
             break;
           else
             value = (byte)read;
         }
-        if (match(matched, matched < search_count && search_count > 1 ? search_index + matched : -1, value))
+        if (match(value, matched, matched < search_count && search_count > 1 ? search_index + matched : -1))
         {
           matched++;
           if (matched == search_count)
@@ -225,38 +280,38 @@ namespace PowerLib.System.IO
           length--;
         }
       }
-      return matched == count ? offset : -1L;
+      return matched == searching ? offset : -1L;
     }
 
-    public static long FindLast(this Stream stream, long length, int count, Func<int, int, byte, bool> match)
+    public static long FindLast(this Stream stream, long length, int searching, Func<byte, int, int, bool> match)
     {
-      long offset = Find(new ReverseSearchStream(stream, true), length, count, match);
-      return offset < 0 || count == 0 ? offset : offset + count - 1;
+      long offset = Find(new ReverseSearchStream(stream, true), length, searching, match);
+      return offset < 0 || searching == 0 ? offset : offset + searching - 1;
     }
 
-    public static long Find(this Stream stream, long length, long count, Func<long, long, byte, bool> match)
+    public static long Find(this Stream stream, long length, long searching, Func<byte, long, long, bool> match)
     {
       if (stream == null)
         throw new ArgumentNullException("stream");
       if (match == null)
         throw new ArgumentNullException("match");
-      if (count < 0L)
-        throw new ArgumentOutOfRangeException("count");
+      if (searching < 0L)
+        throw new ArgumentOutOfRangeException("searching");
 
       long offset = 0L;
       long search_index = 0L, search_count = 0L, matched = 0L;
       byte value = 0;
-      while (matched < count && count <= length)
+      while (matched < searching && searching <= length)
       {
         if (matched >= search_count)
         {
           int read = stream.ReadByte();
-          if (read == -1)
+          if (read < 0)
             break;
           else
             value = (byte)read;
         }
-        if (match(matched, matched < search_count && search_count > 1? search_index + matched : -1L, value))
+        if (match(value, matched, matched < search_count && search_count > 1? search_index + matched : -1L))
         {
           matched++;
           if (matched == search_count)
@@ -277,13 +332,125 @@ namespace PowerLib.System.IO
           length -= 1L;
         }
       }
-      return matched == count ? offset : -1L;
+      return matched == searching ? offset : -1L;
     }
 
-    public static long FindLast(this Stream stream, long length, long count, Func<long, long, byte, bool> match)
+    public static long FindLast(this Stream stream, long length, long count, Func<byte, long, long, bool> match)
     {
       long offset = Find(new ReverseSearchStream(stream, true), length, count, match);
       return offset < 0 || count == 0 ? offset : offset + count - 1;
+    }
+
+    public static long Find(this Stream stream, Encoding encoding, long length, int searching, Func<char, int, int, bool> match)
+    {
+      if (stream == null)
+        throw new ArgumentNullException("stream");
+      if (encoding == null)
+        throw new ArgumentNullException("encoding");
+      if (match == null)
+        throw new ArgumentNullException("match");
+      if (searching < 0)
+        throw new ArgumentOutOfRangeException("searching");
+
+      Decoder decoder = encoding.GetDecoder();
+      long offset = 0L;
+      int search_index = 0, search_count = 0, matched = 0, char_size = 0;
+      char[] chars = new char[1];
+      byte[] bytes = new byte[1];
+      while (matched < searching && searching <= length)
+      {
+        if (matched >= search_count)
+        {
+          if (matched == 0)
+            char_size = 0;
+          int read;
+          do
+          {
+            read = stream.Read(bytes, 0, bytes.Length);
+            if (matched == 0)
+              char_size += read;
+          }
+          while (read > 0 && decoder.GetChars(bytes, 0, bytes.Length, chars, 0) == 0);
+          if (read == 0)
+            break;
+        }
+        if (match(chars[0], matched, matched < search_count && search_count > 1 ? search_index + matched : -1))
+        {
+          matched++;
+          if (matched == search_count)
+            search_index = 0;
+        }
+        else
+        {
+          if (matched >= search_count)
+            search_count = matched;
+          else if (search_count > 0)
+            search_count--;
+          if (search_count == 0)
+            search_index = 0;
+          else
+            search_index++;
+          matched = 0;
+          offset += char_size;
+          length -= char_size;
+        }
+      }
+      return matched == searching ? offset : -1L;
+    }
+
+    public static long Find(this Stream stream, Encoding encoding, long length, long searching, Func<char, long, long, bool> match)
+    {
+      if (stream == null)
+        throw new ArgumentNullException("stream");
+      if (match == null)
+        throw new ArgumentNullException("match");
+      if (searching < 0L)
+        throw new ArgumentOutOfRangeException("searching");
+
+      Decoder decoder = encoding.GetDecoder();
+      long offset = 0L;
+      long search_index = 0L, search_count = 0L, matched = 0L, char_size = 0;
+      char[] chars = new char[1];
+      byte[] bytes = new byte[1];
+      while (matched < searching && searching <= length)
+      {
+        if (matched >= search_count)
+        {
+          if (matched == 0)
+            char_size = 0;
+          int read;
+          do
+          {
+            read = stream.Read(bytes, 0, bytes.Length);
+            if (matched == 0)
+              char_size += read;
+          }
+          while (read > 0 && decoder.GetChars(bytes, 0, bytes.Length, chars, 0) == 0);
+          if (read == 0)
+            break;
+        }
+        if (match(chars[0], matched, matched < search_count && search_count > 1 ? search_index + matched : -1L))
+        {
+          matched++;
+          if (matched == search_count)
+            search_index = 0L;
+        }
+        else
+        {
+          if (matched >= search_count)
+            search_count = matched;
+          else if (search_count > 0L)
+            search_count--;
+          if (search_count == 0L)
+            search_index = 0L;
+          else
+            search_index++;
+          matched = 0L;
+          offset += char_size;
+          length -= char_size;
+        }
+      }
+      return matched == searching ? offset : -1L;
     }
 
     public static int Compare(this Stream xStream, Stream yStream, long count, int buffSize, Comparison<byte> comparison)
@@ -489,26 +656,6 @@ namespace PowerLib.System.IO
         int read = stream.Read(buffer, 0, (int)Comparable.Min(count, buffer.Length));
         if (read == 0)
           break;
-        count -= read;
-      }
-    }
-
-    public static IEnumerable<byte> Enumerate(this Stream stream, long offset, long count, int buffSize)
-    {
-      if (stream == null)
-        throw new ArgumentNullException("stream");
-      if (offset < 0 || offset > stream.Length)
-        throw new ArgumentOutOfRangeException("offset");
-      if (count < 0 || count > stream.Length - offset)
-        throw new ArgumentOutOfRangeException("count");
-
-      int read;
-      byte[] buffer = new byte[buffSize];
-      stream.Position = offset;
-      while ((read = stream.Read(buffer, 0, (int)Comparable.Min(count, buffer.Length))) > 0)
-      {
-        for (int i = 0; i < read; i++)
-          yield return buffer[i];
         count -= read;
       }
     }

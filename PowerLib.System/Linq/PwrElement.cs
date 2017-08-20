@@ -56,116 +56,37 @@ namespace PowerLib.System.Linq
         return selector(element);
     }
 
-    public static IEnumerable<TSource> Yield<TSource>(this TSource element, Func<TSource, TSource> selector)
-      where TSource : class
+    public static IEnumerable<TResult> Yield<TSource, TResult>(this TSource element, Func<TSource, TResult> producer, Func<TSource, TResult, TSource> mutator, Func<TSource, bool> predicate)
     {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
+      if (producer == null)
+        throw new ArgumentNullException("producer");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
 
-      for (; element != null; element = selector(element))
-        yield return element;
+      while (predicate(element))
+      {
+        var portion = producer(element);
+        yield return portion;
+        if (mutator != null)
+          element = mutator(element, portion);
+      }
     }
 
-    public static IEnumerable<TSource> Yield<TSource>(this TSource element, Func<TSource, int, TSource> selector)
-      where TSource : class
+    public static IEnumerable<TResult> Yield<TSource, TResult>(this TSource element, Func<TSource, int, TResult> producer, Func<TSource, int, TResult, TSource> mutator, Func<TSource, int, bool> predicate)
     {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
-
-      for (int i = 0; element != null; element = selector(element, i++))
-        yield return element;
-    }
-
-    public static IEnumerable<TSource> Yield<TSource>(this TSource? element, Func<TSource, TSource?> selector)
-      where TSource : struct
-    {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
-
-      for (; element.HasValue; element = selector(element.Value))
-        yield return element.Value;
-    }
-
-    public static IEnumerable<TSource> Yield<TSource>(this TSource? element, Func<TSource, int, TSource?> selector)
-      where TSource : struct
-    {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
-
-      for (int i = 0; element.HasValue; element = selector(element.Value, i++))
-        yield return element.Value;
-    }
-
-    public static IEnumerable<TSource> YieldWhile<TSource>(this TSource element, Func<TSource, TSource> selector, Func<TSource, bool> predicate)
-      where TSource : class
-    {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
-
-      for (; element != null && predicate(element); element = selector(element))
-        yield return element;
-    }
-
-    public static IEnumerable<TSource> YieldWhile<TSource>(this TSource element, Func<TSource, int, TSource> selector, Func<TSource, int, bool> predicate)
-      where TSource : class
-    {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
-
-      for (int i = 0; element != null && predicate(element, i); element = selector(element, i++))
-        yield return element;
-    }
-
-    public static IEnumerable<TSource> YieldWhile<TSource>(this TSource? element, Func<TSource, TSource?> selector, Func<TSource, bool> predicate)
-      where TSource : struct
-    {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
-
-      for (; element.HasValue&& predicate(element.Value); element = selector(element.Value))
-        yield return element.Value;
-    }
-
-    public static IEnumerable<TSource> YieldWhile<TSource>(this TSource? element, Func<TSource, int, TSource?> selector, Func<TSource, int, bool> predicate)
-      where TSource : struct
-    {
-      if (selector == null)
-        throw new ArgumentNullException("selector");
-
-      for (int i = 0; element.HasValue&& predicate(element.Value, i); element = selector(element.Value, i++))
-        yield return element.Value;
-    }
-
-    public static IEnumerable<TSource> Precede<TSource>(this TSource element, TSource other)
-    {
-      yield return element;
-      yield return other;
-    }
-
-    public static IEnumerable<TSource> Precede<TSource>(this TSource element, IEnumerable<TSource> coll)
-    {
-      if (coll == null)
-        throw new ArgumentNullException("coll");
-
-      yield return element;
-      foreach (var item in coll)
-        yield return item;
-    }
-
-    public static IEnumerable<TSource> Follow<TSource>(this TSource element, TSource other)
-    {
-      yield return other;
-      yield return element;
-    }
-
-    public static IEnumerable<TSource> Follow<TSource>(this TSource element, IEnumerable<TSource> coll)
-    {
-      if (coll == null)
-        throw new ArgumentNullException("coll");
-
-      foreach (var item in coll)
-        yield return item;
-      yield return element;
+      if (producer == null)
+        throw new ArgumentNullException("producer");
+      if (predicate == null)
+        throw new ArgumentNullException("predicate");
+      int i = 0;
+      while (predicate(element, i))
+      {
+        var portion = producer(element, i);
+        yield return portion;
+        if (mutator != null)
+          element = mutator(element, i, portion);
+        i++;
+      }
     }
 
     public static TSource? AsNullable<TSource>(this TSource element)

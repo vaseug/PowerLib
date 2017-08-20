@@ -546,7 +546,7 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
 
-      for (int i = 0, index = 0, length = range, spa = gap; i < count; i++, index += spa + length, spa += skew, length += delta)
+      for (int i = 0, index = 0, length = range, span = gap; i < count; i++, index += span + length, span += skew, length += delta)
       {
         if (index >= array.Length - start)
           Array.Clear(array, index - (array.Length - start), range);

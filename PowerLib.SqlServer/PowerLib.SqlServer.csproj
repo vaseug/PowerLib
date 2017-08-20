@@ -29,6 +29,7 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
     <NoWarn>CS0642</NoWarn>
+    <DocumentationFile>bin\Debug\PowerLib.SqlServer.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -40,6 +41,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Release\PowerLib.SqlServer.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -72,6 +74,7 @@
     <Compile Include="Collections\SqlComplexCollector.cs" />
     <Compile Include="Collections\SqlBigIntegerCollector.cs" />
     <Compile Include="Collections\SqlGradAngleCollector.cs" />
+    <Compile Include="Collections\SqlLongRangeCollector.cs" />
     <Compile Include="Collections\SqlSexagesimalAngleCollector.cs" />
     <Compile Include="Collections\SqlHourAngleCollector.cs" />
     <Compile Include="Collections\SqlRangeCollector.cs" />
@@ -83,10 +86,10 @@
     <Compile Include="Binary\SqlBinaryConcatAggregator.cs" />
     <Compile Include="Collections\SqlCollectionFunctions.cs" />
     <Compile Include="Compression\SqlCompressionFunctions.cs" />
+    <Compile Include="FileSystem\SqlPathCombiner.cs" />
+    <Compile Include="FileSystem\SqlFileSystemFunctions.cs" />
     <Compile Include="Math\SqlCombinatorialFunctions.cs" />
     <Compile Include="Net\SqlUriFunctions.cs" />
-    <Compile Include="SqlRuntime.cs" />
-    <Compile Include="SqlConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\Cryptography\SqlCryptographyFunctions.cs" />
     <Compile Include="Text\SqlRegexFunctions.cs" />
@@ -96,6 +99,10 @@
     <Compile Include="Xml\SqlXmlFunctions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PowerLib.SqlRuntime\PowerLib.SqlRuntime.csproj">
+      <Project>{8271bd07-09ba-49a9-bf97-2c594e6d582c}</Project>
+      <Name>PowerLib.SqlRuntime</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PowerLib.System.Data.SqlTypes\PowerLib.System.Data.SqlTypes.csproj">
       <Project>{4237bd48-1f96-4586-873b-095d6cc53943}</Project>
       <Name>PowerLib.System.Data.SqlTypes</Name>

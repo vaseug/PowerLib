@@ -149,6 +149,18 @@ namespace PowerLib.System.Linq
       return dic.TryGetValue(key, out resultValue) ? resultValue : defaultValue;
     }
 
+    public static IEnumerable<T> Take<T>(this IEnumerable<T> source, long count)
+    {
+      if (source == null)
+        throw new ArgumentNullException("source");
+
+      foreach (var item in source)
+        if (count-- > 0)
+          yield return item;
+        else
+          yield break;
+    }
+
     #endregion
     #region Sort methods
 
@@ -213,8 +225,35 @@ namespace PowerLib.System.Linq
     #endregion
     #region Compare methods
 
-    private static int SequenceCompareCore<T>(IEnumerable<T> source, IEnumerable<T> other, Comparison<T> comparison)
+    public static int SequenceCompare<T>(this IEnumerable<T> source, IEnumerable<T> other)
     {
+      if (source == null)
+        throw new ArgumentNullException("source");
+      if (other == null)
+        throw new ArgumentNullException("other");
+
+      return SequenceCompare(source, other, Comparer<T>.Default.Compare);
+    }
+
+    public static int SequenceCompare<T>(this IEnumerable<T> source, IEnumerable<T> other, IComparer<T> comparer)
+    {
+      if (source == null)
+        throw new ArgumentNullException("source");
+      if (other == null)
+        throw new ArgumentNullException("other");
+
+      return SequenceCompare(source, other, (comparer ?? Comparer<T>.Default).Compare);
+    }
+
+		public static int SequenceCompare<T>(this IEnumerable<T> source, IEnumerable<T> other, Comparison<T> comparison)
+		{
+			if (source == null)
+        throw new ArgumentNullException("source");
+			if (other == null)
+        throw new ArgumentNullException("other");
+			if (comparison == null)
+        throw new ArgumentNullException("comparison");
+
       using (IEnumerator<T> es = source.GetEnumerator())
       using (IEnumerator<T> eo = other.GetEnumerator())
       {
@@ -231,42 +270,8 @@ namespace PowerLib.System.Linq
       }
     }
 
-		public static int SequenceCompare<T>(this IEnumerable<T> source, IEnumerable<T> other)
-		{
-      if (source == null)
-        throw new ArgumentNullException("source");
-      if (other == null)
-        throw new ArgumentNullException("other");
-      //
-      return SequenceCompareCore(source, other, Comparer<T>.Default.Compare);
-		}
-
-    public static int SequenceCompare<T>(this IEnumerable<T> source, IEnumerable<T> other, IComparer<T> comparer)
-    {
-      if (source == null)
-        throw new ArgumentNullException("source");
-      if (other == null)
-        throw new ArgumentNullException("other");
-      if (comparer == null)
-        throw new ArgumentNullException("comparer");
-      //
-      return SequenceCompareCore(source, other, comparer.Compare);
-    }
-
-		public static int SequenceCompare<T>(this IEnumerable<T> source, IEnumerable<T> other, Comparison<T> comparison)
-		{
-			if (source == null)
-        throw new ArgumentNullException("source");
-			if (other == null)
-        throw new ArgumentNullException("other");
-			if (comparison == null)
-        throw new ArgumentNullException("comparison");
-      //
-      return SequenceCompareCore(source, other, comparison);
-		}
-
-		#endregion
-		#region Aggregate methods
+    #endregion
+    #region Aggregate methods
     #region Bound
 
     private static T BoundCore<T>(IEnumerable<T> source, Comparison<T> comparison, bool bound)

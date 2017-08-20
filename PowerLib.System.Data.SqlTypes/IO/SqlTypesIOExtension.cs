@@ -1,24 +1,17 @@
 ﻿using System;
+using System.Linq;
 using System.IO;
 using System.Text;
 using System.Data.SqlTypes;
+using PowerLib.System.Linq;
 using PowerLib.System.IO;
+using PowerLib.SqlServer;
 
 namespace PowerLib.System.Data.SqlTypes.IO
 {
   public static class SqlTypesIOExtension
   {
     private const int sizeofGuid = 16;
-
-    private const int PresetIoBufferSize = 32768;
-
-    private static int ioBufferSize = PresetIoBufferSize;
-
-    public static int IoBufferSize
-    {
-      get { return ioBufferSize; }
-      set { ioBufferSize = value; }
-    }
 
     #region Read sql data types from stream
 
@@ -397,7 +390,7 @@ namespace PowerLib.System.Data.SqlTypes.IO
             stream.Write(value.Buffer, 0, (int)value.Length);
             break;
           case StorageState.Stream:
-            value.Stream.Copy(stream, int.MaxValue, IoBufferSize);
+            value.Stream.Copy(stream, int.MaxValue, SqlRuntime.IoBufferSize);
             break;
           default:
             throw new InvalidOperationException("Unsupported SqlBytes storage.");
@@ -557,7 +550,7 @@ namespace PowerLib.System.Data.SqlTypes.IO
             writer.Write(value.Buffer, 0, (int)value.Length);
             break;
           case StorageState.Stream:
-            value.Stream.Copy(writer.BaseStream, int.MaxValue, IoBufferSize);
+            value.Stream.Copy(writer.BaseStream, int.MaxValue, SqlRuntime.IoBufferSize);
             break;
           default:
             throw new InvalidOperationException("Unsupported SqlBytes storage.");
@@ -614,6 +607,148 @@ namespace PowerLib.System.Data.SqlTypes.IO
         byte[] data = encoding.GetBytes(value.Buffer, 0, (int)value.Length);
         writer.WriteMb(data.Length);
         writer.Write(data);
+      }
+    }
+
+    #endregion
+    #region SqlBytes manipulation
+
+    public static SqlBytes ReadSqlBytes(this Stream stream, Int64 count)
+    {
+      if (stream == null)
+        throw new ArgumentNullException("stream");
+      if (count < 0)
+        throw new ArgumentOutOfRangeException("count");
+
+      var bytes = new SqlBytes(new byte[count]);
+      var buffer = new byte[Comparable.Min(SqlRuntime.IoBufferSize, count)];
+      long index = 0L;
+      bytes.SetLength(0);
+      while (count > 0)
+      {
+        int read = stream.Read(buffer, 0, (int)Comparable.Min(buffer.Length, count));
+        if (read == 0)
+          break;
+        bytes.SetLength(index + read);
+        bytes.Write(index, buffer, 0, read);
+        index += read;
+        count -= read;
+      }
+      return bytes;
+    }
+
+    public static void WriteSqlBytes(this Stream stream, SqlBytes bytes)
+    {
+      if (stream == null)
+        throw new ArgumentNullException("stream");
+      if (bytes == null)
+        throw new ArgumentNullException("bytes");
+
+      long count = bytes.Length;
+      var buffer = new byte[Comparable.Min(SqlRuntime.IoBufferSize, count)];
+      long index = 0L;
+      while (count > 0)
+      {
+        int read = (int)bytes.Read(index, buffer, 0, (int)Comparable.Min(buffer.Length, count));
+        stream.Write(buffer, 0, read);
+        index += read;
+        count -= read;
+      }
+    }
+
+    #endregion
+    #region SqlChars manipulation
+
+    public static SqlChars ReadSqlChars(this Stream stream, Encoding encoding, Int64 count)
+    {
+      if (stream == null)
+        throw new ArgumentNullException("stream");
+      if (encoding == null)
+        throw new ArgumentNullException("encoding");
+      if (count < 0)
+        throw new ArgumentOutOfRangeException("count");
+
+      SqlChars chars = new SqlChars(new char[count]);
+      var buffer = new char[Comparable.Min(SqlRuntime.IoBufferSize, count)];
+      using (var e = stream.ReadChars(encoding).Take(count).GetEnumerator())
+      {
+        long offset = 0L;
+        int read = 0;
+        chars.SetLength(0);
+        do
+        {
+          read = buffer.Fill(e);
+          if (read > 0)
+          {
+            chars.SetLength(offset + read);
+            chars.Write(offset, buffer, 0, read);
+            offset += read;
+          }
+        }
+        while (read == buffer.Length);
+      }
+      return chars;
+    }
+
+    public static void WriteSqlChars(this Stream stream, SqlChars chars, Encoding encoding)
+    {
+      if (stream == null)
+        throw new ArgumentNullException("stream");
+      if (chars == null)
+        throw new ArgumentNullException("chars");
+      if (encoding == null)
+        throw new ArgumentNullException("encoding");
+
+      long count = chars.Length;
+      var buffer = new char[Comparable.Min(SqlRuntime.IoBufferSize, count)];
+      long index = 0L;
+      while (count > 0)
+      {
+        int read = (int)chars.Read(index, buffer, 0, (int)Comparable.Min(buffer.Length, count));
+        stream.WriteChars(buffer.AsEnumerable(), encoding);
+        index += read;
+        count -= read;
+      }
+    }
+
+    public static SqlChars ReadSqlChars(this StreamReader streamReader, Int64 count)
+    {
+      if (streamReader == null)
+        throw new ArgumentNullException("streamReader");
+      if (count < 0)
+        throw new ArgumentOutOfRangeException("count");
+
+      SqlChars chars = new SqlChars(new char[count]);
+      var buffer = new char[Comparable.Min(SqlRuntime.IoBufferSize, count)];
+      long offset = 0L;
+      chars.SetLength(0);
+      while (!streamReader.EndOfStream && count > 0)
+      {
+        int read = streamReader.ReadBlock(buffer, 0, (int)Comparable.Min(buffer.Length, count));
+        chars.SetLength(offset + read);
+        chars.Write(offset, buffer, 0, read);
+        offset += read;
+        count -= read;
+      }
+      return chars;
+    }
+
+    public static void WriteSqlChars(this StreamWriter streamWriter, SqlChars chars)
+    {
+      if (streamWriter == null)
+        throw new ArgumentNullException("streamWriter");
+      if (chars == null)
+        throw new ArgumentNullException("chars");
+
+      long count = chars.Length;
+      var buffer = new char[Comparable.Min(SqlRuntime.IoBufferSize, count)];
+      long index = 0L;
+      while (count > 0)
+      {
+        int read = (int)chars.Read(index, buffer, 0, (int)Comparable.Min(buffer.Length, count));
+        streamWriter.Write(buffer, 0, read);
+        index += read;
+        count -= read;
       }
     }
 

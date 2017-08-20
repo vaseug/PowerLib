@@ -6,4 +6,7 @@ PowerLib.System.Data.SqlTypes.Numerics.SqlSexagesimalAngle;pwrlib
 PowerLib.System.Data.SqlTypes.Text.SqlRegex;pwrlib
 PowerLib.System.Data.SqlTypes.Compression.SqlZipArchive;pwrlib
 PowerLib.System.Data.SqlTypes.SqlRange;pwrlib
+PowerLib.System.Data.SqlTypes.SqlLongRange;pwrlib
 PowerLib.System.Data.SqlTypes.SqlUri;pwrlib
+PowerLib.System.Data.SqlTypes.FileSystem.SqlFileInfo;pwrlib
+PowerLib.System.Data.SqlTypes.FileSystem.SqlDirectoryInfo;pwrlib

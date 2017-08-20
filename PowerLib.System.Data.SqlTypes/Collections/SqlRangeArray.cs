@@ -4,7 +4,6 @@ using System.Linq;
 using System.IO;
 using System.Data.SqlTypes;
 using Microsoft.SqlServer.Server;
-using PowerLib.System;
 using PowerLib.System.IO.Streamed.Typed;
 
 namespace PowerLib.System.Data.SqlTypes.Collections

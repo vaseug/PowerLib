@@ -103,7 +103,7 @@ namespace PowerLib.SqlClr.Deploy
         sb.AppendFormat("[{0}].[{1}]", schema, !string.IsNullOrEmpty(udt.Name) ? udt.Name : type.Name);
       }
       else
-        throw new ArgumentException("Framework type is not mapped to sql type");
+        throw new ArgumentException(string.Format("Framework type '{0}' is not mapped to sql type", type.FullName));
       return sb.ToString();
     }
 

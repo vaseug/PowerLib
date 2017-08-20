@@ -48,7 +48,7 @@ namespace PowerLib.System.IO.Streamed
       bool hasValue = HasItemData(flag);
       int size = FixedDataSize.HasValue && (hasValue || !Compact) ? FixedDataSize.Value : !FixedDataSize.HasValue && hasValue ? GetDataSize(value) : 0;
       if (!FixedDataSize.HasValue && hasValue)
-        size += PwrBitConverter.GetSizeEncodingSize(ItemSizing, size);
+        size += PwrBitConverter.GetSizeEncodingSize(size, ItemSizing);
       return size + (FixedFlagSize.HasValue ? FixedFlagSize.Value : GetFlagSize(flag));
     }
 

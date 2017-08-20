@@ -24,7 +24,7 @@ namespace PowerLib.System.IO.Streamed
 
     protected override int DataOffset
     {
-      get { return HeaderOffset + PwrBitConverter.GetSizeEncodingSize(CountSizing, int.MaxValue); }
+      get { return HeaderOffset + PwrBitConverter.GetSizeEncodingSize(int.MaxValue, CountSizing); }
     }
 
     protected abstract int? FixedDataSize { get; }
@@ -49,7 +49,7 @@ namespace PowerLib.System.IO.Streamed
 
     protected override int ReadCount()
     {
-      int countSize = PwrBitConverter.GetSizeEncodingSize(CountSizing, int.MaxValue);
+      int countSize = PwrBitConverter.GetSizeEncodingSize(int.MaxValue, CountSizing);
       long countOffset = BaseStream.Position = HeaderOffset;
       int count = BaseStream.ReadSize(CountSizing, Endian);
       int rest = countSize - (int)(BaseStream.Position - countOffset);
@@ -60,7 +60,7 @@ namespace PowerLib.System.IO.Streamed
 
     protected override void WriteCount(int count)
     {
-      int countSize = PwrBitConverter.GetSizeEncodingSize(CountSizing, int.MaxValue);
+      int countSize = PwrBitConverter.GetSizeEncodingSize(int.MaxValue, CountSizing);
       long countOffset = BaseStream.Position = HeaderOffset;
       BaseStream.WriteSize(count, CountSizing, Endian);
       int rest = countSize - (int)(BaseStream.Position - countOffset);
@@ -80,7 +80,7 @@ namespace PowerLib.System.IO.Streamed
       if (FixedItemSize.HasValue)
         return FixedItemSize.Value;
       int itemSize = GetDataSize(value);
-      return itemSize + PwrBitConverter.GetSizeEncodingSize(ItemSizing, itemSize);
+      return itemSize + PwrBitConverter.GetSizeEncodingSize(itemSize, ItemSizing);
     }
 
     protected override int ReadItemSize(int index)

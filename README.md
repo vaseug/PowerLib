@@ -394,6 +394,8 @@ Contains several dozens of user-defined types (UDTs) and functions:
 - __SqlZipArchive__ - Represents a zip archive (System.IO.Compression.ZipArchive type) to be stored in or retrieved from a database and and having its methods and properties.
 - __SqlRange__ - Represents a range - integer index and count (PowerLib.System.Range type) to be stored in or retrieved from a database and and having its methods and properties.
 - __SqlUri__ - Represents an uri - Uniform Resource Identifier (URI) value (System.Uri type) to be stored in or retrieved from a database and and having its methods and properties.
+- __SqlFileInfo__ - Represents a file path value to be stored in or retrieved from a database and and having methods and properties to work with file located at path.
+- __SqlDirectoryInfo__ - Represents a directory path value to be stored in or retrieved from a database and and having methods and properties to work with directory located at path.
 - __Sql__<*ClrType*>__Collection__ - Represents collection items of <*Type*> type to be stored in or retrieved from a database. In SQL server collection names as <*DbType*>__Collection__.
 - __Sql__<*ClrType*>__Array__ - Represents single dimension array of <*Type*> item type to be stored in or retrieved from a database. In SQL server single dimension array names as <*DbType*>__Array__.
 - __Sql__<*ClrType*>__RegularArray__ - Represents multiple dimensions array of <*Type*> item type to be stored in or retrieved from a database. In SQL server multiple dimensions array names as <*DbType*>__RegularArray__.
@@ -416,6 +418,7 @@ Int16|SmallInt
 Int32|Int
 Int64|BigInt
 Range|Range
+LongRange|BigRange
 SexagesimalAngle|SexagesimalAngle
 Single|SingleFloat
 String|String

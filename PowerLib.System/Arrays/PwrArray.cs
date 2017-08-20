@@ -9,14 +9,14 @@ using PowerLib.System.Linq;
 
 namespace PowerLib.System
 {
-  /// <summary>
-  /// Array extension methods
-  /// <remarks>
-  /// All methods to work with multidimension and jagged arrays are nonrecursive.
-  /// </remarks>
-  /// </summary>^
-  public static class PwrArray
-  {
+	/// <summary>
+	/// Array extension methods
+	/// <remarks>
+	/// All methods to work with multidimension and jagged arrays are nonrecursive.
+	/// </remarks>
+	/// </summary>^
+	public static class PwrArray
+	{
     //  Pattern formatting parameters: 0 - delimiters, 1 - spaces, 2 - escapes, 3 - open brackets, 4 - close brackets
     //private const string arrayItemsFormat = @"(?:[^{0}{1}{2}]|(?:[{2}][{0}{1}]))*";
     private const string arrayItemsFormat = @"(?:(?:[^{0}{1}{2}{3}{4}]|(?:[{2}].))(?:(?:[^{0}{2}{3}{4}]|(?:[{2}].))*(?:[^{0}{1}{2}{3}{4}]|(?:[{2}].)))?)?";
@@ -30,104 +30,104 @@ namespace PowerLib.System
       @"(?'Openings'(?'Open'[{4}][{2}]*)+))(?'Items'(?:(?:(?<![^{3}][{4}])[{2}]*(?<![{3}])[{1}][{2}]*)?{0})*)[{2}]*(?'Closings'(?'Close-Open'[{5}][{2}]*)+))*[{2}]*(?(Open)(?!))$";
 
     private static readonly string IndexOpenBracket;
-    private static readonly string IndexCloseBracket;
-    private static readonly string IndexLevelDelimiter;
-    private static readonly string IndexItemDelimiter;
-    private static readonly string IndexItemFormat;
+		private static readonly string IndexCloseBracket;
+		private static readonly string IndexLevelDelimiter;
+		private static readonly string IndexItemDelimiter;
+		private static readonly string IndexItemFormat;
 
-    #region Constructor
+		#region Constructor
 
-    static PwrArray()
-    {
+		static PwrArray()
+		{
       IndexOpenBracket = "";// ArrayResources.Default.Strings[ArrayMessage.IndexOpenBracket];
       IndexCloseBracket = "";// ArrayResources.Default.Strings[ArrayMessage.IndexCloseBracket];
       IndexLevelDelimiter = "";// ArrayResources.Default.Strings[ArrayMessage.IndexLevelDelimiter];
       IndexItemDelimiter = "";// ArrayResources.Default.Strings[ArrayMessage.IndexItemDelimiter];
       IndexItemFormat = "";// ArrayResources.Default.Strings[ArrayMessage.IndexItemFormat];
-    }
+		}
 
-    #endregion
-    #region Regular array extensions
-    #region Miscellaneous regular extensions
+		#endregion
+		#region Regular array extensions
+		#region Miscellaneous regular extensions
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="array"></param>
-    /// <returns></returns>
-    public static Type GetRegularArrayElementType(this Array array)
-    {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="array"></param>
+		/// <returns></returns>
+		public static Type GetRegularArrayElementType(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       return array.GetType().GetElementType();
-    }
+		}
 
-    public static int[] GetRegularArrayLowerBounds(this Array array)
-    {
+		public static int[] GetRegularArrayLowerBounds(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       return Enumerable.Range(0, array.Rank)
-        .Select(dim => array.GetLowerBound(dim))
-        .ToArray();
-    }
+				.Select(dim => array.GetLowerBound(dim))
+				.ToArray();
+		}
 
-    public static long[] GetRegularArrayLongLowerBounds(this Array array)
-    {
+		public static long[] GetRegularArrayLongLowerBounds(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       return Enumerable.Range(0, array.Rank)
-        .Select(dim => 0L)
-        .ToArray();
-    }
+				.Select(dim => 0L)
+				.ToArray();
+		}
 
-    public static int[] GetRegularArrayLengths(this Array array)
-    {
+		public static int[] GetRegularArrayLengths(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       return Enumerable.Range(0, array.Rank)
-        .Select(dim => array.GetLength(dim))
-        .ToArray();
-    }
+				.Select(dim => array.GetLength(dim))
+				.ToArray();
+		}
 
-    public static long[] GetRegularArrayLongLengths(this Array array)
-    {
+		public static long[] GetRegularArrayLongLengths(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       return Enumerable.Range(0, array.Rank)
-        .Select(dim => array.GetLongLength(dim))
-        .ToArray();
-    }
+				.Select(dim => array.GetLongLength(dim))
+				.ToArray();
+		}
 
     public static ArrayDimension[] GetRegularArrayDimensions(this Array array, bool zeroBased, params Range[] ranges)
     {
       if (array == null)
         throw new ArgumentNullException("array");
       if (ranges != null && ranges.Length > 0)
-      {
-        if (ranges.Length != array.Rank)
-          throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "ranges");
-        for (int i = 0; i < ranges.Length; i++)
-        {
-          int length = array.GetLength(i);
-          int lowerBound = array.GetLowerBound(i);
-          if (ranges[i].Index < (zeroBased ? 0 : lowerBound) || ranges[i].Index > (zeroBased ? 0 : lowerBound) + length)
-            throw new ArgumentRegularArrayElementException("ranges", i);
-          else if (ranges[i].Index + ranges[i].Count > (zeroBased ? 0 : lowerBound) + length)
-            throw new ArgumentRegularArrayElementException("ranges", i);
-        }
-      }
+			{
+				if (ranges.Length != array.Rank)
+					throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "ranges");
+				for (int i = 0; i < ranges.Length; i++)
+				{
+					int length = array.GetLength(i);
+					int lowerBound = array.GetLowerBound(i);
+					if (ranges[i].Index < (zeroBased ? 0 : lowerBound) || ranges[i].Index > (zeroBased ? 0 : lowerBound) + length)
+						throw new ArgumentRegularArrayElementException("ranges", i);
+					else if (ranges[i].Index + ranges[i].Count > (zeroBased ? 0 : lowerBound) + length)
+						throw new ArgumentRegularArrayElementException("ranges", i);
+				}
+			}
 
-      return Enumerable.Range(0, array.Rank)
-        .Select(dim => ranges != null && ranges.Length > 0 ?
-          new ArrayDimension(ranges[dim].Count, ranges[dim].Index + (zeroBased ? array.GetLowerBound(dim) : 0)) :
-          new ArrayDimension(array.GetLength(dim)))
-        .ToArray();
-    }
+			return Enumerable.Range(0, array.Rank)
+				.Select(dim => ranges != null && ranges.Length > 0 ?
+					new ArrayDimension(ranges[dim].Count, ranges[dim].Index + (zeroBased ? array.GetLowerBound(dim) : 0)) :
+					new ArrayDimension(array.GetLength(dim)))
+				.ToArray();
+		}
 
     public static ArrayDimension[] GetRegularArrayDimensions(this Array array, params Range[] ranges)
     {
@@ -135,138 +135,138 @@ namespace PowerLib.System
     }
 
     public static ArrayLongDimension[] GetRegularArrayLongDimensions(this Array array, params LongRange[] ranges)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (ranges != null && ranges.Length > 0)
-      {
-        if (ranges.Length != array.Rank)
-          throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "ranges");
-        for (int i = 0; i < ranges.Length; i++)
-        {
-          long length = array.GetLongLength(i);
-          if (ranges[i].Index < 0 || ranges[i].Index > length)
-            throw new ArgumentRegularArrayElementException("ranges", i);
-          else if (ranges[i].Index + ranges[i].Count > length)
-            throw new ArgumentRegularArrayElementException("ranges", i);
-        }
-      }
+			{
+				if (ranges.Length != array.Rank)
+					throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "ranges");
+				for (int i = 0; i < ranges.Length; i++)
+				{
+					long length = array.GetLongLength(i);
+					if (ranges[i].Index < 0 || ranges[i].Index > length)
+						throw new ArgumentRegularArrayElementException("ranges", i);
+					else if (ranges[i].Index + ranges[i].Count > length)
+						throw new ArgumentRegularArrayElementException("ranges", i);
+				}
+			}
 
-      return Enumerable.Range(0, array.Rank)
-        .Select(dim => ranges != null && ranges.Length > 0 ?
-          new ArrayLongDimension(ranges[dim].Count, ranges[dim].Index) :
-          new ArrayLongDimension(array.GetLongLength(dim), 0L))
-        .ToArray();
-    }
+			return Enumerable.Range(0, array.Rank)
+				.Select(dim => ranges != null && ranges.Length > 0 ?
+					new ArrayLongDimension(ranges[dim].Count, ranges[dim].Index) :
+					new ArrayLongDimension(array.GetLongLength(dim), 0L))
+				.ToArray();
+		}
 
-    #endregion
-    #region Validation methods
+		#endregion
+		#region Validation methods
 
-    public static void ValidateRange(this Array array, int index, int count)
-    {
+		public static void ValidateRange(this Array array, int index, int count)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (index < 0 || index > array.Length)
-        throw new ArgumentOutOfRangeException("index");
-      if (count < 0 || count > array.Length - index)
-        throw new ArgumentOutOfRangeException("count");
-    }
+				throw new ArgumentOutOfRangeException("index");
+			if (count < 0 || count > array.Length - index)
+				throw new ArgumentOutOfRangeException("count");
+		}
 
-    public static void ValidateRange(this Array array, long index, long count)
-    {
+		public static void ValidateRange(this Array array, long index, long count)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (index < 0 || index > array.LongLength)
-        throw new ArgumentOutOfRangeException("index");
-      if (count < 0 || count > array.LongLength - index)
-        throw new ArgumentOutOfRangeException("count");
-    }
+				throw new ArgumentOutOfRangeException("index");
+			if (count < 0 || count > array.LongLength - index)
+				throw new ArgumentOutOfRangeException("count");
+		}
 
-    public static void ValidateRange(this Array array, Range range)
-    {
+		public static void ValidateRange(this Array array, Range range)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (range.Index < 0 || range.Index > array.Length)
-        throw new ArgumentOutOfRangeException("Index is out of range", "range");
-      if (range.Count < 0 || range.Count > array.Length - range.Index)
-        throw new ArgumentOutOfRangeException("Count is out of range", "range");
-    }
+				throw new ArgumentOutOfRangeException("Index is out of range", "range");
+			if (range.Count < 0 || range.Count > array.Length - range.Index)
+				throw new ArgumentOutOfRangeException("Count is out of range", "range");
+		}
 
-    public static void ValidateRange(this Array array, LongRange range)
-    {
+		public static void ValidateRange(this Array array, LongRange range)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (range.Index < 0 || range.Index > array.LongLength)
-        throw new ArgumentOutOfRangeException("Index is out of range", "range");
-      if (range.Count < 0 || range.Count > array.LongLength - range.Index)
-        throw new ArgumentOutOfRangeException("Count is out of range", "range");
-    }
+				throw new ArgumentOutOfRangeException("Index is out of range", "range");
+			if (range.Count < 0 || range.Count > array.LongLength - range.Index)
+				throw new ArgumentOutOfRangeException("Count is out of range", "range");
+		}
 
-    public static void ValidateRanges(this Array array, Range[] ranges)
-    {
+		public static void ValidateRanges(this Array array, Range[] ranges)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (ranges == null)
-        throw new ArgumentNullException("ranges");
-      if (ranges.Length != array.Rank)
-        throw new ArgumentException("Invalid array length", "ranges");
+				throw new ArgumentNullException("ranges");
+			if (ranges.Length != array.Rank)
+				throw new ArgumentException("Invalid array length", "ranges");
 
-      for (int i = 0; i < array.Rank; i++)
-      {
-        try
-        {
-          int bias = array.GetLowerBound(i);
-          int length = array.GetLength(i);
-          if (ranges[i].Index < bias || ranges[i].Index > bias + length)
-            throw new ArgumentOutOfRangeException(null, "Index is out of range");
-          if (ranges[i].Count < 0 || ranges[i].Count > bias + length - ranges[i].Index)
-            throw new ArgumentOutOfRangeException(null, "Count is out of range");
-        }
-        catch (Exception ex)
-        {
-          throw new ArgumentRegularArrayElementException("ranges", ex, i);
-        }
-      }
-    }
+			for (int i = 0; i < array.Rank; i++)
+			{
+				try
+				{
+					int bias = array.GetLowerBound(i);
+					int length = array.GetLength(i);
+					if (ranges[i].Index < bias || ranges[i].Index > bias + length)
+						throw new ArgumentOutOfRangeException(null, "Index is out of range");
+					if (ranges[i].Count < 0 || ranges[i].Count > bias + length - ranges[i].Index)
+						throw new ArgumentOutOfRangeException(null, "Count is out of range");
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentRegularArrayElementException("ranges", ex, i);
+				}
+			}
+		}
 
-    public static void ValidateRanges(this Array array, LongRange[] ranges)
-    {
+		public static void ValidateRanges(this Array array, LongRange[] ranges)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (ranges == null)
-        throw new ArgumentNullException("ranges");
-      if (ranges.Length != array.Rank)
-        throw new ArgumentException("Invalid array length", "ranges");
+				throw new ArgumentNullException("ranges");
+			if (ranges.Length != array.Rank)
+				throw new ArgumentException("Invalid array length", "ranges");
 
-      for (int i = 0; i < array.Rank; i++)
-      {
-        try
-        {
-          long longLength = array.GetLongLength(i);
-          if (ranges[i].Index < 0 || ranges[i].Index > longLength)
-            throw new ArgumentOutOfRangeException(null, "Index is out of range");
-          if (ranges[i].Count < 0 || ranges[i].Count > longLength - ranges[i].Index)
-            throw new ArgumentOutOfRangeException(null, "Count is out of range");
-        }
-        catch (Exception ex)
-        {
-          throw new ArgumentRegularArrayElementException("ranges", ex, i);
-        }
-      }
-    }
+			for (int i = 0; i < array.Rank; i++)
+			{
+				try
+				{
+					long longLength = array.GetLongLength(i);
+					if (ranges[i].Index < 0 || ranges[i].Index > longLength)
+						throw new ArgumentOutOfRangeException(null, "Index is out of range");
+					if (ranges[i].Count < 0 || ranges[i].Count > longLength - ranges[i].Index)
+						throw new ArgumentOutOfRangeException(null, "Count is out of range");
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentRegularArrayElementException("ranges", ex, i);
+				}
+			}
+		}
 
-    #endregion
-    #region Create regular array
+		#endregion
+		#region Create regular array
 
-    public static Array CreateAsRegular<T>(ArrayDimension[] dimensions)
-    {
-      if (dimensions == null)
-        throw new ArgumentNullException("arrayDims");
-      if (dimensions.Length == 0)
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "dimensions");
+		public static Array CreateAsRegular<T>(ArrayDimension[] dimensions)
+		{
+			if (dimensions == null)
+				throw new ArgumentNullException("arrayDims");
+			if (dimensions.Length == 0)
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "dimensions");
 
-      return Array.CreateInstance(typeof(T), dimensions.Select(d => d.Length).ToArray(), dimensions.Select(d => d.LowerBound).ToArray());
-    }
+			return Array.CreateInstance(typeof(T), dimensions.Select(d => d.Length).ToArray(), dimensions.Select(d => d.LowerBound).ToArray());
+		}
 
     public static Array CreateAsLongRegular<T>(ArrayLongDimension[] dimensions)
     {
@@ -279,26 +279,26 @@ namespace PowerLib.System
     }
 
     public static Array CreateAsRegular<T>(int[] lengths, int[] lowerBounds = null)
-    {
-      if (lengths == null)
-        throw new ArgumentNullException("lengths");
-      if (lengths.Length == 0)
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "lengths");
-      if (lowerBounds != null && lengths.Length != lowerBounds.Length)
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "lowerBounds");
+		{
+			if (lengths == null)
+				throw new ArgumentNullException("lengths");
+			if (lengths.Length == 0)
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "lengths");
+			if (lowerBounds != null && lengths.Length != lowerBounds.Length)
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "lowerBounds");
 
-      return lowerBounds != null ? Array.CreateInstance(typeof(T), lengths, lowerBounds) : Array.CreateInstance(typeof(T), lengths);
-    }
+			return lowerBounds != null ? Array.CreateInstance(typeof(T), lengths, lowerBounds) : Array.CreateInstance(typeof(T), lengths);
+		}
 
-    public static Array CreateAsLongRegular<T>(long[] lengths)
-    {
-      if (lengths == null)
-        throw new ArgumentNullException("lengths");
-      if (lengths.Length == 0)
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "lengths");
+		public static Array CreateAsLongRegular<T>(long[] lengths)
+		{
+			if (lengths == null)
+				throw new ArgumentNullException("lengths");
+			if (lengths.Length == 0)
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "lengths");
 
-      return Array.CreateInstance(typeof(T), lengths);
-    }
+			return Array.CreateInstance(typeof(T), lengths);
+		}
 
     #endregion
     #region Enumerate regular array
@@ -311,27 +311,27 @@ namespace PowerLib.System
         throw new ArgumentOutOfRangeException("Parameter is out of range", "range");
 
       Type type = array.GetType().GetElementType();
-      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       ArrayInfo arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
       if (range.HasValue && (range.Value.Index > arrayInfo.Length || range.Value.Count > arrayInfo.Length - range.Value.Index))
         throw new ArgumentException("Invalid parameter.", "range");
 
       if (array.Length != 0)
-        for (ArrayIndex arrayIndex = new ArrayIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0, ZeroBased = zeroBased, AsRanges = ranges != null };
+				for (ArrayIndex arrayIndex = new ArrayIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0, ZeroBased = zeroBased, AsRanges = ranges != null };
           arrayIndex.Carry == 0 && (!range.HasValue || arrayIndex.FlatIndex < range.Value.Index + range.Value.Count); arrayIndex++)
           yield return arrayIndex.GetValue<T>(array);
-    }
+		}
 
     public static IEnumerable<T> EnumerateAsLongRegular<T>(this Array array, bool zeroBased = false, LongRange? range = null, params LongRange[] ranges)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       Type type = array.GetType().GetElementType();
-      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
       if (range.HasValue && (range.Value.Index < 0L || range.Value.Count < 0L))
         throw new ArgumentOutOfRangeException("Parameter is out of range.", "range");
 
@@ -340,10 +340,10 @@ namespace PowerLib.System
         throw new ArgumentException("Invalid parameter.", "range");
 
       if (array.LongLength != 0)
-        for (ArrayLongIndex arrayIndex = new ArrayLongIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0L, ZeroBased = zeroBased, AsRanges = ranges != null };
+				for (ArrayLongIndex arrayIndex = new ArrayLongIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0L, ZeroBased = zeroBased, AsRanges = ranges != null };
           arrayIndex.Carry == 0 && (!range.HasValue || arrayIndex.FlatIndex < range.Value.Index + range.Value.Count); arrayIndex++)
-          yield return arrayIndex.GetValue<T>(array);
-    }
+					yield return arrayIndex.GetValue<T>(array);
+		}
 
     #endregion
     #region Clone regular array
@@ -556,19 +556,19 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
       if (itemFormatter == null)
-        throw new ArgumentNullException("itemFormatter");
-      if (itemDelimiter == null)
-        throw new ArgumentNullException("itemDelimiter");
-      if (openBracket == null)
-        throw new ArgumentNullException("openBracket");
-      if (closeBracket == null)
-        throw new ArgumentNullException("closeBracket");
+				throw new ArgumentNullException("itemFormatter");
+			if (itemDelimiter == null)
+				throw new ArgumentNullException("itemDelimiter");
+			if (openBracket == null)
+				throw new ArgumentNullException("openBracket");
+			if (closeBracket == null)
+				throw new ArgumentNullException("closeBracket");
       if (indices != null && indices.Length != array.Rank)
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
 
       Type type = array.GetType().GetElementType();
-      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       RegularArrayLongInfo arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
       if (range.HasValue && (range.Value.Index > arrayInfo.Length || range.Value.Count > arrayInfo.Length - range.Value.Index))
@@ -621,8 +621,8 @@ namespace PowerLib.System
           }
         }
       }
-      return sb.ToString();
-    }
+			return sb.ToString();
+		}
 
     #endregion
     #region Select regular array
@@ -637,31 +637,31 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
       if (selector == null)
-        throw new ArgumentNullException("selector");
+				throw new ArgumentNullException("selector");
       if (indices != null && indices.Length != array.Rank)
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "indices");
       if (range.HasValue && (range.Value.Index < 0 || range.Value.Count < 0))
         throw new ArgumentOutOfRangeException("Parameter is out of range", "range");
 
-      Type type = array.GetType().GetElementType();
-      if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			Type type = array.GetType().GetElementType();
+			if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       RegularArrayInfo arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
       if (range.HasValue && (range.Value.Index > arrayInfo.Length || range.Value.Count > arrayInfo.Length - range.Value.Index))
         throw new ArgumentException("Invalid parameter.", "range");
 
       if (array.Length != 0)
-      {
+			{
         for (ArrayIndex arrayIndex = new ArrayIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0, ZeroBased = zeroBased, AsRanges = ranges != null };
           arrayIndex.Carry == 0 && (!range.HasValue || arrayIndex.FlatIndex < range.Value.Index + range.Value.Count); arrayIndex++)
         {
           if (indices != null)
-            arrayIndex.GetDimIndices(indices);
-          yield return selector(arrayIndex.GetValue<TSource>(array), arrayIndex.FlatIndex, indices);
-        }
-      }
-    }
+						arrayIndex.GetDimIndices(indices);
+					yield return selector(arrayIndex.GetValue<TSource>(array), arrayIndex.FlatIndex, indices);
+				}
+			}
+		}
 
     public static IEnumerable<TResult> SelectAsLongRegular<TSource, TResult>(this Array array, Func<TSource, TResult> selector, LongRange? range = null, params LongRange[] ranges)
     {
@@ -673,31 +673,31 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
       if (selector == null)
-        throw new ArgumentNullException("selector");
+				throw new ArgumentNullException("selector");
       if (indices != null && indices.Length != array.Rank)
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "indices");
       if (range.HasValue && (range.Value.Index < 0L || range.Value.Count < 0L))
         throw new ArgumentOutOfRangeException("Parameter is out of range.", "range");
 
       Type type = array.GetType().GetElementType();
-      if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       RegularArrayLongInfo arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
       if (range.HasValue && (range.Value.Index > arrayInfo.Length || range.Value.Count > arrayInfo.Length - range.Value.Index))
         throw new ArgumentException("Invalid parameter.", "range");
 
       if (array.LongLength != 0)
-      {
+			{
         for (ArrayLongIndex arrayIndex = new ArrayLongIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0L, ZeroBased = zeroBased, AsRanges = ranges != null };
           arrayIndex.Carry == 0 && (!range.HasValue || arrayIndex.FlatIndex < (range.Value.Index + range.Value.Count)); arrayIndex++)
         {
           if (indices != null)
-            arrayIndex.GetDimIndices(indices);
-          yield return selector(arrayIndex.GetValue<TSource>(array), arrayIndex.FlatIndex, indices);
-        }
-      }
-    }
+						arrayIndex.GetDimIndices(indices);
+					yield return selector(arrayIndex.GetValue<TSource>(array), arrayIndex.FlatIndex, indices);
+				}
+			}
+		}
 
     #endregion
     #region Where regular array
@@ -712,22 +712,22 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
       if (predicate == null)
-        throw new ArgumentNullException("predicate");
+				throw new ArgumentNullException("predicate");
       if (indices != null && indices.Length != array.Rank)
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "dimIndices");
       if (range.HasValue && (range.Value.Index < 0 || range.Value.Count < 0))
         throw new ArgumentOutOfRangeException("Parameter is out of range", "range");
 
       Type type = array.GetType().GetElementType();
-      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       RegularArrayInfo arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
       if (range.HasValue && (range.Value.Index > arrayInfo.Length || range.Value.Count > arrayInfo.Length - range.Value.Index))
         throw new ArgumentException("Invalid parameter.", "range");
 
       if (array.Length != 0)
-      {
+			{
         for (ArrayIndex arrayIndex = new ArrayIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0, ZeroBased = zeroBased, AsRanges = ranges != null };
           arrayIndex.Carry == 0 && (!range.HasValue || arrayIndex.FlatIndex < range.Value.Index + range.Value.Count); arrayIndex++)
         {
@@ -735,10 +735,10 @@ namespace PowerLib.System
             arrayIndex.GetDimIndices(indices);
           T value = arrayIndex.GetValue<T>(array);
           if (predicate(value, arrayIndex.FlatIndex, indices))
-            yield return value;
-        }
-      }
-    }
+					  yield return value;
+				}
+			}
+		}
 
     public static IEnumerable<T> WhereAsLongRegular<T>(this Array array, Func<T, bool> predicate, LongRange? range = null, params LongRange[] ranges)
     {
@@ -750,22 +750,22 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
       if (predicate == null)
-        throw new ArgumentNullException("predicate");
+				throw new ArgumentNullException("predicate");
       if (indices != null && indices.Length != array.Rank)
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "indices");
       if (range.HasValue && (range.Value.Index < 0L || range.Value.Count < 0L))
         throw new ArgumentOutOfRangeException("Parameter is out of range.", "range");
 
       Type type = array.GetType().GetElementType();
-      if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       RegularArrayLongInfo arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
       if (range.HasValue && (range.Value.Index > arrayInfo.Length || range.Value.Count > arrayInfo.Length - range.Value.Index))
         throw new ArgumentException("Invalid parameter.", "range");
 
       if (array.LongLength != 0)
-      {
+			{
         for (ArrayLongIndex arrayIndex = new ArrayLongIndex(arrayInfo) { FlatIndex = range.HasValue ? range.Value.Index : 0L, ZeroBased = zeroBased, AsRanges = ranges != null };
           arrayIndex.Carry == 0 && (!range.HasValue || arrayIndex.FlatIndex < (range.Value.Index + range.Value.Count)); arrayIndex++)
         {
@@ -773,10 +773,10 @@ namespace PowerLib.System
             arrayIndex.GetDimIndices(indices);
           T value = arrayIndex.GetValue<T>(array);
           if (predicate(value, arrayIndex.FlatIndex, indices))
-            yield return value;
-        }
-      }
-    }
+					  yield return value;
+				}
+			}
+		}
 
     #endregion
     #region Apply regular array
@@ -943,7 +943,7 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
       if (converter == null)
-        throw new ArgumentNullException("converter");
+				throw new ArgumentNullException("converter");
       if (range.HasValue && (range.Value.Index < 0 || range.Value.Count < 0))
         throw new ArgumentOutOfRangeException("Parameter is out of range", "range");
 
@@ -1000,8 +1000,8 @@ namespace PowerLib.System
           targetArrayIndex.SetValue<TResult>(target, converter(source, sourceIndex, sourceIndices, targetArrayIndex.FlatIndex, targetIndices));
         }
       }
-      return target;
-    }
+			return target;
+		}
 
     public static Array ConvertAsLongRegular<TSource, TResult>(this Array array, Func<TSource, TResult> converter, int[] transposition = null,
       LongRange? range = null, params LongRange[] ranges)
@@ -1015,7 +1015,7 @@ namespace PowerLib.System
       if (array == null)
         throw new ArgumentNullException("array");
       if (converter == null)
-        throw new ArgumentNullException("converter");
+				throw new ArgumentNullException("converter");
 
       Type type = array.GetType().GetElementType();
       if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
@@ -1043,9 +1043,9 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "sourceIndices");
 
       RegularArrayLongInfo targetArrayInfo = new RegularArrayLongInfo((transposition != null ? transposition.AsEnumerable() : Enumerable.Range(0, sourceArrayInfo.Rank)).Select(d => sourceArrayInfo.GetLength(d)).ToArray());
-      Array target = targetArrayInfo.CreateArray<TResult>();
-      if (array.LongLength != 0)
-      {
+			Array target = targetArrayInfo.CreateArray<TResult>();
+			if (array.LongLength != 0)
+			{
         long[] indices = new long[sourceArrayInfo.Rank];
         for (ArrayLongIndex targetArrayIndex = new ArrayLongIndex(targetArrayInfo) { ZeroBased = zeroBased, AsRanges = false };
           targetArrayIndex.Carry == 0; targetArrayIndex++)
@@ -1063,8 +1063,8 @@ namespace PowerLib.System
           targetArrayIndex.SetValue<TResult>(target, converter(source, sourceIndex, sourceIndices, targetArrayIndex.FlatIndex, targetIndices));
         }
       }
-      return target;
-    }
+			return target;
+		}
 
     #endregion
     #region Range regular array
@@ -1194,127 +1194,127 @@ namespace PowerLib.System
     /// <param name="arrayType"></param>
     /// <returns></returns>
     public static bool IsJaggedArray(this Type arrayType)
-    {
-      if (arrayType == null)
-        throw new ArgumentNullException("arrayType");
-      else if (!arrayType.IsArray)
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.TypeIsNotArray]);
-      //
-      return arrayType.GetElementType().IsArray;
-    }
+		{
+			if (arrayType == null)
+				throw new ArgumentNullException("arrayType");
+			else if (!arrayType.IsArray)
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.TypeIsNotArray]);
+			//
+			return arrayType.GetElementType().IsArray;
+		}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="array"></param>
-    /// <returns></returns>
-    public static bool IsJaggedArray(this Array array)
-    {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="array"></param>
+		/// <returns></returns>
+		public static bool IsJaggedArray(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       //
       return array.GetType().IsJaggedArray();
-    }
+		}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="elementType"></param>
-    /// <param name="ranks"></param>
-    /// <returns></returns>
-    public static Type MakeJaggedArrayType(this Type elementType, int[] ranks)
-    {
-      if (elementType == null)
-        throw new ArgumentNullException("elementType");
-      if (ranks == null)
-        throw new ArgumentNullException("ranks");
-      int rank = 0;
-      for (int i = 0; i < ranks.Length; rank += ranks[i++])
-        if (ranks[i] <= 0)
-          throw new ArgumentRegularArrayElementException("ranks", "Value is out of range", i);
-        else if (ranks[i] > int.MaxValue - rank)
-          throw new ArgumentRegularArrayElementException("ranks", "Ranks sum is out of range", i);
-      //
-      for (int i = 0; i < ranks.Length; i++)
-        elementType = ranks[ranks.Length - i - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - i - 1]);
-      return elementType;
-    }
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="elementType"></param>
+		/// <param name="ranks"></param>
+		/// <returns></returns>
+		public static Type MakeJaggedArrayType(this Type elementType, int[] ranks)
+		{
+			if (elementType == null)
+				throw new ArgumentNullException("elementType");
+			if (ranks == null)
+				throw new ArgumentNullException("ranks");
+			int rank = 0;
+			for (int i = 0; i < ranks.Length; rank += ranks[i++])
+				if (ranks[i] <= 0)
+					throw new ArgumentRegularArrayElementException("ranks", "Value is out of range", i);
+				else if (ranks[i] > int.MaxValue - rank)
+					throw new ArgumentRegularArrayElementException("ranks", "Ranks sum is out of range", i);
+			//
+			for (int i = 0; i < ranks.Length; i++)
+				elementType = ranks[ranks.Length - i - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - i - 1]);
+			return elementType;
+		}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="elementType"></param>
-    /// <param name="ranks"></param>
-    /// <returns></returns>
-    public static Type[] MakeJaggedArrayTypes(this Type elementType, int[] ranks)
-    {
-      if (elementType == null)
-        throw new ArgumentNullException("elementType");
-      if (ranks == null)
-        throw new ArgumentNullException("ranks");
-      int rank = 0;
-      for (int i = 0; i < ranks.Length; rank += ranks[i++])
-        if (ranks[i] <= 0)
-          throw new ArgumentRegularArrayElementException("ranks", "Value is out of range", i);
-        else if (ranks[i] > int.MaxValue - rank)
-          throw new ArgumentRegularArrayElementException("ranks", "Ranks sum is out of range", i);
-      //
-      Type[] types = new Type[ranks.Length];
-      for (int i = 0; i < ranks.Length; i++)
-        types[ranks.Length - i - 1] = elementType = ranks[ranks.Length - i - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - i - 1]);
-      return types;
-    }
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="elementType"></param>
+		/// <param name="ranks"></param>
+		/// <returns></returns>
+		public static Type[] MakeJaggedArrayTypes(this Type elementType, int[] ranks)
+		{
+			if (elementType == null)
+				throw new ArgumentNullException("elementType");
+			if (ranks == null)
+				throw new ArgumentNullException("ranks");
+			int rank = 0;
+			for (int i = 0; i < ranks.Length; rank += ranks[i++])
+				if (ranks[i] <= 0)
+					throw new ArgumentRegularArrayElementException("ranks", "Value is out of range", i);
+				else if (ranks[i] > int.MaxValue - rank)
+					throw new ArgumentRegularArrayElementException("ranks", "Ranks sum is out of range", i);
+			//
+			Type[] types = new Type[ranks.Length];
+			for (int i = 0; i < ranks.Length; i++)
+				types[ranks.Length - i - 1] = elementType = ranks[ranks.Length - i - 1] == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(ranks[ranks.Length - i - 1]);
+			return types;
+		}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="array"></param>
-    /// <returns></returns>
-    public static Type GetJaggedArrayElementType(this Array array)
-    {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="array"></param>
+		/// <returns></returns>
+		public static Type GetJaggedArrayElementType(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       //
       Type type = array.GetType();
-      while (type.IsArray)
-        type = type.GetElementType();
-      return type;
-    }
+			while (type.IsArray)
+				type = type.GetElementType();
+			return type;
+		}
 
-    public static int[] GetJaggedArrayRanks(this Array array)
-    {
+		public static int[] GetJaggedArrayRanks(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       //
       PwrList<int> ranks = new PwrList<int>();
-      Type type = array.GetType();
-      while (type.IsArray)
-      {
-        ranks.Add(type.GetArrayRank());
-        type = type.GetElementType();
-      }
-      return ranks.ToArray();
-    }
+			Type type = array.GetType();
+			while (type.IsArray)
+			{
+				ranks.Add(type.GetArrayRank());
+				type = type.GetElementType();
+			}
+			return ranks.ToArray();
+		}
 
-    public static T[][] ToRankedArray<T>(this T[] array, int[] ranks)
-    {
-      if (array == null)
-        throw new ArgumentNullException("flatArray");
-      if (ranks == null)
-        throw new ArgumentNullException("ranks");
-      if (ranks.Any(r => r < 0))
-        throw new ArgumentException("Array contains out of range value", "ranks");
-      if (array.Length != ranks.Aggregate((left, right) => left + right))
-        throw new ArgumentException("Invalitotarank", "ranks");
+		public static T[][] ToRankedArray<T>(this T[] array, int[] ranks)
+		{
+			if (array == null)
+				throw new ArgumentNullException("flatArray");
+			if (ranks == null)
+				throw new ArgumentNullException("ranks");
+			if (ranks.Any(r => r < 0))
+				throw new ArgumentException("Array contains out of range value", "ranks");
+			if (array.Length != ranks.Aggregate((left, right) => left + right))
+				throw new ArgumentException("Invalitotarank", "ranks");
 
-      int i = 0;
-      return ranks.Select(r => { int s = i; i += r; return array.Skip(s).Take(r).ToArray(); }).ToArray();
-    }
+			int i = 0;
+			return ranks.Select(r => { int s = i; i += r; return array.Skip(s).Take(r).ToArray(); }).ToArray();
+		}
 
-    public static T[] ToFlatArray<T>(this T[][] array)
-    {
-      return array.SelectMany(a => a).ToArray();
-    }
+		public static T[] ToFlatArray<T>(this T[][] array)
+		{
+			return array.SelectMany(a => a).ToArray();
+		}
 
     #endregion
     #region Create jagged array
@@ -1350,7 +1350,7 @@ namespace PowerLib.System
     /// <param name="ranges"></param>
     /// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
     public static IEnumerable<T> EnumerateAsJagged<T>(this Array array, int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
@@ -1380,28 +1380,28 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
       var arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.LongLength > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.LongLength == 0)
-          break;
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.LongLength > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.LongLength == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
         if (rankedIndices != null)
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
-        arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
         arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
         {
@@ -1409,35 +1409,35 @@ namespace PowerLib.System
           AsRanges = ranges != null && ranges.Length > 0
         };
         if (depth == ranks.Count - 1 && array.Length != 0)
-          for (; arrayIndex.Carry == 0; arrayIndex++)
-            yield return arrayIndex.GetValue<T>(array);
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+					for (; arrayIndex.Carry == 0; arrayIndex++)
+						yield return arrayIndex.GetValue<T>(array);
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    /// <summary>
-    /// Enumerate all elements of <paramref name="array"/>.
-    /// </summary>
-    /// <typeparam name="T">Type of enumerated elements i<paramref name="array"/>.</typeparam>
-    /// <param name="array">Jagged array to enumerate.</param>
-    /// <param name="ranges"></param>
-    /// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
-    public static IEnumerable<T> EnumerateAsLongJagged<T>(this Array array, long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
-    {
+		/// <summary>
+		/// Enumerate all elements of <paramref name="array"/>.
+		/// </summary>
+		/// <typeparam name="T">Type of enumerated elements i<paramref name="array"/>.</typeparam>
+		/// <param name="array">Jagged array to enumerate.</param>
+		/// <param name="ranges"></param>
+		/// <returns>Returns IEnumerable&lt;<typeparamref name="T"/>&gt;</returns>
+		public static IEnumerable<T> EnumerateAsLongJagged<T>(this Array array, long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
@@ -1467,20 +1467,20 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
       int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
       var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.LongLength > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.LongLength == 0)
-          break;
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.LongLength > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.LongLength == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -1488,7 +1488,7 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
         arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
         {
@@ -1496,36 +1496,36 @@ namespace PowerLib.System
           AsRanges = ranges != null && ranges.Length > 0
         };
         if (depth == ranks.Count - 1 && array.Length != 0)
-          for (; arrayIndex.Carry == 0; arrayIndex++)
-            yield return arrayIndex.GetValue<T>(array);
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+					for (; arrayIndex.Carry == 0; arrayIndex++)
+						yield return arrayIndex.GetValue<T>(array);
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    #endregion
-    #region Clone jagged array
+		#endregion
+		#region Clone jagged array
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="array"></param>
-    /// <returns></returns>
-    public static Array CloneAsJagged(this Array array)
-    {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="array"></param>
+		/// <returns></returns>
+		public static Array CloneAsJagged(this Array array)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
@@ -1549,7 +1549,7 @@ namespace PowerLib.System
       var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions());
       var arrayIndex = new ArrayIndex(arrayInfo);
       var targetArray = arrayInfo.CreateArray(types[depth]);
-      descent:
+    descent:
       while (depth < ranks.Count - 1)
       {
         if (array.Length > 0)
@@ -1569,7 +1569,7 @@ namespace PowerLib.System
           for (; arrayIndex.Carry == 0; arrayIndex++)
             arrayIndex.SetValue(targetArray, arrayIndex.GetValue(array));
       }
-      ascent:
+    ascent:
       if (depth != 0)
       {
         var arrayContext = arrayContexts.Pop();
@@ -1618,7 +1618,7 @@ namespace PowerLib.System
       var arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions());
       var arrayIndex = new ArrayLongIndex(arrayInfo);
       var targetArray = arrayInfo.CreateArray(types[depth]);
-      descent:
+    descent:
       while (depth < ranks.Count - 1)
       {
         if (array.Length > 0)
@@ -1638,7 +1638,7 @@ namespace PowerLib.System
           for (; arrayIndex.Carry == 0; arrayIndex++)
             arrayIndex.SetValue(targetArray, arrayIndex.GetValue(array));
       }
-      ascent:
+    ascent:
       if (depth != 0)
       {
         var arrayContext = arrayContexts.Pop();
@@ -1661,40 +1661,40 @@ namespace PowerLib.System
     #region Format jagged array
 
     public static string FormatAsJagged<T>(this Array array, Func<T, string> itemFormatter,
-      Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
-    {
-      return array.FormatAsJagged<T>(itemFormatter != null ? (t, fi, bi, ri) => itemFormatter(t) : default(Func<T, int, int[], int[][], string>),
+			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket)
+		{
+			return array.FormatAsJagged<T>(itemFormatter != null ? (t, fi, bi, ri) => itemFormatter(t) : default(Func<T, int, int[], int[][], string>),
         nullFormatter, itemDelimiter, openBracket, closeBracket);
-    }
+		}
 
-    /// <summary>
-    /// Format array.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="array">Formatting array.</param>
-    /// <param name="options">Jagged array options.</param>
-    /// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contain array item value and jagged array item indices.</param>
-    /// <param name="nullFormatter">Function that returns null array string representation. Parameter is jagged array item indices.</param>
-    /// <param name="itemDelimiter">Function that returns item delimiter. Parameter is current jagged array depth and regular array rank.</param>
-    /// <param name="openBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
-    /// <param name="closeBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
-    /// <returns>Formatted string representation of array.</returns>
-    public static string FormatAsJagged<T>(this Array array, Func<T, int, int[], int[][], string> itemFormatter,
-      Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket,
+		/// <summary>
+		/// Format array.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="array">Formatting array.</param>
+		/// <param name="options">Jagged array options.</param>
+		/// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contain array item value and jagged array item indices.</param>
+		/// <param name="nullFormatter">Function that returns null array string representation. Parameter is jagged array item indices.</param>
+		/// <param name="itemDelimiter">Function that returns item delimiter. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="openBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="closeBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <returns>Formatted string representation of array.</returns>
+		public static string FormatAsJagged<T>(this Array array, Func<T, int, int[], int[][], string> itemFormatter,
+			Func<int, string> nullFormatter, Func<int, int, int, string> itemDelimiter, Func<int, int, int, string> openBracket, Func<int, int, int, string> closeBracket,
       int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (itemFormatter == null)
-        throw new ArgumentNullException("itemFormatter");
-      if (nullFormatter == null)
-        throw new ArgumentNullException("nullFormatter");
-      if (itemDelimiter == null)
-        throw new ArgumentNullException("itemDelimiter");
-      if (openBracket == null)
-        throw new ArgumentNullException("openBracket");
-      if (closeBracket == null)
-        throw new ArgumentNullException("closeBracket");
+				throw new ArgumentNullException("itemFormatter");
+			if (nullFormatter == null)
+				throw new ArgumentNullException("nullFormatter");
+			if (itemDelimiter == null)
+				throw new ArgumentNullException("itemDelimiter");
+			if (openBracket == null)
+				throw new ArgumentNullException("openBracket");
+			if (closeBracket == null)
+				throw new ArgumentNullException("closeBracket");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -1719,13 +1719,13 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      int flatIndex = 0;
-      int depth = 0;
-      int brackets = 0;
-      var sb = new StringBuilder();
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+			int flatIndex = 0;
+			int depth = 0;
+			int brackets = 0;
+			var sb = new StringBuilder();
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
       var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
       var arrayIndex = new ArrayIndex(arrayInfo)
@@ -1733,42 +1733,42 @@ namespace PowerLib.System
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (arrayInfo.Length == 0)
-        {
-          for (int i = 0; i < arrayInfo.Rank; i++)
-            sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-          for (int i = array.Rank - 1; i >= 0; i--)
-            sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-          break;
-        }
-        for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-        if (arrayIndex.FlatIndex > 0)
-          sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-        for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
-          sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-        var a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
-        if (a == null)
-        {
-          sb.Append(nullFormatter(depth));
-          for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-          for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
-            sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-          if (arrayIndex.Inc())
-            break;
-          else
-            continue;
-        }
+    descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (arrayInfo.Length == 0)
+				{
+					for (int i = 0; i < arrayInfo.Rank; i++)
+						sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+					for (int i = array.Rank - 1; i >= 0; i--)
+						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+					break;
+				}
+				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+				if (arrayIndex.FlatIndex > 0)
+					sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
+				for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
+					sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+				var a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
+				if (a == null)
+				{
+					sb.Append(nullFormatter(depth));
+					for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+					for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
+						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+					if (arrayIndex.Inc())
+						break;
+					else
+						continue;
+				}
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
         if (rankedIndices != null)
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
-        arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = a;
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
+				array = a;
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
         arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
         arrayIndex = new ArrayIndex(arrayInfo)
@@ -1777,94 +1777,94 @@ namespace PowerLib.System
           AsRanges = ranges != null && ranges.Length > 0
         };
         if (depth == ranks.Count - 1)
-        {
-          if (arrayInfo.Length == 0)
-          {
-            for (int i = 0; i < arrayInfo.Rank; i++)
-              sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-            for (int i = arrayInfo.Rank - 1; i >= 0; i--)
-              sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-          }
-          else
-          {
-            do
-            {
+				{
+					if (arrayInfo.Length == 0)
+					{
+						for (int i = 0; i < arrayInfo.Rank; i++)
+							sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+						for (int i = arrayInfo.Rank - 1; i >= 0; i--)
+							sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+					}
+					else
+					{
+						do
+						{
               if (bandedIndices != null)
                 for (int i = 0; i < ranks[depth]; i++)
                   bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
               if (rankedIndices != null)
                 arrayIndex.GetDimIndices(rankedIndices[depth]);
               for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-              if (arrayIndex.FlatIndex > 0)
-                sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-              for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
-                sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-              sb.Append(itemFormatter(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices));
-              for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-              for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
-                sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-            }
-            while (!arrayIndex.Inc());
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        arrayInfo = (RegularArrayInfo)arrayIndex.ArrayInfo;
-        depth--;
-        for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-        for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
-          sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-        if (arrayIndex.FlatIndex < arrayIndex.ArrayInfo.Length - 1)
-        {
-          arrayIndex++;
-          goto descent;
-        }
-        else
-          goto ascent;
-      }
-      return sb.ToString();
-    }
+							if (arrayIndex.FlatIndex > 0)
+								sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
+							for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
+								sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+							sb.Append(itemFormatter(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices));
+							for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+							for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
+								sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+						}
+						while (!arrayIndex.Inc());
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				arrayInfo = (RegularArrayInfo)arrayIndex.ArrayInfo;
+				depth--;
+				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+				for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
+					sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+				if (arrayIndex.FlatIndex < arrayIndex.ArrayInfo.Length - 1)
+				{
+					arrayIndex++;
+					goto descent;
+				}
+				else
+					goto ascent;
+			}
+			return sb.ToString();
+		}
 
-    public static string FormatAsLongJagged<T>(this Array array, Func<T, string> itemFormatter,
-      Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
-    {
-      return array.FormatAsLongJagged<T>(itemFormatter != null ? (t, fi, bi, ri) => itemFormatter(t) : default(Func<T, long, long[], long[][], string>),
-        nullFormatter, itemDelimiter, openBracket, closeBracket);
-    }
+		public static string FormatAsLongJagged<T>(this Array array, Func<T, string> itemFormatter,
+			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket)
+		{
+			return array.FormatAsLongJagged<T>(itemFormatter != null ? (t, fi, bi, ri) => itemFormatter(t) : default(Func<T, long, long[], long[][], string>),
+				nullFormatter, itemDelimiter, openBracket, closeBracket);
+		}
 
-    /// <summary>
-    /// Format array.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="array">Formatting array.</param>
-    /// <param name="options">Jagged array options.</param>
-    /// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contain array item value and jagged array item indices.</param>
-    /// <param name="nullFormatter">Function that returns null array string representation. Parameter is jagged array item indices.</param>
-    /// <param name="itemDelimiter">Function that returns item delimiter. Parameter is current jagged array depth and regular array rank.</param>
-    /// <param name="openBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
-    /// <param name="closeBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
-    /// <returns>Formatted string representation of array.</returns>
-    public static string FormatAsLongJagged<T>(this Array array, Func<T, long, long[], long[][], string> itemFormatter,
-      Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket,
+		/// <summary>
+		/// Format array.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="array">Formatting array.</param>
+		/// <param name="options">Jagged array options.</param>
+		/// <param name="itemFormatter">Function that returns string representation of array item value. Parameters contain array item value and jagged array item indices.</param>
+		/// <param name="nullFormatter">Function that returns null array string representation. Parameter is jagged array item indices.</param>
+		/// <param name="itemDelimiter">Function that returns item delimiter. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="openBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <param name="closeBracket">Function that returns open bracket string. Parameter is current jagged array depth and regular array rank.</param>
+		/// <returns>Formatted string representation of array.</returns>
+		public static string FormatAsLongJagged<T>(this Array array, Func<T, long, long[], long[][], string> itemFormatter,
+			Func<int, string> nullFormatter, Func<int, int, long, string> itemDelimiter, Func<int, int, long, string> openBracket, Func<int, int, long, string> closeBracket,
       long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (itemFormatter == null)
-        throw new ArgumentNullException("itemFormatter");
-      if (nullFormatter == null)
-        throw new ArgumentNullException("nullFormatter");
-      if (itemDelimiter == null)
-        throw new ArgumentNullException("itemDelimiter");
-      if (openBracket == null)
-        throw new ArgumentNullException("openBracket");
-      if (closeBracket == null)
-        throw new ArgumentNullException("closeBracket");
+				throw new ArgumentNullException("itemFormatter");
+			if (nullFormatter == null)
+				throw new ArgumentNullException("nullFormatter");
+			if (itemDelimiter == null)
+				throw new ArgumentNullException("itemDelimiter");
+			if (openBracket == null)
+				throw new ArgumentNullException("openBracket");
+			if (closeBracket == null)
+				throw new ArgumentNullException("closeBracket");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -1889,13 +1889,13 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      long flatIndex = 0;
-      int depth = 0;
-      int brackets = 0;
-      var sb = new StringBuilder();
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			long flatIndex = 0;
+			int depth = 0;
+			int brackets = 0;
+			var sb = new StringBuilder();
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
       var arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
       var arrayIndex = new ArrayLongIndex(arrayInfo)
@@ -1903,34 +1903,34 @@ namespace PowerLib.System
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (arrayInfo.Length == 0)
-        {
-          for (int i = 0; i < arrayInfo.Rank; i++)
-            sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-          for (int i = array.Rank - 1; i >= 0; i--)
-            sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-          break;
-        }
-        for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-        if (arrayIndex.FlatIndex > 0)
-          sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-        for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
-          sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-        var a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
-        if (a == null)
-        {
-          sb.Append(nullFormatter(depth));
-          for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-          for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
-            sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-          if (arrayIndex.Inc())
-            break;
-          else
-            continue;
-        }
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (arrayInfo.Length == 0)
+				{
+					for (int i = 0; i < arrayInfo.Rank; i++)
+						sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+					for (int i = array.Rank - 1; i >= 0; i--)
+						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+					break;
+				}
+				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+				if (arrayIndex.FlatIndex > 0)
+					sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
+				for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
+					sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+				var a = (arrayIndex.FlatIndex < arrayInfo.Length) ? arrayIndex.GetValue<Array>(array) : null;
+				if (a == null)
+				{
+					sb.Append(nullFormatter(depth));
+					for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+					for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
+						sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+					if (arrayIndex.Inc())
+						break;
+					else
+						continue;
+				}
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -1938,7 +1938,7 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = a;
+				array = a;
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
         arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
         arrayIndex = new ArrayLongIndex(arrayInfo)
@@ -1946,67 +1946,67 @@ namespace PowerLib.System
           ZeroBased = zeroBased,
           AsRanges = ranges != null && ranges.Length > 0
         };
-        if (depth == ranks.Count - 1)
-        {
-          if (arrayInfo.Length == 0)
-          {
-            for (int i = 0; i < array.Rank; i++)
-              sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-            for (int i = arrayInfo.Rank - 1; i >= 0; i--)
-              sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-          }
-          else
-          {
-            do
-            {
-              if (bandedIndices != null)
-                for (int j = 0; j < ranks[depth]; j++)
-                  bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-              if (rankedIndices != null)
-                arrayIndex.GetDimIndices(rankedIndices[depth]);
-              for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-              if (arrayIndex.FlatIndex > 0)
-                sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
-              for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
-                sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
-              sb.Append(itemFormatter(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices));
-              for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-              for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
-                sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-            }
-            while (!arrayIndex.Inc());
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        arrayInfo = (RegularArrayLongInfo)arrayIndex.ArrayInfo;
-        depth--;
-        for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
-        for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
-          sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-      return sb.ToString();
-    }
+				if (depth == ranks.Count - 1)
+				{
+					if (arrayInfo.Length == 0)
+					{
+						for (int i = 0; i < array.Rank; i++)
+							sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+						for (int i = arrayInfo.Rank - 1; i >= 0; i--)
+							sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+					}
+					else
+					{
+						do
+						{
+							if (bandedIndices != null)
+								for (int j = 0; j < ranks[depth]; j++)
+									bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
+							if (rankedIndices != null)
+								arrayIndex.GetDimIndices(rankedIndices[depth]);
+							for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.LowerBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+							if (arrayIndex.FlatIndex > 0)
+								sb.Append(itemDelimiter(depth, arrayInfo.Rank - 1 - brackets, arrayInfo.GetLength(arrayInfo.Rank - 1 - brackets)));
+							for (int i = arrayInfo.Rank - brackets; brackets > 0; i++, brackets--)
+								sb.Append(openBracket(depth, i, arrayInfo.GetLength(i)));
+							sb.Append(itemFormatter(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices));
+							for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+							for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
+								sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+						}
+						while (!arrayIndex.Inc());
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				arrayInfo = (RegularArrayLongInfo)arrayIndex.ArrayInfo;
+				depth--;
+				for (brackets = 0; brackets < arrayInfo.Rank && arrayIndex.DimIndices[arrayInfo.Rank - 1 - brackets] == arrayInfo.UpperBounds[arrayInfo.Rank - 1 - brackets]; brackets++) ;
+				for (int i = arrayInfo.Rank - 1; brackets > 0; i--, brackets--)
+					sb.Append(closeBracket(depth, i, arrayInfo.GetLength(i)));
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+			return sb.ToString();
+		}
 
-    #endregion
-    #region Select jagged array
+		#endregion
+		#region Select jagged array
 
-    public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, TResult> selector)
-    {
+		public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, TResult> selector)
+		{
       return array.SelectAsJagged<TSource, TResult>(selector != null ? (t, fi, bi, ri) => selector(t) : default(Func<TSource, int, int[], int[][], TResult>));
-    }
+		}
 
     public static IEnumerable<TResult> SelectAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> selector,
       int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
@@ -2050,7 +2050,7 @@ namespace PowerLib.System
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
+    descent:
       while (depth < ranks.Count - 1)
       {
         if (array.Length > 0)
@@ -2089,7 +2089,7 @@ namespace PowerLib.System
           }
         }
       }
-      ascent:
+    ascent:
       if (depth != 0)
       {
         var arrayContext = arrayContexts.Pop();
@@ -2107,17 +2107,17 @@ namespace PowerLib.System
     }
 
     public static IEnumerable<TResult> SelectAsLongJagged<TSource, TResult>(this Array array, Func<TSource, TResult> selector)
-    {
-      return array.SelectAsLongJagged<TSource, TResult>(selector != null ? (t, fi, bi, ri) => selector(t) : default(Func<TSource, long, long[], long[][], TResult>));
-    }
+		{
+			return array.SelectAsLongJagged<TSource, TResult>(selector != null ? (t, fi, bi, ri) => selector(t) : default(Func<TSource, long, long[], long[][], TResult>));
+		}
 
-    public static IEnumerable<TResult> SelectAsLongJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> selector,
+		public static IEnumerable<TResult> SelectAsLongJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> selector,
       long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (selector == null)
-        throw new ArgumentNullException("selector");
+				throw new ArgumentNullException("selector");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -2141,25 +2141,25 @@ namespace PowerLib.System
       if (bandedIndices != null && bandedIndices.Length != totalRank)
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
-      if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+			if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      long flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			long flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
       var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -2167,63 +2167,63 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
         arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
         {
           ZeroBased = zeroBased,
           AsRanges = ranges != null && ranges.Length > 0
         };
-        if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				if (depth == ranks.Count - 1 && array.Length != 0)
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
-            if (bandedIndices != null)
-              for (int j = 0; j < ranks[depth]; j++)
-                bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
-            if (rankedIndices != null)
-              arrayIndex.GetDimIndices(rankedIndices[depth]);
-            yield return selector(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices);
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+					{
+						if (bandedIndices != null)
+							for (int j = 0; j < ranks[depth]; j++)
+								bandedIndices[biases[depth] + j] = arrayIndex.DimIndices[j];
+						if (rankedIndices != null)
+							arrayIndex.GetDimIndices(rankedIndices[depth]);
+						yield return selector(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices);
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    #endregion
-    #region Where jagged array
+		#endregion
+		#region Where jagged array
 
-    public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, bool> predicate)
-    {
-      return array.WhereAsJagged<T>(predicate != null ? (t, fi, bi, ri) => predicate(t) : default(Func<T, int, int[], int[][], bool>));
-    }
+		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, bool> predicate)
+		{
+			return array.WhereAsJagged<T>(predicate != null ? (t, fi, bi, ri) => predicate(t) : default(Func<T, int, int[], int[][], bool>));
+		}
 
-    public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[], int[][], bool> predicate,
+		public static IEnumerable<T> WhereAsJagged<T>(this Array array, Func<T, int, int[], int[][], bool> predicate,
       int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (predicate == null)
-        throw new ArgumentNullException("predicate");
+				throw new ArgumentNullException("predicate");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -2248,11 +2248,11 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      int flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+			int flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
       var arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
       {
@@ -2260,12 +2260,12 @@ namespace PowerLib.System
         AsRanges = ranges != null && ranges.Length > 0
       };
       descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -2273,7 +2273,7 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
         arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
         {
@@ -2281,54 +2281,54 @@ namespace PowerLib.System
           AsRanges = ranges != null && ranges.Length > 0
         };
         if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
+					{
             if (bandedIndices != null)
               for (int i = 0; i < ranks[depth]; i++)
                 bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
             if (rankedIndices != null)
               arrayIndex.GetDimIndices(rankedIndices[depth]);
             T value = arrayIndex.GetValue<T>(array);
-            if (predicate(value, flatIndex++, bandedIndices, rankedIndices))
-              yield return value;
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+						if (predicate(value, flatIndex++, bandedIndices, rankedIndices))
+							yield return value;
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    public static IEnumerable<T> WhereAsLongJagged<T>(this Array array, Func<T, bool> predicate)
-    {
-      return array.WhereAsLongJagged<T>(predicate != null ? (t, fi, bi, ri) => predicate(t) : default(Func<T, long, long[], long[][], bool>));
-    }
+		public static IEnumerable<T> WhereAsLongJagged<T>(this Array array, Func<T, bool> predicate)
+		{
+			return array.WhereAsLongJagged<T>(predicate != null ? (t, fi, bi, ri) => predicate(t) : default(Func<T, long, long[], long[][], bool>));
+		}
 
-    public static IEnumerable<T> WhereAsLongJagged<T>(this Array array, Func<T, long, long[], long[][], bool> predicate,
+		public static IEnumerable<T> WhereAsLongJagged<T>(this Array array, Func<T, long, long[], long[][], bool> predicate,
       long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (predicate == null)
-        throw new ArgumentNullException("predicate");
+				throw new ArgumentNullException("predicate");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -2353,24 +2353,24 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      long flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			long flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
       var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -2378,7 +2378,7 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
         arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
         {
@@ -2386,62 +2386,62 @@ namespace PowerLib.System
           AsRanges = ranges != null && ranges.Length > 0
         };
         if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
+					{
             if (bandedIndices != null)
               for (int i = 0; i < ranks[depth]; i++)
                 bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
             if (rankedIndices != null)
               arrayIndex.GetDimIndices(rankedIndices[depth]);
             T value = arrayIndex.GetValue<T>(array);
-            if (predicate(value, flatIndex++, bandedIndices, rankedIndices))
-              yield return value;
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+						if (predicate(value, flatIndex++, bandedIndices, rankedIndices))
+							yield return value;
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    #endregion
-    #region Fill jagged array
+		#endregion
+		#region Fill jagged array
 
-    public static void FillAsJagged<T>(this Array array, T value)
-    {
-      array.FillAsJagged<T>((fi, bi, ri) => value);
-    }
+		public static void FillAsJagged<T>(this Array array, T value)
+		{
+			array.FillAsJagged<T>((fi, bi, ri) => value);
+		}
 
-    public static void FillAsJagged<T>(this Array array, Func<T> valuator)
-    {
-      array.FillAsJagged<T>(valuator != null ? (fi, bi, ri) => valuator() : default(Func<int, int[], int[][], T>));
-    }
+		public static void FillAsJagged<T>(this Array array, Func<T> valuator)
+		{
+			array.FillAsJagged<T>(valuator != null ? (fi, bi, ri) => valuator() : default(Func<int, int[], int[][], T>));
+		}
 
-    public static void FillAsJagged<T>(this Array array, Func<int, int[], int[][], T> valuator,
+		public static void FillAsJagged<T>(this Array array, Func<int, int[], int[][], T> valuator,
       int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (valuator == null)
-        throw new ArgumentNullException("valuator");
+				throw new ArgumentNullException("valuator");
 
       PwrList<int> ranks = new PwrList<int>();
       PwrList<int> biases = new PwrList<int>();
@@ -2466,24 +2466,24 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      int flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+			int flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
       ArrayIndex arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -2491,47 +2491,47 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
         arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
         {
           ZeroBased = zeroBased,
           AsRanges = ranges != null && ranges.Length > 0
         };
-        if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				if (depth == ranks.Count - 1 && array.Length != 0)
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
+					{
             if (bandedIndices != null)
               for (int i = 0; i < ranks[depth]; i++)
                 bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
             if (rankedIndices != null)
               arrayIndex.GetDimIndices(rankedIndices[depth]);
             arrayIndex.SetValue<T>(array, valuator(flatIndex++, bandedIndices, rankedIndices));
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
     public static void FillAsLongJagged<T>(this Array array, T value)
     {
@@ -2539,17 +2539,17 @@ namespace PowerLib.System
     }
 
     public static void FillAsLongJagged<T>(this Array array, Func<T> valuator)
-    {
-      array.FillAsLongJagged<T>(valuator != null ? (fi, bi, ri) => valuator() : default(Func<long, long[], long[][], T>));
-    }
+		{
+			array.FillAsLongJagged<T>(valuator != null ? (fi, bi, ri) => valuator() : default(Func<long, long[], long[][], T>));
+		}
 
-    public static void FillAsLongJagged<T>(this Array array, Func<long, long[], long[][], T> valuator,
+		public static void FillAsLongJagged<T>(this Array array, Func<long, long[], long[][], T> valuator,
       long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (valuator == null)
-        throw new ArgumentNullException("valuator");
+				throw new ArgumentNullException("valuator");
 
       PwrList<int> ranks = new PwrList<int>();
       PwrList<int> biases = new PwrList<int>();
@@ -2574,24 +2574,24 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      long flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			long flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
       var arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+    descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -2599,63 +2599,63 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
         arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
         {
           ZeroBased = zeroBased,
           AsRanges = ranges != null && ranges.Length > 0
         };
-        if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				if (depth == ranks.Count - 1 && array.Length != 0)
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
+					{
             if (bandedIndices != null)
               for (int i = 0; i < ranks[depth]; i++)
                 bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
             if (rankedIndices != null)
               arrayIndex.GetDimIndices(rankedIndices[depth]);
             arrayIndex.SetValue<T>(array, valuator(flatIndex++, bandedIndices, rankedIndices));
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    #endregion
-    #region Apply jagged array
+		#endregion
+		#region Apply jagged array
 
-    public static void ApplyAsJagged<T>(this Array array, Action<T> action)
-    {
-      array.ApplyAsJagged<T>(action != null ? (t, fi, bi, ri) => action(t) : default(Action<T, int, int[], int[][]>));
-    }
+		public static void ApplyAsJagged<T>(this Array array, Action<T> action)
+		{
+			array.ApplyAsJagged<T>(action != null ? (t, fi, bi, ri) => action(t) : default(Action<T, int, int[], int[][]>));
+		}
 
-    public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[], int[][]> action,
+		public static void ApplyAsJagged<T>(this Array array, Action<T, int, int[], int[][]> action,
       int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
+				throw new ArgumentNullException("action");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -2680,24 +2680,24 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      int flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+			int flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
       var arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
+		descent:
+			while (depth < ranks.Count - 1)
+			{
         if (array.Length > 0)
           for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -2705,7 +2705,7 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
         arrayIndex = new ArrayIndex(new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges)))
         {
@@ -2713,52 +2713,52 @@ namespace PowerLib.System
           AsRanges = ranges != null && ranges.Length > 0
         };
         if (depth == ranks.Count - 1 && array.Length != 0)
-        {
-          if (bandedIndices != null)
-            for (int i = 0; i < ranks[depth]; i++)
-              bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
-          if (rankedIndices != null)
-            arrayIndex.GetDimIndices(rankedIndices[depth]);
-          for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
-            if (bandedIndices != null)
-              for (int i = 0; i < ranks[depth]; i++)
-                bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
-            if (rankedIndices != null)
-              arrayIndex.GetDimIndices(rankedIndices[depth]);
-            action(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices);
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+				{
+					if (bandedIndices != null)
+					  for (int i = 0; i < ranks[depth]; i++)
+						  bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+					if (rankedIndices != null)
+					  arrayIndex.GetDimIndices(rankedIndices[depth]);
+					for (; arrayIndex.Carry == 0; arrayIndex++)
+					{
+						if (bandedIndices != null)
+							for (int i = 0; i < ranks[depth]; i++)
+								bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
+						if (rankedIndices != null)
+							arrayIndex.GetDimIndices(rankedIndices[depth]);
+						action(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices);
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    public static void ApplyAsLongJagged<T>(this Array array, Action<T> action)
-    {
-      array.ApplyAsLongJagged<T>(action != null ? (t, fi, bi, ri) => action(t) : default(Action<T, long, long[], long[][]>));
-    }
+		public static void ApplyAsLongJagged<T>(this Array array, Action<T> action)
+		{
+			array.ApplyAsLongJagged<T>(action != null ? (t, fi, bi, ri) => action(t) : default(Action<T, long, long[], long[][]>));
+		}
 
-    public static void ApplyAsLongJagged<T>(this Array array, Action<T, long, long[], long[][]> action,
+		public static void ApplyAsLongJagged<T>(this Array array, Action<T, long, long[], long[][]> action,
       long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
+				throw new ArgumentNullException("action");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -2783,24 +2783,24 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(T) != type && !typeof(T).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      long flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			long flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
       ArrayLongIndex arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
       {
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+    descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
@@ -2808,63 +2808,63 @@ namespace PowerLib.System
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
         arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        array = arrayIndex.GetValue<Array>(array);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
         arrayIndex = new ArrayLongIndex(new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges)))
         {
           ZeroBased = zeroBased,
           AsRanges = ranges != null && ranges.Length > 0
         };
-        if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				if (depth == ranks.Count - 1 && array.Length != 0)
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
+					{
             if (bandedIndices != null)
               for (int i = 0; i < ranks[depth]; i++)
                 bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
             if (rankedIndices != null)
               arrayIndex.GetDimIndices(rankedIndices[depth]);
             action(arrayIndex.GetValue<T>(array), flatIndex++, bandedIndices, rankedIndices);
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-    }
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+		}
 
-    #endregion
-    #region Convert jagged array
+		#endregion
+		#region Convert jagged array
 
-    public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, TResult> convertor)
-    {
-      return array.ConvertAsJagged<TSource, TResult>(convertor != null ? (t, fi, bi, ri) => convertor(t) : default(Func<TSource, int, int[], int[][], TResult>));
-    }
+		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, TResult> convertor)
+		{
+			return array.ConvertAsJagged<TSource, TResult>(convertor != null ? (t, fi, bi, ri) => convertor(t) : default(Func<TSource, int, int[], int[][], TResult>));
+		}
 
-    public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> converter,
+		public static Array ConvertAsJagged<TSource, TResult>(this Array array, Func<TSource, int, int[], int[][], TResult> converter,
       int[] bandedIndices = null, int[][] rankedIndices = null, bool zeroBased = false, Func<int, int[], int[][], bool, Range[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (converter == null)
-        throw new ArgumentNullException("converter");
+				throw new ArgumentNullException("converter");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -2889,17 +2889,17 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      var targetArrayTypes = new Type[ranks.Count];
-      targetArrayTypes[ranks.Count - 1] = typeof(TResult);
-      for (int i = 1; i < ranks.Count; i++)
-        targetArrayTypes[ranks.Count - i - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
+			var targetArrayTypes = new Type[ranks.Count];
+			targetArrayTypes[ranks.Count - 1] = typeof(TResult);
+			for (int i = 1; i < ranks.Count; i++)
+				targetArrayTypes[ranks.Count - i - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
 
-      int flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
-      var targetArrayContexts = new PwrStack<Array>();
+			int flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayIndex>>();
+			var targetArrayContexts = new PwrStack<Array>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
       var arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
       var arrayIndex = new ArrayIndex(arrayInfo)
@@ -2907,82 +2907,82 @@ namespace PowerLib.System
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      var targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+			var targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
         if (rankedIndices != null)
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
-        arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        targetArrayContexts.Push(targetArray);
-        array = arrayIndex.GetValue<Array>(array);
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
+				targetArrayContexts.Push(targetArray);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(Range[]);
         arrayInfo = new RegularArrayInfo(array.GetRegularArrayDimensions(zeroBased, ranges));
-        var a = arrayInfo.CreateArray(targetArrayTypes[depth]);
-        arrayIndex.SetValue<Array>(targetArray, a);
-        targetArray = a;
+				var a = arrayInfo.CreateArray(targetArrayTypes[depth]);
+				arrayIndex.SetValue<Array>(targetArray, a);
+				targetArray = a;
         arrayIndex = new ArrayIndex(arrayInfo)
         {
           ZeroBased = zeroBased,
           AsRanges = ranges != null && ranges.Length > 0
         };
-        if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				if (depth == ranks.Count - 1 && array.Length != 0)
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
+					{
             if (bandedIndices != null)
               for (int i = 0; i < ranks[depth]; i++)
                 bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
             if (rankedIndices != null)
               arrayIndex.GetDimIndices(rankedIndices[depth]);
             arrayIndex.SetValue<TResult>(targetArray, converter(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices));
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        targetArray = targetArrayContexts.Pop();
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-      return targetArray;
-    }
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				targetArray = targetArrayContexts.Pop();
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+			return targetArray;
+		}
 
-    public static Array ConvertAsLongJagged<TSource, TResult>(this Array array, Func<TSource, TResult> convertor)
-    {
-      return array.ConvertAsLongJagged<TSource, TResult>(convertor != null ? (t, fi, bi, ri) => convertor(t) : default(Func<TSource, long, long[], long[][], TResult>));
-    }
+		public static Array ConvertAsLongJagged<TSource, TResult>(this Array array, Func<TSource, TResult> convertor)
+		{
+			return array.ConvertAsLongJagged<TSource, TResult>(convertor != null ? (t, fi, bi, ri) => convertor(t) : default(Func<TSource, long, long[], long[][], TResult>));
+		}
 
-    public static Array ConvertAsLongJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> converter,
+		public static Array ConvertAsLongJagged<TSource, TResult>(this Array array, Func<TSource, long, long[], long[][], TResult> converter,
       long[] bandedIndices = null, long[][] rankedIndices = null, bool zeroBased = false, Func<int, long[], long[][], bool, LongRange[]> ranger = null)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (converter == null)
-        throw new ArgumentNullException("converter");
+				throw new ArgumentNullException("converter");
 
       var ranks = new PwrList<int>();
       var biases = new PwrList<int>();
@@ -3007,17 +3007,17 @@ namespace PowerLib.System
         throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayLength], "bandedIndices");
 
       if (typeof(TSource) != type && !typeof(TSource).IsSubclassOf(type))
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.InvalidArrayElementType]);
 
-      var targetArrayTypes = new Type[ranks.Count];
-      targetArrayTypes[ranks.Count - 1] = typeof(TResult);
-      for (int i = 1; i < ranks.Count; i++)
-        targetArrayTypes[ranks.Count - i - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
+			var targetArrayTypes = new Type[ranks.Count];
+			targetArrayTypes[ranks.Count - 1] = typeof(TResult);
+			for (int i = 1; i < ranks.Count; i++)
+				targetArrayTypes[ranks.Count - i - 1] = ranks[ranks.Count - i] == 1 ? targetArrayTypes[ranks.Count - i].MakeArrayType() : targetArrayTypes[ranks.Count - i].MakeArrayType(ranks[ranks.Count - i]);
 
-      long flatIndex = 0;
-      int depth = 0;
-      var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
-      var targetArrayContexts = new PwrStack<Array>();
+			long flatIndex = 0;
+			int depth = 0;
+			var arrayContexts = new PwrStack<Tuple<Array, ArrayLongIndex>>();
+			var targetArrayContexts = new PwrStack<Array>();
       var ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
       var arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
       var arrayIndex = new ArrayLongIndex(arrayInfo)
@@ -3025,69 +3025,69 @@ namespace PowerLib.System
         ZeroBased = zeroBased,
         AsRanges = ranges != null && ranges.Length > 0
       };
-      var targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
-      descent:
-      while (depth < ranks.Count - 1)
-      {
-        if (array.Length > 0)
-          for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
-        if (arrayIndex.Carry != 0 || array.Length == 0)
-          break;
+			var targetArray = arrayInfo.CreateArray(targetArrayTypes[depth]);
+		descent:
+			while (depth < ranks.Count - 1)
+			{
+				if (array.Length > 0)
+					for (; arrayIndex.Carry == 0 && arrayIndex.GetValue<Array>(array) == null; arrayIndex++) ;
+				if (arrayIndex.Carry != 0 || array.Length == 0)
+					break;
         if (bandedIndices != null)
           for (int i = 0; i < ranks[depth]; i++)
             bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
         if (rankedIndices != null)
           arrayIndex.GetDimIndices(rankedIndices[depth]);
         depth++;
-        arrayContexts.Push(Tuple.Create(array, arrayIndex));
-        targetArrayContexts.Push(targetArray);
-        array = arrayIndex.GetValue<Array>(array);
+				arrayContexts.Push(Tuple.Create(array, arrayIndex));
+				targetArrayContexts.Push(targetArray);
+				array = arrayIndex.GetValue<Array>(array);
         ranges = ranger != null ? ranger(depth, bandedIndices, rankedIndices, zeroBased) : default(LongRange[]);
         arrayInfo = new RegularArrayLongInfo(array.GetRegularArrayLongDimensions(ranges));
         var a = arrayInfo.CreateArray(targetArrayTypes[depth]);
         arrayIndex.SetValue<Array>(targetArray, a);
-        targetArray = a;
+				targetArray = a;
         arrayIndex = new ArrayLongIndex(arrayInfo)
         {
           ZeroBased = zeroBased,
           AsRanges = ranges != null && ranges.Length > 0
         };
-        if (depth == ranks.Count - 1 && array.Length != 0)
-        {
+				if (depth == ranks.Count - 1 && array.Length != 0)
+				{
           if (bandedIndices != null)
             for (int i = 0; i < ranks[depth]; i++)
               bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
           if (rankedIndices != null)
             arrayIndex.GetDimIndices(rankedIndices[depth]);
           for (; arrayIndex.Carry == 0; arrayIndex++)
-          {
+					{
             if (bandedIndices != null)
               for (int i = 0; i < ranks[depth]; i++)
                 bandedIndices[biases[depth] + i] = arrayIndex.DimIndices[i];
             if (rankedIndices != null)
               arrayIndex.GetDimIndices(rankedIndices[depth]);
             arrayIndex.SetValue<TResult>(targetArray, converter(arrayIndex.GetValue<TSource>(array), flatIndex++, bandedIndices, rankedIndices));
-          }
-        }
-      }
-      ascent:
-      if (depth != 0)
-      {
-        var arrayContext = arrayContexts.Pop();
-        array = arrayContext.Item1;
-        arrayIndex = arrayContext.Item2;
-        targetArray = targetArrayContexts.Pop();
-        depth--;
-        if (arrayIndex.IsMax)
-          goto ascent;
-        else
-        {
-          arrayIndex++;
-          goto descent;
-        }
-      }
-      return targetArray;
-    }
+					}
+				}
+			}
+		ascent:
+			if (depth != 0)
+			{
+				var arrayContext = arrayContexts.Pop();
+				array = arrayContext.Item1;
+				arrayIndex = arrayContext.Item2;
+				targetArray = targetArrayContexts.Pop();
+				depth--;
+				if (arrayIndex.IsMax)
+					goto ascent;
+				else
+				{
+					arrayIndex++;
+					goto descent;
+				}
+			}
+			return targetArray;
+		}
 
     #endregion
     #region
@@ -3099,142 +3099,121 @@ namespace PowerLib.System
     #region Validation methods
 
     public static void ValidateRange<T>(this T[] array, int index, int count)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (index < 0 || index > array.Length)
-        throw new ArgumentOutOfRangeException("index");
-      if (count < 0 || count > array.Length - index)
-        throw new ArgumentOutOfRangeException("count");
-    }
+				throw new ArgumentOutOfRangeException("index");
+			if (count < 0 || count > array.Length - index)
+				throw new ArgumentOutOfRangeException("count");
+		}
 
-    public static void ValidateRange<T>(this T[] array, Range range)
-    {
+		public static void ValidateRange<T>(this T[] array, Range range)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (range.Index < 0 || range.Index > array.Length)
-        throw new ArgumentOutOfRangeException("Index is out of range", "range");
-      if (range.Count < 0 || range.Count > array.Length - range.Index)
-        throw new ArgumentOutOfRangeException("Count is out of range", "range");
-    }
+				throw new ArgumentOutOfRangeException("Index is out of range", "range");
+			if (range.Count < 0 || range.Count > array.Length - range.Index)
+				throw new ArgumentOutOfRangeException("Count is out of range", "range");
+		}
 
-    #endregion
-    #region Apply methods
+		#endregion
+		#region Apply methods
 
-    public static void Apply<T>(this T[] array, Action<T> action)
-    {
+		public static void Apply<T>(this T[] array, Action<T> action)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
+				throw new ArgumentNullException("action");
 
-      for (int i = 0; i < array.Length; i++)
-        action(array[i]);
-    }
+			for (int i = 0; i < array.Length; i++)
+				action(array[i]);
+		}
 
-    public static void Apply<T>(this T[] array, Action<T, int> action)
-    {
+		public static void Apply<T>(this T[] array, Action<T, int> action)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
+				throw new ArgumentNullException("action");
 
-      for (int i = 0; i < array.Length; i++)
-        action(array[i], i);
-    }
+			for (int i = 0; i < array.Length; i++)
+				action(array[i], i);
+		}
 
-    public static void Apply<T>(this T[] array, Action<T> action, int index, int count)
-    {
+		public static void Apply<T>(this T[] array, Action<T> action, int index, int count)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
-      if (index < 0 || index > array.Length)
-        throw new ArgumentOutOfRangeException("index");
-      if (count < 0 || count > array.Length - index)
-        throw new ArgumentOutOfRangeException("count");
+				throw new ArgumentNullException("action");
+			if (index < 0 || index > array.Length)
+				throw new ArgumentOutOfRangeException("index");
+			if (count < 0 || count > array.Length - index)
+				throw new ArgumentOutOfRangeException("count");
 
-      for (; count > 0; count--)
-        action(array[index++]);
-    }
+			for (; count > 0; count--)
+				action(array[index++]);
+		}
 
-    public static void Apply<T>(this T[] array, Action<T, int> action, int index, int count)
-    {
+		public static void Apply<T>(this T[] array, Action<T, int> action, int index, int count)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
-      if (index < 0 || index > array.Length)
-        throw new ArgumentOutOfRangeException("index");
-      if (count < 0 || count > array.Length - index)
-        throw new ArgumentOutOfRangeException("count");
+				throw new ArgumentNullException("action");
+			if (index < 0 || index > array.Length)
+				throw new ArgumentOutOfRangeException("index");
+			if (count < 0 || count > array.Length - index)
+				throw new ArgumentOutOfRangeException("count");
 
-      for (; count > 0; index++, count--)
-        action(array[index], index);
-    }
+			for (; count > 0; index++, count--)
+				action(array[index], index);
+		}
 
-    public static void Apply<T>(this T[] array, Action<T> action, Range range)
-    {
+		public static void Apply<T>(this T[] array, Action<T> action, Range range)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
-      if (range.Index < 0 || range.Index > array.Length)
-        throw new ArgumentOutOfRangeException("range", "Index is out of range");
-      if (range.Count < 0 || range.Count > array.Length - range.Index)
-        throw new ArgumentOutOfRangeException("range", "Count is out of range");
+				throw new ArgumentNullException("action");
+			if (range.Index < 0 || range.Index > array.Length)
+				throw new ArgumentOutOfRangeException("range", "Index is out of range");
+			if (range.Count < 0 || range.Count > array.Length - range.Index)
+				throw new ArgumentOutOfRangeException("range", "Count is out of range");
 
-      for (int i = range.Index, c = range.Count; c > 0; i++, c--)
-        action(array[i]);
-    }
+			for (int i = range.Index, c = range.Count; c > 0; i++, c--)
+				action(array[i]);
+		}
 
-    public static void Apply<T>(this T[] array, Action<T, int> action, Range range)
-    {
+		public static void Apply<T>(this T[] array, Action<T, int> action, Range range)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (action == null)
-        throw new ArgumentNullException("action");
-      if (range.Index < 0 || range.Index > array.Length)
-        throw new ArgumentOutOfRangeException("range", "Index is out of range");
-      if (range.Count < 0 || range.Count > array.Length - range.Index)
-        throw new ArgumentOutOfRangeException("range", "Count is out of range");
+				throw new ArgumentNullException("action");
+			if (range.Index < 0 || range.Index > array.Length)
+				throw new ArgumentOutOfRangeException("range", "Index is out of range");
+			if (range.Count < 0 || range.Count > array.Length - range.Index)
+				throw new ArgumentOutOfRangeException("range", "Count is out of range");
 
-      for (int i = range.Index, c = range.Count; c > 0; i++, c--)
-        action(array[i], i);
-    }
+			for (int i = range.Index, c = range.Count; c > 0; i++, c--)
+				action(array[i], i);
+		}
 
     #endregion
     #region Fill methods
 
     public static void Fill<T>(this T[] array, T value)
     {
-      if (array == null)
-        throw new ArgumentNullException("array");
-
-      for (int i = 0; i < array.Length; i++)
-        array[i] = value;
+      array.Fill(value, 0, array != null ? array.Length : 0);
     }
 
-    public static void Fill<T>(this T[] array, Func<T> valuator)
+    public static void Fill<T>(this T[] array, T value, int index)
     {
-      if (array == null)
-        throw new ArgumentNullException("array");
-      if (valuator == null)
-        throw new ArgumentNullException("valuator");
-
-      for (int i = 0; i < array.Length; i++)
-        array[i] = valuator();
-    }
-
-    public static void Fill<T>(this T[] array, Func<int, T> valuator)
-    {
-      if (array == null)
-        throw new ArgumentNullException("array");
-      if (valuator == null)
-        throw new ArgumentNullException("valuator");
-
-      for (int i = 0; i < array.Length; i++)
-        array[i] = valuator(i);
+      array.Fill(value, index, array != null ? array.Length - index : 0);
     }
 
     public static void Fill<T>(this T[] array, T value, int index, int count)
@@ -3246,39 +3225,49 @@ namespace PowerLib.System
       if (count < 0 || count > array.Length - index)
         throw new ArgumentOutOfRangeException("count");
 
-      for (; count > 0; count--)
-        array[index++] = value;
+      for (; count > 0; index++, count--)
+        array[index] = value ;
+    }
+
+    public static void Fill<T>(this T[] array, Func<T> valuator)
+    {
+      array.Fill(valuator != null ? i => valuator() : default(Func<int, T>), 0, array != null ? array.Length : 0);
+    }
+
+    public static void Fill<T>(this T[] array, Func<T> valuator, int index)
+    {
+      array.Fill(valuator != null ? i => valuator() : default(Func<int, T>), index, array != null ? array.Length - index : 0);
     }
 
     public static void Fill<T>(this T[] array, Func<T> valuator, int index, int count)
-    {
-      if (array == null)
-        throw new ArgumentNullException("array");
-      if (valuator == null)
-        throw new ArgumentNullException("valuator");
-      if (index < 0 || index > array.Length)
-        throw new ArgumentOutOfRangeException("index");
-      if (count < 0 || count > array.Length - index)
-        throw new ArgumentOutOfRangeException("count");
+		{
+      array.Fill(valuator != null ? i => valuator() : default(Func<int, T>), index, count);
+		}
 
-      for (; count > 0; count--)
-        array[index++] = valuator();
+    public static void Fill<T>(this T[] array, Func<int, T> valuator)
+    {
+      array.Fill(valuator, 0, array.Length);
+    }
+
+    public static void Fill<T>(this T[] array, Func<int, T> valuator, int index)
+    {
+      array.Fill(valuator, index, array != null ? array.Length - index : 0);
     }
 
     public static void Fill<T>(this T[] array, Func<int, T> valuator, int index, int count)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (valuator == null)
-        throw new ArgumentNullException("valuator");
-      if (index < 0 || index > array.Length)
-        throw new ArgumentOutOfRangeException("index");
-      if (count < 0 || count > array.Length - index)
-        throw new ArgumentOutOfRangeException("count");
+				throw new ArgumentNullException("valuator");
+			if (index < 0 || index > array.Length)
+				throw new ArgumentOutOfRangeException("index");
+			if (count < 0 || count > array.Length - index)
+				throw new ArgumentOutOfRangeException("count");
 
-      for (; count > 0; index++, count--)
-        array[index] = valuator(index);
-    }
+			for (; count > 0; index++, count--)
+				array[index] = valuator(index);
+		}
 
     public static void Fill<T>(this T[] array, T value, Range range)
     {
@@ -3294,33 +3283,60 @@ namespace PowerLib.System
     }
 
     public static void Fill<T>(this T[] array, Func<T> valuator, Range range)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (valuator == null)
-        throw new ArgumentNullException("valuator");
-      if (range.Index < 0 || range.Index > array.Length)
-        throw new ArgumentOutOfRangeException("range", "Index is out of range");
-      if (range.Count < 0 || range.Count > array.Length - range.Index)
-        throw new ArgumentOutOfRangeException("range", "Count is out of range");
+				throw new ArgumentNullException("valuator");
+			if (range.Index < 0 || range.Index > array.Length)
+				throw new ArgumentOutOfRangeException("range", "Index is out of range");
+			if (range.Count < 0 || range.Count > array.Length - range.Index)
+				throw new ArgumentOutOfRangeException("range", "Count is out of range");
 
-      for (int i = range.Index, c = range.Count; c > 0; i++, c--)
-        array[i] = valuator();
+			for (int i = range.Index, c = range.Count; c > 0; i++, c--)
+				array[i] = valuator();
+		}
+
+		public static void Fill<T>(this T[] array, Func<int, T> valuator, Range range)
+		{
+      if (array == null)
+        throw new ArgumentNullException("array");
+      if (valuator == null)
+				throw new ArgumentNullException("valuator");
+			if (range.Index < 0 || range.Index > array.Length)
+				throw new ArgumentOutOfRangeException("range", "Index is out of range");
+			if (range.Count < 0 || range.Count > array.Length - range.Index)
+				throw new ArgumentOutOfRangeException("range", "Count is out of range");
+
+			for (int i = range.Index, c = range.Count; c > 0; i++, c--)
+				array[i] = valuator(i);
+		}
+
+    public static int Fill<T>(this T[] array, IEnumerator<T> enumerator)
+    {
+      return array.Fill(enumerator, 0, array != null ? array.Length : 0);
     }
 
-    public static void Fill<T>(this T[] array, Func<int, T> valuator, Range range)
+    public static int Fill<T>(this T[] array, IEnumerator<T> enumerator, int index)
+    {
+      return array.Fill(enumerator, index, array != null ? array.Length - index : 0);
+    }
+
+    public static int Fill<T>(this T[] array, IEnumerator<T> enumerator, int index, int count)
     {
       if (array == null)
         throw new ArgumentNullException("array");
-      if (valuator == null)
-        throw new ArgumentNullException("valuator");
-      if (range.Index < 0 || range.Index > array.Length)
-        throw new ArgumentOutOfRangeException("range", "Index is out of range");
-      if (range.Count < 0 || range.Count > array.Length - range.Index)
-        throw new ArgumentOutOfRangeException("range", "Count is out of range");
+      if (enumerator == null)
+        throw new ArgumentNullException("enumerator");
+      if (index < 0 || index > array.Length)
+        throw new ArgumentOutOfRangeException("index");
+      if (count < 0 || count > array.Length - index)
+        throw new ArgumentOutOfRangeException("count");
 
-      for (int i = range.Index, c = range.Count; c > 0; i++, c--)
-        array[i] = valuator(i);
+      int total = 0;
+      for (; count > 0 && enumerator.MoveNext(); index++, count--, total++)
+        array[index] = enumerator.Current;
+      return total;
     }
 
     #endregion
@@ -3354,12 +3370,12 @@ namespace PowerLib.System
     #region Reverse methods
 
     public static void Reverse<T>(this T[] array)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       Array.Reverse(array);
-    }
+		}
 
     public static void Reverse<T>(this T[] array, int index, int count)
     {
@@ -3374,13 +3390,13 @@ namespace PowerLib.System
     }
 
     public static void Reverse<T>(this T[] array, Range range)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (range.Index < 0 || range.Index > array.Length)
-        throw new ArgumentOutOfRangeException("range", "Index is out of range");
-      if (range.Count < 0 || range.Count > array.Length - range.Index)
-        throw new ArgumentOutOfRangeException("range", "Count is out of range");
+				throw new ArgumentOutOfRangeException("range", "Index is out of range");
+			if (range.Count < 0 || range.Count > array.Length - range.Index)
+				throw new ArgumentOutOfRangeException("range", "Count is out of range");
 
       Array.Reverse(array, range.Index, range.Count);
     }
@@ -3652,125 +3668,125 @@ namespace PowerLib.System
     #region Range methods
 
     public static T[] Range<T>(this T[] array, int index, int count)
-    {
+		{
       if (array == null)
         throw new ArgumentNullException("array");
 
       T[] result = new T[count];
-      Array.Copy(array, index, result, 0, count);
-      return result;
-    }
+			Array.Copy(array, index, result, 0, count);
+			return result;
+		}
 
-    public static T[] Range<T>(this T[] array, Range range)
-    {
-      return array.Range(range.Index, range.Count);
-    }
+		public static T[] Range<T>(this T[] array, Range range)
+		{
+			return array.Range(range.Index, range.Count);
+		}
 
-    #endregion
-    #region Resize methods
+		#endregion
+		#region Resize methods
 
-    public static T[] Resize<T>(this T[] array, int newSize)
-    {
+		public static T[] Resize<T>(this T[] array, int newSize)
+		{
       if (array == null)
         throw new ArgumentNullException("array");
       if (newSize < 0)
-        throw new ArgumentOutOfRangeException("newSize");
+				throw new ArgumentOutOfRangeException("newSize");
 
-      if (newSize == array.Length)
-        return array;
-      T[] newArray = new T[newSize];
-      Array.Copy(array, newArray, newSize < array.Length ? newSize : array.Length);
-      return newArray;
-    }
+			if (newSize == array.Length)
+				return array;
+			T[] newArray = new T[newSize];
+			Array.Copy(array, newArray, newSize < array.Length ? newSize : array.Length);
+			return newArray;
+		}
 
-    #endregion
-    #endregion
-    #region Index formatting
+		#endregion
+		#endregion
+		#region Index formatting
 
-    public static string FormatAsRegularIndices(int[] indices)
-    {
-      if (indices == null)
-        throw new ArgumentNullException("indices");
-      if (indices.Length == 0)
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "indices");
+		public static string FormatAsRegularIndices(int[] indices)
+		{
+			if (indices == null)
+				throw new ArgumentNullException("indices");
+			if (indices.Length == 0)
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "indices");
 
-      StringBuilder sb = new StringBuilder();
-      string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
-      sb.Append(IndexOpenBracket);
-      sb.AppendFormat(itemFormat, indices[0]);
-      itemFormat = IndexItemDelimiter + itemFormat;
-      for (int i = 0; i < indices.Length; i++)
-      {
-        if (i > 0)
-          sb.Append(IndexItemDelimiter);
-        sb.AppendFormat(itemFormat, indices[i]);
-      }
-      sb.Append(IndexCloseBracket);
-      return sb.ToString();
-    }
+			StringBuilder sb = new StringBuilder();
+			string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
+			sb.Append(IndexOpenBracket);
+			sb.AppendFormat(itemFormat, indices[0]);
+			itemFormat = IndexItemDelimiter + itemFormat;
+			for (int i = 0; i < indices.Length; i++)
+			{
+				if (i > 0)
+					sb.Append(IndexItemDelimiter);
+				sb.AppendFormat(itemFormat, indices[i]);
+			}
+			sb.Append(IndexCloseBracket);
+			return sb.ToString();
+		}
 
-    public static string FormatAsJaggedIndices(int[][] indices)
-    {
-      if (indices == null)
-        throw new ArgumentNullException("indices");
-      if (indices.Length == 0)
-        throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "indices");
+		public static string FormatAsJaggedIndices(int[][] indices)
+		{
+			if (indices == null)
+				throw new ArgumentNullException("indices");
+			if (indices.Length == 0)
+				throw new ArgumentException(ArrayResources.Default.Strings[ArrayMessage.ArrayIsEmpty], "indices");
 
-      StringBuilder sb = new StringBuilder();
-      string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
-      for (int i = 0; i < indices.Length; i++)
-      {
-        if (i > 0)
-          sb.Append(IndexLevelDelimiter);
-        sb.Append(IndexOpenBracket);
-        for (int j = 0; j < indices[i].Length; j++)
-        {
-          if (j > 0)
-            sb.Append(IndexItemDelimiter);
-          sb.AppendFormat(itemFormat, indices[i][j]);
-        }
-        sb.Append(IndexCloseBracket);
-      }
-      return sb.ToString();
-    }
+			StringBuilder sb = new StringBuilder();
+			string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
+			for (int i = 0; i < indices.Length; i++)
+			{
+				if (i > 0)
+					sb.Append(IndexLevelDelimiter);
+				sb.Append(IndexOpenBracket);
+				for (int j = 0; j < indices[i].Length; j++)
+				{
+					if (j > 0)
+						sb.Append(IndexItemDelimiter);
+					sb.AppendFormat(itemFormat, indices[i][j]);
+				}
+				sb.Append(IndexCloseBracket);
+			}
+			return sb.ToString();
+		}
 
-    public static string FormatAsLongRegularIndices(long[] indices)
-    {
-      StringBuilder sb = new StringBuilder();
-      string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
-      sb.Append(IndexOpenBracket);
-      sb.AppendFormat(itemFormat, indices[0]);
-      itemFormat = IndexItemDelimiter + itemFormat;
-      for (int i = 0; i < indices.Length; i++)
-      {
-        if (i > 0)
-          sb.Append(IndexItemDelimiter);
-        sb.AppendFormat(itemFormat, indices[i]);
-      }
-      sb.Append(IndexCloseBracket);
-      return sb.ToString();
-    }
+		public static string FormatAsLongRegularIndices(long[] indices)
+		{
+			StringBuilder sb = new StringBuilder();
+			string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
+			sb.Append(IndexOpenBracket);
+			sb.AppendFormat(itemFormat, indices[0]);
+			itemFormat = IndexItemDelimiter + itemFormat;
+			for (int i = 0; i < indices.Length; i++)
+			{
+				if (i > 0)
+					sb.Append(IndexItemDelimiter);
+				sb.AppendFormat(itemFormat, indices[i]);
+			}
+			sb.Append(IndexCloseBracket);
+			return sb.ToString();
+		}
 
-    public static string FormatAsLongJaggedIndices(long[][] indices)
-    {
-      StringBuilder sb = new StringBuilder();
-      string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
-      for (int i = 0; i < indices.Length; i++)
-      {
-        if (i > 0)
-          sb.Append(IndexLevelDelimiter);
-        sb.Append(IndexOpenBracket);
-        for (int j = 0; j < indices[i].Length; j++)
-        {
-          if (j > 0)
-            sb.Append(IndexItemDelimiter);
-          sb.AppendFormat(itemFormat, indices[i][j]);
-        }
-        sb.Append(IndexCloseBracket);
-      }
-      return sb.ToString();
-    }
+		public static string FormatAsLongJaggedIndices(long[][] indices)
+		{
+			StringBuilder sb = new StringBuilder();
+			string itemFormat = string.Format("{{0{0}}}", IndexItemFormat);
+			for (int i = 0; i < indices.Length; i++)
+			{
+				if (i > 0)
+					sb.Append(IndexLevelDelimiter);
+				sb.Append(IndexOpenBracket);
+				for (int j = 0; j < indices[i].Length; j++)
+				{
+					if (j > 0)
+						sb.Append(IndexItemDelimiter);
+					sb.AppendFormat(itemFormat, indices[i][j]);
+				}
+				sb.Append(IndexCloseBracket);
+			}
+			return sb.ToString();
+		}
 
-    #endregion
-  }
+		#endregion
+	}
 }
