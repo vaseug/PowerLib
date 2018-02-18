@@ -10,6 +10,28 @@ namespace PowerLib.System.Collections
   {
     #region Methods
 
+    public static ICollection<T> Append<T>(this ICollection<T> coll, params T[] values)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (values != null)
+        for (int i = 0; i < values.Length; i++)
+          coll.Add(values[i]);
+      return coll;
+    }
+
+    public static ICollection<T> Append<T>(this ICollection<T> coll, IEnumerable<T> values)
+    {
+      if (coll == null)
+        throw new ArgumentNullException("coll");
+
+      if (values != null)
+        foreach (var value in values)
+          coll.Add(value);
+      return coll;
+    }
+
     public static void ValidateRange(this ICollection coll, int index, int count)
     {
       if (coll == null)

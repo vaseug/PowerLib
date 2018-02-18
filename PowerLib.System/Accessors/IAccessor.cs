@@ -39,7 +39,7 @@ namespace PowerLib.System
 		/// </summary>
 		/// <param name="a">Argumenvalue.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A a]
 		{
 			get;
@@ -65,7 +65,7 @@ namespace PowerLib.System
 		/// <param name="a1">First argument value.</param>
 		/// <param name="a2">Second argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2]
 		{
 			get;
@@ -93,7 +93,7 @@ namespace PowerLib.System
 		/// <param name="a2">Second argument value.</param>
 		/// <param name="a3">Third argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3]
 		{
 			get;
@@ -123,7 +123,7 @@ namespace PowerLib.System
 		/// <param name="a3">Third argument value.</param>
 		/// <param name="a4">Fourth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4]
 		{
 			get;
@@ -155,7 +155,7 @@ namespace PowerLib.System
 		/// <param name="a4">Fourth argument value.</param>
 		/// <param name="a5">Fifth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5]
 		{
 			get;
@@ -189,7 +189,7 @@ namespace PowerLib.System
 		/// <param name="a5">Fifth argument value.</param>
 		/// <param name="a6">Sixth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6]
 		{
 			get;
@@ -225,7 +225,7 @@ namespace PowerLib.System
 		/// <param name="a6">Sixth argument value.</param>
 		/// <param name="a7">Seventh argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7]
 		{
 			get;
@@ -263,7 +263,7 @@ namespace PowerLib.System
 		/// <param name="a7">Seventh argument value.</param>
 		/// <param name="a8">Eighth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8]
 		{
 			get;
@@ -303,7 +303,7 @@ namespace PowerLib.System
 		/// <param name="a8">Eighth argument value.</param>
 		/// <param name="a9">Ninth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9]
 		{
 			get;
@@ -345,7 +345,7 @@ namespace PowerLib.System
 		/// <param name="a9">Ninth argument value.</param>
 		/// <param name="a10">Tenth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10]
 		{
 			get;
@@ -389,7 +389,7 @@ namespace PowerLib.System
 		/// <param name="a10">Tenth argument value.</param>
 		/// <param name="a11">Eleventh argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11]
 		{
 			get;
@@ -435,7 +435,7 @@ namespace PowerLib.System
 		/// <param name="a11">Eleventh argument value.</param>
 		/// <param name="a12">Twelfth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12]
 		{
 			get;
@@ -483,7 +483,7 @@ namespace PowerLib.System
 		/// <param name="a12">Twelfth argument value.</param>
 		/// <param name="a13">Thirteenth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13]
 		{
 			get;
@@ -533,7 +533,7 @@ namespace PowerLib.System
 		/// <param name="a13">Thirteenth argument value.</param>
 		/// <param name="a14">Fourteenth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14]
 		{
 			get;
@@ -585,7 +585,7 @@ namespace PowerLib.System
 		/// <param name="a14">Fourteenth argument value.</param>
 		/// <param name="a15">Fifteenth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15]
 		{
 			get;

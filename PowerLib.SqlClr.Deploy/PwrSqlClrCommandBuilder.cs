@@ -128,7 +128,7 @@ namespace PowerLib.SqlClr.Deploy
         sb.AppendFormat(CultureInfo.InvariantCulture, " = {0}", defaultValueAttr.Value == null ? (object)"NULL" : 
           defaultValueAttr.Value.GetType().IsEnum ? ((Enum)defaultValueAttr.Value).ToString("D") : defaultValueAttr.Value);
       //  Append OUT parameter
-      if (param.IsOut)
+      if (param.IsOut || param.ParameterType.IsByRef)
         sb.Append(" OUT");
       return sb.ToString();
     }

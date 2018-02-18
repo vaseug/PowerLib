@@ -8,6 +8,7 @@ This solution contains the following projects:
 * **[PowerLib.EntityFramework](#PowerLib.EntityFramework)**
 * **[PowerLib.System.Data.SqlTypes](#PowerLib.System.Data.SqlTypes)**
 * **[PowerLib.SqlServer](#PowerLib.SqlServer)**
+* **[PowerLib.SqlServer.Web](#PowerLib.SqlServer.Web)**
 * **[PowerLib.SqlClr.Deploy](#PowerLib.SqlClr.Deploy)**
 * **[PowerLib.SqlClr.Deploy.Utility](#PowerLib.SqlClr.Deploy.Utility)**
 
@@ -169,7 +170,7 @@ There are many classes in namespace **PowerLib.System.Collection.Matching** for 
 
 To work with the file system, the **PowerLib.System.IO.FileSystemInfoExtension** class exists, which allows you to display hierarchical information about the file structure using flexible filtering and sorting capabilities. Also, group operations for deleting and moving (renaming) files by condition are supported. For example, search files with max depth: 2 (0 - unrestricted depth), file extension: "\***.csproj**", directory starts with: "**PowerLib.**" and output by directory name *descending order* and file name *ascending order*.
 ```csharp
-  foreach (var item in new DirectoryInfo(@"D:\Projects\Github\PowerLib\").EnumerateFiles("*", 2, false, 
+  foreach (var item in new DirectoryInfo(@"D:\Projects\Github\PowerLib\").EnumerateFiles("*", 2, FileSystemTraversalOptions.ExcludeStart | FileSystemTraversalOptions.ExcludeEmpty, 
     fi => fi.Extension == ".csproj", (x, y) => Comparable.Compare(x.Name, y.Name, false),
     di => di.Name.StartsWith(@"PowerLib."), (x, y) => Comparable.Compare(x.Name, y.Name, false) * -1))
     Console.WriteLine("{0}", Path.Combine(item.DirectoryName, item.Name));
@@ -189,40 +190,40 @@ D:\Projects\Github\PowerLib\PowerLib.EntityFramework\PowerLib.EntityFramework.cs
 Below are the prototypes of functions for working with the elements of the file system with the most complete number of arguments:
 ```csharp
 //	Enumerate abstract filesystem items
-public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren)
+public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, FileSystemTraversalOptions traversalOptions, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren)
 where DI : FileSystemInfo;
 
 //	Enumerate filesystem items
-public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison);
+public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions, Func<FileSystemInfo, bool> predicate, Comparison<FileSystemInfo> comparison);
 
 //	Enumerate files
 public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction, Func<FileInfo, bool> filePredicate, Comparison<FileInfo> fileComparison, Func<DirectoryInfo, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison);
 
 //	Enumerate directories
-public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparer);
+public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions, Func<DirectoryInfo, bool> predicate, Comparison<DirectoryInfo> comparer);
 
 // Move (rename) filesystem items
-public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty,  Func<FileSystemInfo, bool> predicate, Func<FileSystemInfo, string> replacing);
+public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions,  Func<FileSystemInfo, bool> predicate, Func<FileSystemInfo, string> replacing);
 
 // Delete filesytem items
-public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<FileSystemInfo, bool> predicate, bool recursive);
+public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions, Func<FileSystemInfo, bool> predicate, bool recursive);
 ```
 There are also functions with a predicate, the parameter of which, together with the element, is the context of the hierarchy of type IHierarchicalContext\<DirectoryInfo\> containing the list of ancestors:
 ```csharp
 //	Enumerate abstract filesystem items
-public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, bool excludeEmpty, HierarchicalContext<DI> context, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DI>>, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren) where DI : FileSystemInfo;
+public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos<DI>(this DI diParent, int maxDepth, FileSystemTraversalOptions traversalOptions, HierarchicalContext<DI> context, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DI>>, bool> predicate, Comparison<FileSystemInfo> comparison, Func<DI, IEnumerable<FileSystemInfo>> getChildren, Func<FileSystemInfo, bool> hasChildren) where DI : FileSystemInfo;
 
 //	Enumerate files
 public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool direction, Func<ElementContext<FileInfo, IHierarchicalContext<DirectoryInfo>>, bool> filePredicate, IComparer<FileInfo> fileComparer, Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> dirPredicate, Comparison<DirectoryInfo> dirComparison);
 
 //	Enumerate directories
-public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison);
+public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions, Func<ElementContext<DirectoryInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Comparison<DirectoryInfo> comparison);
 
 // Move (rename) filesystem items
-public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Func<FileSystemInfo, string> replacing);
+public static int MoveTo(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, Func<FileSystemInfo, string> replacing);
             
 // Delete filesytem items
-public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, bool excludeEmpty, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, bool recursive);
+public static int Delete(this DirectoryInfo diStart, string searchPattern, int maxDepth, FileSystemTraversalOptions traversalOptions, Func<ElementContext<FileSystemInfo, IHierarchicalContext<DirectoryInfo>>, bool> predicate, bool recursive);
 ```
 
 ### Builders
@@ -393,9 +394,11 @@ Contains several dozens of user-defined types (UDTs) and functions:
 - __SqlSexagesimalAngle__ - Represents a sexagesimal angle (PowerLib.System.Numerics.SexagesimalAngle type) to be stored in or retrieved from a database and and having its methods and properties.
 - __SqlZipArchive__ - Represents a zip archive (System.IO.Compression.ZipArchive type) to be stored in or retrieved from a database and and having its methods and properties.
 - __SqlRange__ - Represents a range - integer index and count (PowerLib.System.Range type) to be stored in or retrieved from a database and and having its methods and properties.
+- __SqlLongRange__ - Represents a long range - long integer index and count (PowerLib.System.Range type) to be stored in or retrieved from a database and and having its methods and properties.
 - __SqlUri__ - Represents an uri - Uniform Resource Identifier (URI) value (System.Uri type) to be stored in or retrieved from a database and and having its methods and properties.
 - __SqlFileInfo__ - Represents a file path value to be stored in or retrieved from a database and and having methods and properties to work with file located at path.
 - __SqlDirectoryInfo__ - Represents a directory path value to be stored in or retrieved from a database and and having methods and properties to work with directory located at path.
+- __SqlNameValueCollection__ - Represents collection of associated string keys and string values that can be accessed either with the key or with the index.
 - __Sql__<*ClrType*>__Collection__ - Represents collection items of <*Type*> type to be stored in or retrieved from a database. In SQL server collection names as <*DbType*>__Collection__.
 - __Sql__<*ClrType*>__Array__ - Represents single dimension array of <*Type*> item type to be stored in or retrieved from a database. In SQL server single dimension array names as <*DbType*>__Array__.
 - __Sql__<*ClrType*>__RegularArray__ - Represents multiple dimensions array of <*Type*> item type to be stored in or retrieved from a database. In SQL server multiple dimensions array names as <*DbType*>__RegularArray__.
@@ -422,7 +425,6 @@ LongRange|BigRange
 SexagesimalAngle|SexagesimalAngle
 Single|SingleFloat
 String|String
-
 
 To deploy the assembly on an MSSQL server, use the sqlclrdu.exe utility described below. For example,
 ```
@@ -451,6 +453,69 @@ Dependent assemblies without sqlclr contents are installed with the -invisible o
 
 Continued...
 
+## PowerLib.SqlServer.Web
+
+Contains functions for working with web services that integrates into the SQL server.
+
+Functions for web queries have the following forms:
+
+__webQueryGet__<*DataType*> - function request web service and receive data of <*DataType*> type.
+
+__webQueryPut__<*DataType*> - function request web service and send data of <*DataType*> type.
+
+__webQueryPut__<*DataType*>__Get__<*DataType*> - function request web service, send data of <*DataType*> type and receive of <*DataType*>.
+
+__webQueryGet__<*DataType*>__Ext__ - stored procedure request web service and receive data of <*DataType*> type.
+
+__webQueryPut__<*DataType*>__Ext__ - stored procedure request web service and send data of <*DataType*> type.
+
+__webQueryPut__<*DataType*>__Get__<*DataType*>__Ext__ - stored procedure request web service, send data of <*DataType*> type and receive of <*DataType*>.
+
+
+where <*DataType*> = __Xml__ | __Text__ | __Binary__
+
+Also, the following data conversion functions are defined in this assembly (schema __pwrlib__):
+
+__webHtmlDecode__,
+__webHtmlEncode__,
+__webUrlDecode__,
+__webUrlEncode__,
+__webUrlDecodeBinary__,
+__webUrlEncodeBinary__,
+__webDateTimeToString__,
+__webDateTimeParse__.
+
+Web query example:
+```sql
+declare @html nvarchar(max);
+declare @headers_get pwrlib.NameValueCollection;
+declare @attrs_get pwrlib.NameValueCollection;
+--  NameValueCollection initialization
+--  Initialize collection response property names to retrieve (properties to request object prefixied by 'request:')
+set @attrs_get = pwrlib.nvCollCreate()
+  .AddItem('response:StatusCode', null)
+  .AddItem('response:CharacterSet', null)
+  .AddItem('response:LastModified', null)
+  .AddItem('response:Method', null)
+  .AddItem('response:Server', null)
+  .AddItem('response:ResponseUri', null)
+  .AddItem('response:ProtocolVersion', null)
+  .AddItem('response:StatusDescription', null);
+--  Request home page of wikipedia.org
+execute pwrlib.webQueryGetTextExt N'http://www.wikipedia.org', N'GET', null, @headers_get output, @html output, @attrs_get output;
+--  Select results of query
+select *
+  from pwrlib.nvCollEnumerate(@headers_get)
+union
+select *
+  from pwrlib.nvCollEnumerate(@attrs_get)
+--
+declare @headers_put pwrlib.NameValueCollection;
+--  NameValueCollection alternate initialization
+set @headers_put = pwrlib.nvCollAdd(pwrlib.nvCollCreate(), 'content-type', 'application/text;charset=utf-16');
+--  Store file on local storage in utf-16 encoding
+execute pwrlib.webQueryPutTextExt N'file://e:\WebStore\wikipedia.org.html', N'PUT', @headers_put, @html, null, null;
+```
 ---
 ## PowerLib.SqlClr.Deploy
 

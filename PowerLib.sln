@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.System", "PowerLib.System\PowerLib.System.csproj", "{34D71A5D-1F7C-4A23-8404-5956FA32730A}"
 EndProject
@@ -29,6 +29,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.System.ComponentModel.DataAnnotations", "PowerLib.System.ComponentModel.DataAnnotations\PowerLib.System.ComponentModel.DataAnnotations.csproj", "{615C5CDA-2907-4355-A728-2B7CD1B63C92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.SqlRuntime", "PowerLib.SqlRuntime\PowerLib.SqlRuntime.csproj", "{8271BD07-09BA-49A9-BF97-2C594E6D582C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerLib.SqlServer.Web", "PowerLib.SqlServer.Web\PowerLib.SqlServer.Web.csproj", "{592F6A86-C121-4B9E-875F-6DB4B31ABBE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,8 +78,15 @@ Global
 		{8271BD07-09BA-49A9-BF97-2C594E6D582C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8271BD07-09BA-49A9-BF97-2C594E6D582C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8271BD07-09BA-49A9-BF97-2C594E6D582C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{592F6A86-C121-4B9E-875F-6DB4B31ABBE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{592F6A86-C121-4B9E-875F-6DB4B31ABBE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{592F6A86-C121-4B9E-875F-6DB4B31ABBE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{592F6A86-C121-4B9E-875F-6DB4B31ABBE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FFA00CED-45DC-4C09-9D84-98AF1ABF10E1}
 	EndGlobalSection
 EndGlobal

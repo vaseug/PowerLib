@@ -22,7 +22,7 @@ namespace PowerLib.SqlServer.Xml
     {
       var nsResolver = new XmlNamespaceManager(nameTable);
       if (nsMap != null)
-        nsMap.SplitToKeyValue(new[] { ';' }, new[] { '=' })
+        nsMap.SplitToKeyValue(new[] { ';' }, new[] { '=' }, new[] { ' ' })
           .ForEach(p => nsResolver.AddNamespace(p.Key, p.Value));
       return nsResolver;
     }

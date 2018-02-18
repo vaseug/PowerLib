@@ -9,10 +9,11 @@ namespace PowerLib.SqlServer
 {
   public static class SqlRuntime
   {
-    private const string MaxBufferSizeName = "MaxBufferSize";
-    private const string IoBufferSizeName = "IoBufferSize";
-    private const string TextEncodingName = "TextEncoding";
-    private const string FileEncodingName = "FileEncoding";
+    private const string MaxBufferSizeName = nameof(MaxBufferSize);
+    private const string IoBufferSizeName = nameof(IoBufferSize);
+    private const string TextEncodingName = nameof(TextEncoding);
+    private const string FileEncodingName = nameof(FileEncoding);
+    private const string WebEncodingName = nameof(WebEncoding);
 
     #region Constructor
 
@@ -22,6 +23,7 @@ namespace PowerLib.SqlServer
       SqlConfiguration.Init(IoBufferSizeName, 4096);
       SqlConfiguration.Init(TextEncodingName, Encoding.Unicode);
       SqlConfiguration.Init(FileEncodingName, Encoding.UTF8);
+      SqlConfiguration.Init(WebEncodingName, Encoding.UTF8);
     }
 
     #endregion
@@ -117,6 +119,28 @@ namespace PowerLib.SqlServer
     {
       if (!cpName.IsNull)
         SqlConfiguration.Set(FileEncodingName, Encoding.GetEncoding(cpName.Value));
+    }
+
+    #endregion
+    #region Web encoding
+
+    public static Encoding WebEncoding
+    {
+      get { return SqlConfiguration.Get<Encoding>(WebEncodingName); }
+    }
+
+    [SqlProcedure(Name = "setWebEncodingByCpId")]
+    public static void SetWebEncodingByCpId(SqlInt32 cpId)
+    {
+      if (!cpId.IsNull)
+        SqlConfiguration.Set(WebEncodingName, Encoding.GetEncoding(cpId.Value));
+    }
+
+    [SqlProcedure(Name = "setWebEncodingByCpName")]
+    public static void SetWebEncodingByCpName(SqlString cpName)
+    {
+      if (!cpName.IsNull)
+        SqlConfiguration.Set(WebEncodingName, Encoding.GetEncoding(cpName.Value));
     }
 
     #endregion

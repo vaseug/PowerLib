@@ -444,50 +444,53 @@ namespace PowerLib.System
       return Split(str, separators, trims, escapeItems.ToArray(), quotationItems.ToArray(), count, options);
     }
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims)
 		{
-			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, int.MaxValue , StringSplitOptions.None);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, int.MaxValue , StringSplitOptions.None);
 		}
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, int count)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, int count)
 		{
-			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, count, StringSplitOptions.None);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, count, StringSplitOptions.None);
 		}
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, StringSplitOptions options)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringSplitOptions options)
 		{
-			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, int.MaxValue , options);
+			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, int.MaxValue , options);
 		}
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, int count, StringSplitOptions options)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, int count, StringSplitOptions options)
 		{
-			return str.Split(itemDelimiters, count, options).Select(item =>
+      if (trims == null)
+        trims = new char[0];
+			return str.Split(itemDelimiters, count, options)
+        .Select(item =>
 				{
-					string[] items = item.Split(keyDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries);
+					string[] items = item.Split(keyDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim(trims)).ToArray();
 					return new KeyValuePair<string, string>(items[0], items.Length > 1 && (items[1] != string.Empty || (options & StringSplitOptions.RemoveEmptyEntries) == 0) ? items[1] : null);
 				});
 		}
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
-			char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims,
+      StringEscape[] escapes, StringQuotation[] quotations)
 		{
 			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
 		}
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
-			char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims,
+      StringEscape[] escapes, StringQuotation[] quotations, int count)
 		{
 			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
 		}
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
-			char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims,
+      StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
 		{
 			return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , options);
 		}
 
-		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters,
-			char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count, StringSplitOptionsEx options)
+		public static IEnumerable<KeyValuePair<string, string>> SplitToKeyValue(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims,
+      StringEscape[] escapes, StringQuotation[] quotations, int count, StringSplitOptionsEx options)
 		{
 			return str.Split(itemDelimiters, trims, escapes, quotations, count, options).Select(item =>
 				{
@@ -496,31 +499,31 @@ namespace PowerLib.System
 				});
 		}
 
-		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters)
+		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters, char[] trims)
 		{
-			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, int.MaxValue , int.MaxValue , StringSplitOptions.None);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, trims, int.MaxValue , int.MaxValue , StringSplitOptions.None);
 		}
 
-		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
+		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters, char[] trims,
 			int itemCount, int elementCount)
 		{
-			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, itemCount, elementCount, StringSplitOptions.None);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, trims, itemCount, elementCount, StringSplitOptions.None);
 		}
 
-		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
+		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters, char[] trims,
 			StringSplitOptions options)
 		{
-			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, int.MaxValue , int.MaxValue , options);
+			return str.SplitToKeyGroup(itemDelimiters, keyDelimiters, elementDelimiters, trims, int.MaxValue , int.MaxValue , options);
 		}
 
-		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters,
+		public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> SplitToKeyGroup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] elementDelimiters, char[] trims,
 			int itemCount, int elementCount, StringSplitOptions options)
 		{
 			return str.Split(itemDelimiters, itemCount, options).Select<string, KeyValuePair<string, IEnumerable<string>>>(item =>
 				{
-					string[] items = item.Split(keyDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries);
+					string[] items = item.Split(keyDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim(trims)).ToArray();
 					return new KeyValuePair<string, IEnumerable<string>>(items[0], items.Length > 1 && (items[1] != string.Empty || (options & StringSplitOptions.RemoveEmptyEntries) == 0)
-						? items[1].Split(elementDelimiters, elementCount, options) : Enumerable.Empty<string>());
+						? items[1].Split(elementDelimiters, elementCount, options).Select(t => t.Trim(trims)) : Enumerable.Empty<string>());
 				});
 		}
 
@@ -553,32 +556,24 @@ namespace PowerLib.System
 			});
 		}
 
-		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters)
+		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims)
 		{
-			return str.SplitToLookup(itemDelimiters, keyDelimiters, int.MaxValue , StringSplitOptions.None);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, trims, int.MaxValue , StringSplitOptions.None);
 		}
 
-		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, int count)
+		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, int count)
 		{
-			return str.SplitToLookup(itemDelimiters, keyDelimiters, count, StringSplitOptions.None);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, trims, count, StringSplitOptions.None);
 		}
 
-		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, StringSplitOptions options)
+		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringSplitOptions options)
 		{
-			return str.SplitToLookup(itemDelimiters, keyDelimiters, int.MaxValue , options);
+			return str.SplitToLookup(itemDelimiters, keyDelimiters, trims, int.MaxValue , options);
 		}
 
-		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, int count, StringSplitOptions options)
+		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, int count, StringSplitOptions options)
 		{
-			return str.Split(itemDelimiters, count, options).ToLookup(item =>
-			{
-				string[] items = item.Split(keyDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries);
-				return items[0];
-			}, item =>
-			{
-				string[] items = item.Split(keyDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries);
-				return items.Length > 1 && (items[1] != string.Empty || (options & StringSplitOptions.RemoveEmptyEntries) == 0) ? items[1] : null;
-			});
+      return str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, count, options).ToLookup(t => t.Key, t => t.Value);
 		}
 
 		public static ILookup<string, string> SplitToLookup(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
@@ -609,60 +604,48 @@ namespace PowerLib.System
 			});
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims)
 		{
-			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, int.MaxValue , StringSplitOptions.None);
+			return str.SplitToDictionary(itemDelimiters, keyDelimiters, trims, int.MaxValue , StringSplitOptions.None);
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, int count)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, int count)
 		{
-			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, count, StringSplitOptions.None);
+			return str.SplitToDictionary(itemDelimiters, keyDelimiters, trims, count, StringSplitOptions.None);
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, StringSplitOptions options)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringSplitOptions options)
 		{
-			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, int.MaxValue , options);
+			return str.SplitToDictionary(itemDelimiters, keyDelimiters, trims, int.MaxValue , options);
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, int count, StringSplitOptions options)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, int count, StringSplitOptions options)
 		{
-			return str.Split(itemDelimiters, count, options).ToDictionary(item =>
-				{
-					string[] items = item.Split(keyValueDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries);
-					return items[0];
-				}, item =>
-				{
-					string[] items = item.Split(keyValueDelimiters, 2, options & ~StringSplitOptions.RemoveEmptyEntries);
-					return items.Length > 1 && (items[1] != string.Empty || (options & StringSplitOptions.RemoveEmptyEntries) == 0) ? items[1] : null;
-				});
+      var dic = new Dictionary<string, string>();
+      dic.AddRange(str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, count, options));
+      return dic;
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations)
 		{
-			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
+			return str.SplitToDictionary(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , StringSplitOptionsEx.None);
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count)
 		{
-			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
+			return str.SplitToDictionary(itemDelimiters, keyDelimiters, trims, escapes, quotations, count, StringSplitOptionsEx.None);
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, StringSplitOptionsEx options)
 		{
-			return str.SplitToDictionary(itemDelimiters, keyValueDelimiters, trims, escapes, quotations, int.MaxValue , options);
+			return str.SplitToDictionary(itemDelimiters, keyDelimiters, trims, escapes, quotations, int.MaxValue , options);
 		}
 
-		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyValueDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count, StringSplitOptionsEx options)
+		public static IDictionary<string, string> SplitToDictionary(this string str, char[] itemDelimiters, char[] keyDelimiters, char[] trims, StringEscape[] escapes, StringQuotation[] quotations, int count, StringSplitOptionsEx options)
 		{
-			return str.Split(itemDelimiters, trims, escapes, quotations, count, options).ToDictionary(item =>
-			{
-				string[] items = item.Split(keyValueDelimiters, trims, escapes, quotations, 2, options & ~StringSplitOptionsEx.RemoveEmptyEntries);
-				return items[0];
-			}, item =>
-			{
-				string[] items = item.Split(keyValueDelimiters, trims, escapes, quotations, 2, options & ~StringSplitOptionsEx.RemoveEmptyEntries);
-				return items.Length > 1 && (items[1] != string.Empty || (options & StringSplitOptionsEx.RemoveEmptyEntries) == 0) ? items[1] : null;
-			});
+      var dic = new Dictionary<string, string>();
+      dic.AddRange(str.SplitToKeyValue(itemDelimiters, keyDelimiters, trims, escapes, quotations, count, options));
+      return dic;
 		}
 
 		/// <summary>

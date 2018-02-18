@@ -25,17 +25,15 @@ namespace PowerLib.System.Collections.Matching
 			_selector = selector;
 		}
 
-		public SelectEqualityComparer(Func<T, K> selector, IEqualityComparer<K> equalityComparer, Func<K, int> hasher)
+		public SelectEqualityComparer(Func<T, K> selector, IEqualityComparer<K> equalityComparer)
     {
 			if (equalityComparer == null)
 				throw new ArgumentNullException("equalityComparer");
-			if (hasher == null)
-				throw new ArgumentNullException("hasher");
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
 			_equality = equalityComparer.Equals;
-			_hasher = hasher;
+			_hasher = equalityComparer.GetHashCode;
 			_selector = selector;
 		}
 

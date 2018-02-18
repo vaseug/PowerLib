@@ -22,7 +22,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>bin\Debug\PowerLib.System.Data.SqlTypes.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,7 +31,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>bin\Release\PowerLib.System.Data.SqlTypes.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -56,6 +54,7 @@
     <Compile Include="Collections\SqlLongRangeArray.cs" />
     <Compile Include="Collections\SqlLongRangeCollection.cs" />
     <Compile Include="Collections\SqlLongRangeRegularArray.cs" />
+    <Compile Include="Collections\SqlNameValueCollection.cs" />
     <Compile Include="Compression\SqlZipArchive.cs" />
     <Compile Include="Compression\SqlZipArchiveFunctions.cs" />
     <Compile Include="FileSystem\SqlDirectoryInfo.cs" />

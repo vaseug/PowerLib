@@ -74,7 +74,7 @@ namespace PowerLib.System
 		/// </summary>
 		/// <param name="a">Argumenvalue.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		public T this[A a]
 		{
 			get

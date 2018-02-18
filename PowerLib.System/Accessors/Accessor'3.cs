@@ -78,7 +78,7 @@ namespace PowerLib.System
 		/// <param name="a2">Second argument value.</param>
 		/// <param name="a3">Third argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		public T this[A1 a1, A2 a2, A3 a3]
 		{
 			get

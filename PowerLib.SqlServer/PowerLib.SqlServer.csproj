@@ -41,7 +41,9 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>bin\Release\PowerLib.SqlServer.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
+    <NoWarn>0642</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -75,6 +77,8 @@
     <Compile Include="Collections\SqlBigIntegerCollector.cs" />
     <Compile Include="Collections\SqlGradAngleCollector.cs" />
     <Compile Include="Collections\SqlLongRangeCollector.cs" />
+    <Compile Include="Collections\SqlNameValueCollectionFunctions.cs" />
+    <Compile Include="Collections\SqlNameValueCollector.cs" />
     <Compile Include="Collections\SqlSexagesimalAngleCollector.cs" />
     <Compile Include="Collections\SqlHourAngleCollector.cs" />
     <Compile Include="Collections\SqlRangeCollector.cs" />
@@ -114,9 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="PowerLib.System.Data.map">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="PowerLib.SqlServer.map" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DateTime\" />

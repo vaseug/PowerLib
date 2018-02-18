@@ -10,3 +10,4 @@ PowerLib.System.Data.SqlTypes.SqlLongRange;pwrlib
 PowerLib.System.Data.SqlTypes.SqlUri;pwrlib
 PowerLib.System.Data.SqlTypes.FileSystem.SqlFileInfo;pwrlib
 PowerLib.System.Data.SqlTypes.FileSystem.SqlDirectoryInfo;pwrlib
+PowerLib.System.Data.SqlTypes.Collections.SqlNameValueCollection;pwrlib

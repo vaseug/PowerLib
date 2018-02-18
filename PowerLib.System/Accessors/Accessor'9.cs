@@ -90,7 +90,7 @@ namespace PowerLib.System
 		/// <param name="a8">Eighth argument value.</param>
 		/// <param name="a9">Ninth argument value.</param>
 		/// <returns>Accessed value.</returns>
-		/// <exceptiocref="System.InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
+		/// <exception cref="InvalidOperationException">The property is get and accessor cannot read of the property is set and accessor cannot write.</exception>
 		public T this[A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9]
 		{
 			get

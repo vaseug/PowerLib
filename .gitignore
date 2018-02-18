@@ -28,3 +28,7 @@
 /packages
 /Debug
 /Release
+/.vs/PowerLib/v15
+/PowerLib.SqlServer.Web/bin/Release
+/PowerLib.SqlServer.Web/obj/Release
+/PowerLib.System.Help

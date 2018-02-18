@@ -135,6 +135,7 @@
     <Compile Include="ComponentModel\AttributeValueHelper.cs" />
     <Compile Include="ComponentModel\DisplayStringAttribute.cs" />
     <Compile Include="ComponentModel\DisplayStringResourceAttribute.cs" />
+    <Compile Include="ComponentModel\TypeInitializer.cs" />
     <Compile Include="ConditionCriteria.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
